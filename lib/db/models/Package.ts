@@ -1,0 +1,142 @@
+import mongoose, { Schema, Document, Model } from 'mongoose';
+
+export interface IItineraryDay {
+  dayNumber: number;
+  title: string;
+  description: string;
+}
+
+export interface IPackage extends Document {
+  title: string;
+  description: string;
+  location: string;
+  duration: string;
+  category: 'domestic' | 'international' | 'kailash';
+  packageType: string;
+  originalPrice: number;
+  discountedPrice?: number;
+  imageUrl1?: string;
+  imageUrl2?: string;
+  imageUrl3?: string;
+  imageUrl4?: string;
+  isActive: boolean;
+  isTrending: boolean;
+  hasOffer: boolean;
+  badges: string[];
+  inclusions: string[];
+  exclusions: string[];
+  termsAndConditions: string[];
+  itinerary: IItineraryDay[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ItineraryDaySchema = new Schema<IItineraryDay>({
+  dayNumber: { type: Number, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+});
+
+const PackageSchema = new Schema<IPackage>(
+  {
+    title: {
+      type: String,
+      required: [true, 'Please provide a package title'],
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    location: {
+      type: String,
+      required: [true, 'Please provide a location'],
+      trim: true,
+    },
+    duration: {
+      type: String,
+      required: [true, 'Please provide the duration'],
+    },
+    category: {
+      type: String,
+      enum: ['domestic', 'international', 'kailash'],
+      required: [true, 'Category is required'],
+    },
+    packageType: {
+      type: String,
+      default: 'other',
+    },
+    originalPrice: {
+      type: Number,
+      required: [true, 'Please provide the original price'],
+    },
+    discountedPrice: {
+      type: Number,
+    },
+    imageUrl1: {
+      type: String,
+      default: '',
+    },
+    imageUrl2: {
+      type: String,
+      default: '',
+    },
+    imageUrl3: {
+      type: String,
+      default: '',
+    },
+    imageUrl4: {
+      type: String,
+      default: '',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    isTrending: {
+      type: Boolean,
+      default: false,
+    },
+    hasOffer: {
+      type: Boolean,
+      default: false,
+    },
+    badges: {
+      type: [String],
+      enum: ['bestseller'],
+      default: [],
+    },
+    inclusions: {
+      type: [String],
+      default: [],
+    },
+    exclusions: {
+      type: [String],
+      default: [],
+    },
+    termsAndConditions: {
+      type: [String],
+      default: [],
+    },
+    itinerary: {
+      type: [ItineraryDaySchema],
+      default: [],
+    },
+  },
+  { timestamps: true }
+);
+
+PackageSchema.index({ category: 1 });
+PackageSchema.index({ isTrending: 1 });
+PackageSchema.index({ isActive: 1 });
+PackageSchema.index({ createdAt: -1 });
+
+// Delete cached model to force recompilation in dev mode
+if (mongoose.models.Package) {
+  delete mongoose.models.Package;
+}
+
+const Package: Model<IPackage> = mongoose.model<IPackage>('Package', PackageSchema);
+
+export default Package;
