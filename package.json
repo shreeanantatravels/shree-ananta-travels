@@ -8,6 +8,12 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "overrides": {
+    "react-popper": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
