@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     siteName: 'Shree Ananta Travels',
     type: 'website',
   },
+  
   twitter: {
     card: 'summary_large_image',
     title: 'Tour Packages for India and Abroad | Shree Ananta Travels',
