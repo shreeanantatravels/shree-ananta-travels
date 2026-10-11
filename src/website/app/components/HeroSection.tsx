@@ -19,8 +19,8 @@ export function HeroSection() {
 
   // Dynamic Badge, Title, Subtitle with luxury fallbacks
   const badgeText = siteConfig?.heroBadge?.trim() || `${displayName} • ${taglineText}`;
-  const titleText = siteConfig?.heroTitle?.trim() || 'SHREE ANANTA TRAVEL • YOUR TRUSTED TRAVEL PARTNER';
-  const subtitleText = siteConfig?.heroSubtitle?.trim() || 'Discover Handcrafted Luxury Journeys & Unforgettable Experiences Worldwide';
+  const heroHeading = siteConfig?.heroTitle?.trim() || 'Tour Packages for India and Abroad';
+  const heroSubtitle = siteConfig?.heroSubtitle?.trim() || 'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.';
 
   const images = (siteConfig?.heroImages && siteConfig.heroImages.length > 0)
     ? siteConfig.heroImages
@@ -233,6 +233,38 @@ export function HeroSection() {
     </div>
   );
 
+  const renderHeroHeading = (isRoyalGold = false) => {
+    return (
+      <div className="max-w-4xl mx-auto text-center pt-8 pb-4 px-4 sm:px-6">
+        <h1
+          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          {heroHeading === 'Tour Packages for India and Abroad' ? (
+            <>
+              Tour Packages for{' '}
+              <span
+                className={
+                  isRoyalGold
+                    ? "text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3d375] to-[#c59b27]"
+                    : "text-transparent bg-clip-text"
+                }
+                style={isRoyalGold ? undefined : { backgroundImage: 'var(--theme-gradient)' }}
+              >
+                India and Abroad
+              </span>
+            </>
+          ) : (
+            heroHeading
+          )}
+        </h1>
+        <p className="mt-2.5 text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          {heroSubtitle}
+        </p>
+      </div>
+    );
+  };
+
   if (layoutVariant === 'centered') {
     return (
       <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
@@ -282,6 +314,9 @@ export function HeroSection() {
             {renderSuggestionsDropdown()}
           </div>
         </div>
+
+        {/* Primary Page Heading (H1) for SEO */}
+        {renderHeroHeading()}
       </div>
     );
   }
@@ -335,6 +370,9 @@ export function HeroSection() {
             {renderSuggestionsDropdown()}
           </div>
         </div>
+
+        {/* Primary Page Heading (H1) for SEO */}
+        {renderHeroHeading()}
       </div>
     );
   }
@@ -388,6 +426,9 @@ export function HeroSection() {
             {renderSuggestionsDropdown()}
           </div>
         </div>
+
+        {/* Primary Page Heading (H1) for SEO */}
+        {renderHeroHeading(true)}
       </div>
     );
   }
@@ -440,6 +481,9 @@ export function HeroSection() {
           {renderSuggestionsDropdown()}
         </div>
       </div>
+
+      {/* Primary Page Heading (H1) for SEO */}
+      {renderHeroHeading()}
     </div>
   );
 }

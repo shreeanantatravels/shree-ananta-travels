@@ -17,6 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com'),
   title: "Shree Ananta Travels",
   description: "Your trusted travel partner for unforgettable domestic and international experiences.",
   icons: {
