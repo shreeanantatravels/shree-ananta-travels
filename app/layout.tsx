@@ -20,6 +20,17 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com'),
   title: "Shree Ananta Travels",
   description: "Your trusted travel partner for unforgettable domestic and international experiences.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png" },

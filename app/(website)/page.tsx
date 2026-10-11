@@ -25,7 +25,18 @@ export const metadata: Metadata = {
     siteName: 'Shree Ananta Travels',
     type: 'website',
   },
-  
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   twitter: {
     card: 'summary_large_image',
     title: 'Tour Packages for India and Abroad | Shree Ananta Travels',
