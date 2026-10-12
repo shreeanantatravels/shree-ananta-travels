@@ -22,32 +22,29 @@ All requirements have been implemented locally on the `seo-data-quality-implemen
 
 ---
 
-## 2. Homepage UI and Heading Hierarchy Redesign
+## 2. Homepage UI and Heading Structure
 
-### Previous Issue
-The H1 heading (`Tour Packages for India and Abroad`) and its supporting description were previously rendered below the floating search bar, awkwardly sandwiched between the search inputs and the "Our Services" section. This created a disjointed layout where the page title appeared detached from the hero banner.
-
-### Redesigned Architecture
-- **Unified Hero Card:** Positioned an elevated glassmorphic hero container (`-mt-16 sm:-mt-24 md:-mt-32`) overlapping the hero banner slider:
-  1. **Brand Trust Badge:** Pill badge displaying `{displayName} • {taglineText}`.
-  2. **Primary H1 Heading:**
+Per the user's preference, the homepage hero layout has been restored to the original approved design:
+1. **Top Banner Image Slider:** High-definition photography slider (`h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px]`).
+2. **Compact Floating Search Bar (`-mt-4 sm:-mt-6 md:-mt-8`):**
+   - Glassmorphic search form with typewriter animated placeholder prompts.
+   - Autocomplete suggestions dropdown.
+   - Integrated **Popular Places** quick links (`Kashmir`, `Maldives`, `Dubai`, `Goa`, `Switzerland`, `Kerala`) styled as accessible Next.js `<Link>` tags for crawlability.
+3. **Primary H1 Heading & Supporting Description:**
+   - Positioned gracefully below the search bar:
      ```html
      <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white" style="font-family: 'Playfair Display', serif">
        Tour Packages for <span class="text-transparent bg-clip-text" style="background-image: var(--theme-gradient)">India and Abroad</span>
      </h1>
      ```
-  3. **Supporting Description:** Exact text preserved without alteration:
-     `Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.`
-  4. **Integrated Search Form:** Sleek search box featuring a typewriter placeholder effect cycling through destination prompts, instant autocomplete dropdown, and a high-contrast search CTA button.
-  5. **Popular Destinations Quick Links:** Clickable pill tags (`Kashmir`, `Maldives`, `Dubai`, `Goa`, `Switzerland`, `Kerala`) pointing to `/packages?search=[tag]`.
-- **Theme Variant Support:** The new unified layout supports default, centered, left-aligned, and `royal-gold` variants with tailored gold gradients and dark navy glassmorphism.
-- **Section Transition to "Our Services":**
-  - Added bottom padding `pb-16 sm:pb-20 lg:pb-24` to `HeroSection.tsx` to provide visual breathing room.
-  - Added `pt-16 sm:pt-20 pb-20` and divider `border-t border-gray-100 dark:border-gray-800/80` to `ServicesSection.tsx`.
-- **Heading Outline Integrity:**
-  - **H1:** Single primary page heading on homepage: `Tour Packages for India and Abroad`.
-  - **H2:** Major sections, e.g., `Our Services`, `Trending Tour Packages`, `Kailash Mansarovar Yatra`, `Domestic Destinations`, `International Destinations`, `Why Choose Us`, `Frequently Asked Questions`.
-  - **H3:** Subsection items (individual service titles, package card names, trust points).
+   - Exact supporting description:
+     *“Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.”*
+4. **Services Section Transition:**
+   - Preserves `pt-6 pb-16` spacing into `<ServicesSection />` with clean divider.
+5. **Heading Outline Integrity:**
+   - **H1:** Single primary heading on the page: `Tour Packages for India and Abroad`.
+   - **H2:** Major sections (`Our Services`, `Trending Tour Packages`, `Kailash Mansarovar Yatra`, `Domestic Destinations`, `International Destinations`, `Why Choose Us`, `Frequently Asked Questions`).
+   - **H3:** Subsection items (individual service titles, package card names, trust points).
 
 ---
 
