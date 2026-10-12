@@ -3,10 +3,11 @@ import connectDB from '@/lib/db/connect';
 import Package from '@/lib/db/models/Package';
 import PackageDetail from '@website/app/pages/PackageDetail';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   try {
+    const { id } = await params;
     await connectDB();
-    const pkg = await Package.findById(params.id).lean();
+    const pkg = await Package.findById(id).lean();
 
     if (!pkg || pkg.isActive === false) {
       return {
@@ -26,12 +27,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       title,
       description,
       alternates: {
-        canonical: `/package/${params.id}`,
+        canonical: `/package/${id}`,
       },
       openGraph: {
         title,
         description,
-        url: `/package/${params.id}`,
+        url: `/package/${id}`,
         type: 'website',
         ...(image ? { images: [{ url: image }] } : {}),
       },
@@ -50,13 +51,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function PackageDetailPage({ params }: { params: { id: string } }) {
-  let jsonLd: any = null;
-  let breadcrumbLd: any = null;
+export default async function PackageDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  let jsonLd: Record<string, unknown> | null = null;
+  let breadcrumbLd: Record<string, unknown> | null = null;
 
   try {
+    const { id } = await params;
     await connectDB();
-    const pkg = await Package.findById(params.id).lean();
+    const pkg = await Package.findById(id).lean();
 
     if (pkg && pkg.isActive !== false) {
       const price = pkg.discountedPrice && pkg.discountedPrice > 0
@@ -94,7 +96,7 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
             '@type': 'Offer',
             price: price,
             priceCurrency: 'INR',
-            url: `https://shreeanantatravels.com/package/${params.id}`,
+            url: `https://shreeanantatravels.com/package/${id}`,
           },
         } : {}),
       };
@@ -119,7 +121,7 @@ export default async function PackageDetailPage({ params }: { params: { id: stri
             '@type': 'ListItem',
             position: 3,
             name: pkg.title,
-            item: `https://shreeanantatravels.com/package/${params.id}`,
+            item: `https://shreeanantatravels.com/package/${id}`,
           },
         ],
       };

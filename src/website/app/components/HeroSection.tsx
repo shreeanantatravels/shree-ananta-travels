@@ -180,7 +180,7 @@ export function HeroSection() {
             >
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 flex items-center justify-center border border-gray-100 dark:border-gray-700">
                 {item.image ? (
-                  <img src={item.image} alt="" className="w-full h-full object-cover" />
+                  <img src={item.image} alt={item.title || "Travel Destination"} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-sm">{item.type === 'destination' ? '📍' : '✈️'}</span>
                 )}

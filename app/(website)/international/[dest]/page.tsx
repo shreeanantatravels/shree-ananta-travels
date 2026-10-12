@@ -9,8 +9,9 @@ function formatDestination(dest: string): string {
     .join(' ');
 }
 
-export async function generateMetadata({ params }: { params: { dest: string } }): Promise<Metadata> {
-  const destination = formatDestination(params.dest);
+export async function generateMetadata({ params }: { params: Promise<{ dest: string }> }): Promise<Metadata> {
+  const { dest } = await params;
+  const destination = formatDestination(dest);
   const title = `${destination} Tour Packages | Shree Ananta Travels`;
   const description = `Discover international ${destination} tour packages with Shree Ananta Travels. Handcrafted itineraries, curated accommodations, and seamless travel concierge support.`;
 
@@ -18,12 +19,12 @@ export async function generateMetadata({ params }: { params: { dest: string } })
     title,
     description,
     alternates: {
-      canonical: `/international/${params.dest}`,
+      canonical: `/international/${dest}`,
     },
     openGraph: {
       title,
       description,
-      url: `/international/${params.dest}`,
+      url: `/international/${dest}`,
       type: 'website',
     },
     twitter: {
@@ -34,7 +35,44 @@ export async function generateMetadata({ params }: { params: { dest: string } })
   };
 }
 
-export default function InternationalDestinationPage({ params }: { params: { dest: string } }) {
-  const destination = decodeURIComponent(params.dest).replace(/-/g, ' ');
-  return <AgentMarketplacePage initialCategory="international" initialSearch={destination} />;
+export default async function InternationalDestinationPage({ params }: { params: Promise<{ dest: string }> }) {
+  const { dest } = await params;
+  const destination = decodeURIComponent(dest).replace(/-/g, ' ');
+  const formattedTitle = formatDestination(dest);
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'International Tours',
+        item: `${baseUrl}/international`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${formattedTitle} Packages`,
+        item: `${baseUrl}/international/${dest}`,
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <AgentMarketplacePage initialCategory="international" initialSearch={destination} />
+    </>
+  );
 }

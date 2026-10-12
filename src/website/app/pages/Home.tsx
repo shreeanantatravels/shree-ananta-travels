@@ -18,20 +18,22 @@ import { ChatbotButton } from '../components/ChatbotButton';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
       <Topbar />
       <Navbar />
-      <HeroSection />
-      <ServicesSection />
-      <TrendingPackages />
-      <KailashPackages />
-      <DomesticPackages />
-      <InternationalPackages />
-      <DestinationsCarousel />
-      <PlanTourForm />
-      <WhyTrustUs />
-      <Testimonials />
-      <FAQ />
+      <main id="main-content" className="flex-1">
+        <HeroSection />
+        <ServicesSection />
+        <TrendingPackages />
+        <KailashPackages />
+        <DomesticPackages />
+        <InternationalPackages />
+        <DestinationsCarousel />
+        <PlanTourForm />
+        <WhyTrustUs />
+        <Testimonials />
+        <FAQ />
+      </main>
       <Footer />
       <LeadCaptureModal />
       <ChatbotButton />
