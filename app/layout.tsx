@@ -17,34 +17,40 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.shreeanantatravels.com",
+  ),
   title: {
-    default: "Shree Ananta Travels - #1 Kailash and Adi Kailash Yatra Agency in India",
+    default:
+      "Shree Ananta Travels - kailash and Adi Kailash Yatra Agency in India",
     template: "%s | Shree Ananta Travels",
   },
-  description: "Shree Ananta Travels is the #1 Kailash and Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, domestic and international holiday tour packages.",
+  description:
+    "Shree Ananta Travels is the kailash and Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, domestic and international holiday tour packages.",
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   icons: {
     icon: [
-      { url: '/favicon.png', type: 'image/png' },
-      { url: '/icon.png', type: 'image/png' },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/icon.png", type: "image/png" },
     ],
-    shortcut: '/favicon.png',
-    apple: '/apple-icon.png',
+    shortcut: "/favicon.png",
+    apple: "/apple-icon.png",
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
