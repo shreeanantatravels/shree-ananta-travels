@@ -34,9 +34,8 @@ export function SeoOverviewSection() {
             Shree Ananta Travels is India&apos;s premier pilgrimage and travel
             agency, delivering customized tour packages across domestic
             destinations, international getaways, and sacred Himalayan yatras.
-            With over 15 years of operational excellence, we ensure seamless
-            journeys with certified guides, pure vegetarian meals, and complete
-            permit management.
+            We ensure seamless journeys with dedicated ground support, verified
+            hotel partners, pure vegetarian meals, and complete permit management.
           </p>
         </div>
 
