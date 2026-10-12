@@ -137,7 +137,7 @@ export function ServicesSection() {
   const displayedServices = SERVICES_DATA.slice(0, 6);
 
   return (
-    <section id="services" className="pt-16 sm:pt-20 pb-20 bg-gray-50/70 dark:bg-gray-950/60 border-t border-b border-gray-100 dark:border-gray-800/80">
+    <section id="services" className="pt-6 pb-16 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4">
         
         {/* Header */}
