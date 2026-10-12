@@ -19,6 +19,9 @@ import {
   Calendar,
   Loader2,
   Send,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAgent } from "../context/AgentContext";
@@ -67,6 +70,21 @@ const DEFAULT_ROUTES_FALLBACK = [
   },
 ];
 
+const MONTH_NAMES = [
+  { name: "January", short: "Jan", season: false },
+  { name: "February", short: "Feb", season: false },
+  { name: "March", short: "Mar", season: false },
+  { name: "April", short: "Apr", season: false },
+  { name: "May", short: "May", season: true, special: "Season Start" },
+  { name: "June", short: "Jun", season: true, special: "Purnima" },
+  { name: "July", short: "Jul", season: true, special: "Guru Purnima" },
+  { name: "August", short: "Aug", season: true, special: "Shravan" },
+  { name: "September", short: "Sep", season: true, special: "Bhadrapada" },
+  { name: "October", short: "Oct", season: true, special: "Autumn" },
+  { name: "November", short: "Nov", season: false },
+  { name: "December", short: "Dec", season: false },
+];
+
 export default function MansarovarLanding() {
   const { agent, siteConfig, packages: agentPackages } = useAgent();
 
@@ -91,10 +109,27 @@ export default function MansarovarLanding() {
     name: "",
     phone: "",
     package: "Helicopter Route (10 Days via Lucknow)",
-    month: "May - June 2026",
+    month: "Not Sure / Flexible Dates",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(2027);
+  const calendarRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setShowCalendar(false);
+      }
+    }
+    if (showCalendar) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCalendar]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,34 +361,101 @@ export default function MansarovarLanding() {
                         <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
                       </div>
                     </div>
-                    <div>
-                      <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                    {/* Interactive Month & Calendar Picker */}
+                    <div className="relative" ref={calendarRef}>
+                      <button
+                        type="button"
+                        onClick={() => setShowCalendar(!showCalendar)}
+                        className={`w-full relative flex items-center bg-black/30 border ${
+                          showCalendar ? "border-amber-400 bg-black/50" : "border-white/15"
+                        } rounded-xl px-4 py-3.5 text-left transition-all shadow-inner hover:border-white/30`}
+                      >
                         <Calendar className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                        <select
-                          value={formData.month}
-                          onChange={(e) =>
-                            setFormData({ ...formData, month: e.target.value })
-                          }
-                          className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
-                        >
-                          <option value="May - June 2026 (Buddha / Jyeshtha Purnima)">
-                            May - June 2026 (Buddha / Jyeshtha Purnima)
-                          </option>
-                          <option value="July 2026 (Guru Purnima)">
-                            July 2026 (Guru Purnima)
-                          </option>
-                          <option value="August 2026 (Shravan / Raksha Bandhan)">
-                            August 2026 (Shravan / Raksha Bandhan)
-                          </option>
-                          <option value="September 2026 (Bhadrapada Purnima)">
-                            September 2026 (Bhadrapada Purnima)
-                          </option>
-                          <option value="2027 Advance Booking">
-                            2027 Advance Registration
-                          </option>
-                        </select>
-                        <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
-                      </div>
+                        <span className="text-white text-sm font-medium flex-1 truncate">
+                          {formData.month || "Not Sure / Flexible Dates"}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showCalendar ? "rotate-180 text-amber-400" : ""}`} />
+                      </button>
+
+                      {showCalendar && (
+                        <div className="absolute top-full left-0 right-0 mt-2 p-3 sm:p-4 bg-slate-900/98 border border-amber-500/40 rounded-2xl shadow-[0_16px_45px_rgba(0,0,0,0.85)] z-50 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150">
+                          {/* Quick "Not Sure / Flexible" button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, month: "Not Sure / Flexible Dates" });
+                              setShowCalendar(false);
+                            }}
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
+                              formData.month === "Not Sure / Flexible Dates"
+                                ? "bg-amber-500 text-white border-amber-400 shadow-md"
+                                : "bg-white/5 hover:bg-white/10 text-amber-300 border-white/10"
+                            }`}
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Not Sure / Flexible Dates (Need Guidance)</span>
+                          </button>
+
+                          {/* Year Navigation */}
+                          <div className="flex items-center justify-between pt-3 pb-2 px-1 text-white text-xs font-bold border-t border-white/10 mt-3">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedYear((y) => Math.max(2027, y - 1))}
+                              disabled={selectedYear <= 2027}
+                              className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <span className="text-amber-400 font-extrabold text-sm tracking-wide">
+                              {selectedYear} Yatra Season
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedYear((y) => Math.min(2029, y + 1))}
+                              disabled={selectedYear >= 2029}
+                              className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {/* 12-Month Clickable Grid */}
+                          <div className="grid grid-cols-3 gap-1.5 pt-1">
+                            {MONTH_NAMES.map((m, idx) => {
+                              const monthLabel = `${m.name} ${selectedYear}`;
+                              const isSelected = formData.month === monthLabel;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({ ...formData, month: monthLabel });
+                                    setShowCalendar(false);
+                                  }}
+                                  className={`py-2 px-1 rounded-xl text-xs font-semibold flex flex-col items-center justify-center transition-all ${
+                                    isSelected
+                                      ? "bg-amber-500 text-white font-bold shadow-md scale-95"
+                                      : m.season
+                                      ? "bg-amber-500/10 hover:bg-amber-500/25 text-amber-200 border border-amber-500/20"
+                                      : "bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white"
+                                  }`}
+                                >
+                                  <span>{m.short}</span>
+                                  {m.special && (
+                                    <span className="text-[9px] text-amber-300/80 scale-90 truncate max-w-full">
+                                      {m.special}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          
+                          <p className="text-[10px] text-gray-400 text-center mt-2.5">
+                            * May to Oct is the sacred Himalayan Yatra season
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <button
