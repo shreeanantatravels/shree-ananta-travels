@@ -217,17 +217,24 @@ export function HeroSection() {
     );
   };
 
-  const popularPlaces = ['Kashmir', 'Maldives', 'Dubai', 'Goa', 'Switzerland', 'Kerala'];
+  const popularPlaces = [
+    { label: 'Kashmir', href: '/domestic/kashmir' },
+    { label: 'Maldives', href: '/international/maldives' },
+    { label: 'Dubai', href: '/international/dubai' },
+    { label: 'Goa', href: '/domestic/goa' },
+    { label: 'Switzerland', href: '/international/switzerland' },
+    { label: 'Kerala', href: '/domestic/kerala' },
+  ];
 
   const renderPopularPlaces = (isDark = false) => (
     <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 px-1">
       <span className={`text-[11px] font-semibold ${isDark ? 'text-[#f3d375]/90' : 'text-gray-500 dark:text-gray-400'}`}>
         Popular Places:
       </span>
-      {popularPlaces.map((tag) => (
+      {popularPlaces.map((place) => (
         <Link
-          key={tag}
-          href={`/packages?search=${encodeURIComponent(tag)}`}
+          key={place.label}
+          href={place.href}
           onClick={() => setShowSuggestions(false)}
           className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-all border ${
             isDark
@@ -235,7 +242,7 @@ export function HeroSection() {
               : 'bg-gray-100/90 dark:bg-gray-800/90 hover:bg-[var(--theme-primary)] hover:text-white border-gray-200/80 dark:border-gray-700 text-gray-700 dark:text-gray-200 shadow-2xs'
           }`}
         >
-          {tag}
+          {place.label}
         </Link>
       ))}
     </div>

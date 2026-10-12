@@ -93,14 +93,14 @@ const siteGraphSchema = {
     {
       "@type": "SiteNavigationElement",
       name: "Adi Kailash & Spiritual",
-      url: "https://www.shreeanantatravels.com/packages?category=spiritual",
+      url: "https://www.shreeanantatravels.com/spiritual",
       description:
         "Divine Adi Kailash, Om Parvat and Himalayan spiritual yatras with dedicated local guides and permits.",
     },
     {
       "@type": "SiteNavigationElement",
       name: "Char Dham",
-      url: "https://www.shreeanantatravels.com/packages?category=spiritual",
+      url: "https://www.shreeanantatravels.com/spiritual",
       description:
         "Book Char Dham Yatra 2026 packages with family, group, and helicopter options across Yamunotri, Gangotri, Kedarnath & Badrinath.",
     },

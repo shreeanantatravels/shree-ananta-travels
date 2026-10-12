@@ -7,14 +7,14 @@ import { useGetSiteConfigQuery, useUpdateSiteConfigMutation } from '../api/siteC
 import { toast } from 'sonner';
 
 const DEFAULT_NAV_LINKS = [
-  { id: 'kailash', label: 'Kailash Mansarovar', url: '/packages?category=kailash', isActive: true, canDelete: false, order: 1 },
+  { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
   { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
   { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
   { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
-  { id: 'spiritual', label: 'Spiritual', url: '/packages?category=spiritual', isActive: true, canDelete: false, order: 5 },
+  { id: 'spiritual', label: 'Spiritual', url: '/spiritual', isActive: true, canDelete: false, order: 5 },
   { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
-  { id: 'trending', label: 'Trending', url: '/packages?category=trending', isActive: true, canDelete: false, order: 7 },
-  { id: 'blogs', label: 'Blogs', url: '/blogs', isActive: true, canDelete: false, order: 8 },
+  { id: 'trending', label: 'Trending', url: '/trending', isActive: true, canDelete: false, order: 7 },
+  { id: 'contact', label: 'Contact', url: '/contact', isActive: true, canDelete: false, order: 8 },
 ];
 
 export function BrandingSettings() {

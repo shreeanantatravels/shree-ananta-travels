@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
 import AgentMarketplacePage from '@website/app/pages/AgentMarketplacePage';
+import { fromDestinationSlug } from '@/lib/utils/slugify';
 
 function formatDestination(dest: string): string {
-  const decoded = decodeURIComponent(dest).replace(/-/g, ' ').trim();
-  return decoded
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  return fromDestinationSlug(dest);
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ dest: string }> }): Promise<Metadata> {

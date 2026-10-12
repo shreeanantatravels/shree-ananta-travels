@@ -54,6 +54,9 @@ const getThemeHref = (theme: ThemeItem) => {
   if (t.includes('kailash')) {
     return '/kailash-mansarovar';
   }
+  if (t.includes('spiritual') || t.includes('yatra') || t.includes('pilgrim')) {
+    return '/spiritual';
+  }
   if (t.includes('beach') || t.includes('island')) {
     return '/packages?search=Beach';
   }

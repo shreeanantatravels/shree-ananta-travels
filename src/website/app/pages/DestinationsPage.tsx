@@ -7,6 +7,7 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
 import { MapPin, Search, ArrowRight, ArrowLeft, PackageCheck } from 'lucide-react';
+import { toDestinationSlug } from '@/lib/utils/slugify';
 
 /* ── Theme map ─────────────────────────────────────────────────── */
 const THEMES: Record<string, { primary: string; gradient: string; accent: string }> = {
@@ -252,7 +253,7 @@ export default function DestinationsPage() {
             {filteredDestinations.map(dest => {
               const isKailash = (dest.name || '').toLowerCase().includes('kailash');
               const cat = dest.category === 'international' ? 'international' : 'domestic';
-              const destSlug = (dest as any).slug || encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+              const destSlug = (dest as any).slug || toDestinationSlug(dest.name);
               const cardHref = isKailash ? '/kailash-mansarovar' : `/${cat}/${destSlug}`;
               return (
               <Link

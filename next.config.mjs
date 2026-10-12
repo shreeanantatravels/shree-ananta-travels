@@ -18,6 +18,16 @@ const nextConfig = {
         destination: '/kailash-mansarovar',
         permanent: true,
       },
+      {
+        source: '/domestic/manali-%26-himachal',
+        destination: '/domestic/manali-and-himachal',
+        permanent: true,
+      },
+      {
+        source: '/domestic/andaman-%26-nicobar',
+        destination: '/domestic/andaman-and-nicobar',
+        permanent: true,
+      },
     ];
   },
 };

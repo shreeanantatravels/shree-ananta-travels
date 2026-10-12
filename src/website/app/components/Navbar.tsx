@@ -5,6 +5,7 @@ import { Menu, X, ChevronDown, ArrowRight, MapPin } from 'lucide-react';
 import { useAgent, type AgentPackage } from '../context/AgentContext';
 import { PlanTourModal } from './PlanTourModal';
 import logoAsset from "../../assets/tgt-logo.png";
+import { toDestinationSlug } from '@/lib/utils/slugify';
 
 function formatLogoUrl(url: any): string {
   if (!url) return '';
@@ -32,9 +33,9 @@ const DEFAULT_NAV_LINKS = [
   { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
   { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
   { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
-  { id: 'spiritual', label: 'Spiritual', url: '/packages?category=spiritual', isActive: true, canDelete: false, order: 5 },
+  { id: 'spiritual', label: 'Spiritual', url: '/spiritual', isActive: true, canDelete: false, order: 5 },
   { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
-  { id: 'trending', label: 'Trending', url: '/packages?category=trending', isActive: true, canDelete: false, order: 7 },
+  { id: 'trending', label: 'Trending', url: '/trending', isActive: true, canDelete: false, order: 7 },
   { id: 'contact', label: 'Contact', url: '/contact', isActive: true, canDelete: false, order: 8 },
 ];
 
@@ -72,6 +73,12 @@ export function Navbar() {
     .map((link: any) => {
       if (link.id === 'kailash') {
         return { ...link, url: '/kailash-mansarovar' };
+      }
+      if (link.id === 'trending' || link.url === '/packages?category=trending') {
+        return { ...link, url: '/trending' };
+      }
+      if (link.id === 'spiritual' || link.url === '/packages?category=spiritual') {
+        return { ...link, url: '/spiritual' };
       }
       return link;
     })
@@ -196,7 +203,7 @@ export function Navbar() {
                             <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
                               {dropDestinations.map((dest: any) => {
                                 const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-                                const destSlug = encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                                const destSlug = toDestinationSlug(dest.name);
                                 const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
                                 return (
                                   <Link 
@@ -304,7 +311,7 @@ export function Navbar() {
                         <div className="grid grid-cols-2 gap-2">
                           {dropDestinations.map((dest: any) => {
                             const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-                            const destSlug = encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                            const destSlug = toDestinationSlug(dest.name);
                             const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
                             return (
                               <Link 

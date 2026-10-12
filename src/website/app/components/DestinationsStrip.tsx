@@ -1,6 +1,8 @@
 "use client";
+import Link from 'next/link';
 import { MapPin, Globe, Home as HomeIcon } from 'lucide-react';
 import { useAgent } from '../context/AgentContext';
+import { toDestinationSlug } from '@/lib/utils/slugify';
 
 const FALLBACK_INTERNATIONAL = [
   'Maldives', 'Dubai', 'Thailand', 'Bali', 'Singapore',
@@ -71,10 +73,10 @@ export function DestinationsStrip() {
             <div className="flex flex-wrap gap-2">
               {internationalDests.map((dest) => {
                 const isKailash = (dest || '').toLowerCase().includes('kailash');
-                const destSlug = encodeURIComponent((dest || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                const destSlug = toDestinationSlug(dest);
                 const targetUrl = isKailash ? '/kailash-mansarovar' : `/international/${destSlug}`;
                 return (
-                <a
+                <Link
                   key={dest}
                   href={targetUrl}
                   className="group flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-transparent hover:text-white transition-all duration-200"
@@ -89,7 +91,7 @@ export function DestinationsStrip() {
                 >
                   <MapPin className="w-3 h-3 opacity-50 group-hover:opacity-100" />
                   {dest}
-                </a>
+                </Link>
                 );
               })}
             </div>
@@ -112,10 +114,10 @@ export function DestinationsStrip() {
             <div className="flex flex-wrap gap-2">
               {domesticDests.map((dest) => {
                 const isKailash = (dest || '').toLowerCase().includes('kailash');
-                const destSlug = encodeURIComponent((dest || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                const destSlug = toDestinationSlug(dest);
                 const targetUrl = isKailash ? '/kailash-mansarovar' : `/domestic/${destSlug}`;
                 return (
-                <a
+                <Link
                   key={dest}
                   href={targetUrl}
                   className="group flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:text-white transition-all duration-200"
@@ -130,7 +132,7 @@ export function DestinationsStrip() {
                 >
                   <MapPin className="w-3 h-3 opacity-50 group-hover:opacity-100" />
                   {dest}
-                </a>
+                </Link>
                 );
               })}
             </div>

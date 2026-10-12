@@ -160,7 +160,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-gray-300">
               <li><Link href="/" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Home</Link></li>
               <li><Link href="/kailash-mansarovar" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Kailash Mansarovar</Link></li>
-              <li><Link href="/packages?category=spiritual" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Adi Kailash &amp; Spiritual</Link></li>
+              <li><Link href="/spiritual" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Adi Kailash &amp; Spiritual</Link></li>
               <li><Link href="/domestic" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Domestic Holidays</Link></li>
               <li><Link href="/international" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> International Tours</Link></li>
               <li><Link href="/destinations" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> All Destinations</Link></li>

@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import connectDB from '@/lib/db/connect';
 import Package from '@/lib/db/models/Package';
 import SiteConfig from '@/lib/db/models/SiteConfig';
+import { toDestinationSlug } from '@/lib/utils/slugify';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
@@ -43,6 +44,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/trending`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/spiritual`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/about`,
@@ -97,7 +110,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       destinationRoutes = siteConfig.destinations
         .filter((dest: any) => dest.active !== false && dest.name)
         .map((dest: any) => {
-          const slug = encodeURIComponent(dest.name.toLowerCase().trim().replace(/\s+/g, '-'));
+          const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+          if (isKailash) return null;
+          const slug = toDestinationSlug(dest.name);
           const prefix = dest.category === 'international' ? 'international' : 'domestic';
           return {
             url: `${baseUrl}/${prefix}/${slug}`,
@@ -105,7 +120,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'weekly' as const,
             priority: 0.7,
           };
-        });
+        })
+        .filter(Boolean) as MetadataRoute.Sitemap;
     }
   } catch (error) {
     console.warn('Failed to load dynamic sitemap entities from database:', error);
