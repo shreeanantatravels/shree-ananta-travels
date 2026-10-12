@@ -12,27 +12,18 @@ import {
   Compass,
   ChevronDown,
   Mountain,
-  HeartHandshake,
-  PhoneCall,
   Globe,
   Utensils,
   HeartPulse,
   ExternalLink,
+  Calendar,
 } from "lucide-react";
 import { useAgent } from "../context/AgentContext";
+import { Topbar } from "../components/Topbar";
+import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
 import { WhyTrustUs } from "../components/WhyTrustUs";
 import { Testimonials } from "../components/Testimonials";
-import logoAsset from "../../assets/tgt-logo.png";
-
-function formatLogoUrl(url: any): string {
-  if (!url) return '';
-  if (typeof url === 'object' && url.src) return url.src;
-  if (typeof url === 'string') {
-    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')) return url;
-    return `/uploads/${url}`;
-  }
-  return '';
-}
 
 const DEFAULT_ROUTES_FALLBACK = [
   {
@@ -97,6 +88,7 @@ export default function MansarovarLanding() {
     name: "",
     phone: "",
     package: "Helicopter Route (10 Days via Lucknow)",
+    month: "May - June 2026",
   });
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -104,7 +96,15 @@ export default function MansarovarLanding() {
     if (typeof window !== "undefined" && (window as any).dataLayer) {
       (window as any).dataLayer.push({ event: "mansarovar_form_submit" });
     }
-    const msg = `ॐ नमः शिवाय! I want details for Kailash Mansarovar Yatra 2026 - 2027.\n\nName: ${formData.name}\nPhone: ${formData.phone}\nPreferred Route: ${formData.package}\n\nPlease share the detailed itinerary, upcoming departure batches, and all-inclusive pricing quote.`;
+    const msg = `ॐ नमः शिवाय!
+Hello Shree Ananta Travels, I want to inquire for Kailash Mansarovar Yatra:
+
+• Name: ${formData.name}
+• Phone: +91 ${formData.phone}
+• Preferred Route: ${formData.package}
+• Preferred Month: ${formData.month}
+
+Please share the detailed itinerary, available departure slots, and all-inclusive pricing quote.`;
     window.open(buildWhatsAppUrl(msg), "_blank");
   };
 
@@ -124,71 +124,14 @@ export default function MansarovarLanding() {
   });
   const apiKailash = dbKailash.length > 0 ? dbKailash : DEFAULT_ROUTES_FALLBACK;
 
-  const handleCallClick = () => {
-    if (typeof window !== "undefined" && (window as any).dataLayer) {
-      (window as any).dataLayer.push({ event: "mansarovar_call_click_navbar" });
-    }
-    const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "";
-    const digits = rawNumber.replace(/\D/g, "");
-    if (!digits) {
-      window.location.href = "/contact";
-      return;
-    }
-    const cleanTel = digits.startsWith("91") ? digits : (digits.length === 10 ? `91${digits}` : digits);
-    window.location.href = `tel:+${cleanTel}`;
-  };
-
-  const rawLogo = siteConfig?.logoUrl || agent?.logo || '/uploads/shree-ananta-logo.jpg';
-  const logoUrl = formatLogoUrl(rawLogo) || formatLogoUrl(logoAsset);
-  const displayName = siteConfig?.companyName || agent?.businessName || "Shree Ananta Travels";
-
   return (
-    <div className="bg-white dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100">
-      {/* 0. CUSTOM HIGH-CONVERTING NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/45 backdrop-blur-md border-b border-white/10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 md:h-16">
-            <Link href="/" className="flex items-center gap-2 group">
-              {/* Logo / Brand */}
-              <div className="h-9 w-9 md:h-10 md:w-10 rounded-full flex items-center justify-center overflow-hidden bg-white flex-shrink-0 shadow-lg" style={{ border: '2px solid var(--theme-primary)' }}>
-                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
-              </div>
-              <span className="text-white font-black text-base md:text-xl tracking-tight hidden sm:block group-hover:text-amber-400 transition-colors" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {displayName}
-              </span>
-            </Link>
+    <div className="bg-white dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 flex flex-col min-h-screen">
+      {/* 0. ORIGINAL SITE TOPBAR & NAVBAR */}
+      <Topbar />
+      <Navbar />
 
-            {/* Desktop Links */}
-            <div className="hidden lg:flex items-center gap-7 text-white/90 text-sm font-bold uppercase tracking-wider">
-              <Link href="/" className="hover:text-amber-400 transition-colors">Home</Link>
-              <a href="#packages" className="hover:text-amber-400 transition-colors">Packages</a>
-              <a href="#routes" className="hover:text-amber-400 transition-colors">Routes</a>
-              <a href="#journey" className="hover:text-amber-400 transition-colors">Journey</a>
-              <a href="#faq" className="hover:text-amber-400 transition-colors">FAQs</a>
-            </div>
-            
-            <div className="flex items-center gap-3 md:gap-4">
-              <button 
-                onClick={handleCallClick}
-                className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-colors border border-white/20 backdrop-blur-sm"
-              >
-                <PhoneCall className="w-4 h-4 text-amber-400" />
-                Call Expert
-              </button>
-              <button 
-                onClick={() => handleWhatsAppClick("mansarovar_nav_whatsapp", "ॐ नमः शिवाय! I need details about Kailash Mansarovar Yatra 2026 - 2027.")}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#25D366] text-white font-bold text-sm hover:bg-[#20BA5A] transition-colors shadow-lg active:scale-95"
-              >
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* 1. HERO SECTION WITH EMBEDDED LEAD CAPTURE FORM */}
-      <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-24 overflow-hidden min-h-[90vh] flex items-center border-b border-gray-800">
+      {/* 1. HERO SECTION WITH EMBEDDED HIGH-CONVERSION LEAD CAPTURE FORM */}
+      <section className="relative pt-8 pb-14 sm:pt-12 sm:pb-20 lg:pt-16 lg:pb-24 overflow-hidden min-h-[85vh] flex items-center border-b border-gray-800 bg-slate-950">
         {/* Background Image & Overlay */}
         <div className="absolute inset-0 z-0">
           <img
@@ -200,12 +143,12 @@ export default function MansarovarLanding() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Left: Copy */}
             <div className="lg:col-span-7 text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-amber-300 text-xs sm:text-sm font-bold tracking-wide mb-6 border border-white/20 shadow-lg">
                 <Mountain className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Your Sacred Journey Begins Here ॐ नमः शिवाय | Authorized Pilgrimage Partner</span>
+                <span>ॐ नमः शिवाय | Authorized Pilgrimage Partner</span>
               </div>
               <h1
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight mb-6 leading-tight"
@@ -222,48 +165,48 @@ export default function MansarovarLanding() {
                 Yatra experts — complete with official Tibet permits, certified Sherpas, and hot pure vegetarian Indian meals.
               </p>
 
-              <div className="flex flex-wrap gap-4 mb-8">
+              <div className="flex flex-wrap gap-3 sm:gap-4 mb-4">
                 <div className="flex items-center gap-2 text-white/90 bg-white/5 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/10 shadow-lg">
                   <ShieldCheck className="w-5 h-5 text-amber-400" />
-                  <span className="font-semibold text-sm">
+                  <span className="font-semibold text-xs sm:text-sm">
                     Tibet Permits & China Visa
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-white/90 bg-white/5 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/10 shadow-lg">
                   <Utensils className="w-5 h-5 text-amber-400" />
-                  <span className="font-semibold text-sm">
+                  <span className="font-semibold text-xs sm:text-sm">
                     Indian Cook & Pure Veg
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-white/90 bg-white/5 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/10 shadow-lg">
                   <HeartPulse className="w-5 h-5 text-amber-400" />
-                  <span className="font-semibold text-sm">
+                  <span className="font-semibold text-xs sm:text-sm">
                     Oxygen & Sherpa Care
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Right: Glassmorphism Form */}
+            {/* Right: Glassmorphism High-Converting Form */}
             <div className="lg:col-span-5">
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] relative overflow-hidden">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 sm:p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] relative overflow-hidden">
                 {/* Subtle Amber Glow */}
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/30 blur-[60px] rounded-full pointer-events-none"></div>
 
                 <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 relative z-10 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Get Yatra Details
                 </h2>
-                <p className="text-gray-300 text-xs sm:text-sm mb-6 relative z-10 font-medium leading-relaxed">
+                <p className="text-gray-300 text-xs sm:text-sm mb-5 relative z-10 font-medium leading-relaxed">
                   Share your details to receive route comparison, 2026-2027 season departure advisory, and pricing instantly on WhatsApp.
                 </p>
 
                 <form
                   onSubmit={handleFormSubmit}
-                  className="space-y-4 relative z-10"
+                  className="space-y-3.5 relative z-10"
                 >
                   <div>
-                    <div className="relative flex items-center bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/40 transition-all shadow-inner">
-                      <User className="w-5 h-5 text-gray-400 mr-3" />
+                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                      <User className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
                       <input
                         required
                         type="text"
@@ -277,9 +220,9 @@ export default function MansarovarLanding() {
                     </div>
                   </div>
                   <div>
-                    <div className="relative flex items-center bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/40 transition-all shadow-inner">
-                      <Phone className="w-5 h-5 text-gray-400 mr-3" />
-                      <span className="text-gray-400 text-sm font-bold mr-2">
+                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                      <Phone className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                      <span className="text-gray-300 text-sm font-bold mr-2">
                         +91
                       </span>
                       <input
@@ -297,8 +240,8 @@ export default function MansarovarLanding() {
                     </div>
                   </div>
                   <div>
-                    <div className="relative flex items-center bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/40 transition-all shadow-inner">
-                      <Compass className="w-5 h-5 text-gray-400 mr-3" />
+                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                      <Compass className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
                       <select
                         value={formData.package}
                         onChange={(e) =>
@@ -318,25 +261,54 @@ export default function MansarovarLanding() {
                         <option value="Aerial Darshan Flight (1 Day Scenic Darshan)">
                           Aerial Darshan Flight (1 Day Scenic Darshan)
                         </option>
-                        <option value="Not Sure - Need Expert Guidance">
-                          Not Sure - Need Expert Guidance
+                        <option value="Not Sure - Need Guidance">
+                          Not Sure - Need Guidance
                         </option>
                       </select>
                       <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
                     </div>
                   </div>
+                  <div>
+                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                      <Calendar className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                      <select
+                        value={formData.month}
+                        onChange={(e) =>
+                          setFormData({ ...formData, month: e.target.value })
+                        }
+                        className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
+                      >
+                        <option value="May - June 2026 (Buddha / Jyeshtha Purnima)">
+                          May - June 2026 (Buddha / Jyeshtha Purnima)
+                        </option>
+                        <option value="July 2026 (Guru Purnima)">
+                          July 2026 (Guru Purnima)
+                        </option>
+                        <option value="August 2026 (Shravan / Raksha Bandhan)">
+                          August 2026 (Shravan / Raksha Bandhan)
+                        </option>
+                        <option value="September 2026 (Bhadrapada Purnima)">
+                          September 2026 (Bhadrapada Purnima)
+                        </option>
+                        <option value="2027 Advance Booking">
+                          2027 Advance Registration
+                        </option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
-                    className="w-full py-4 mt-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+                    className="w-full py-4 mt-3 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-[0_4px_16px_0_rgba(37,211,102,0.45)] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
                   >
                     <MessageCircle className="w-5 h-5" />
-                    Get Details on WhatsApp
+                    GET DETAILS ON WHATSAPP
                   </button>
                 </form>
 
-                <p className="text-xs text-gray-400 text-center mt-5 flex items-center justify-center gap-1.5 font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Your information is
-                  100% secure with us.
+                <p className="text-xs text-gray-300 text-center mt-4 flex items-center justify-center gap-1.5 font-medium">
+                  <ShieldCheck className="w-4 h-4 text-amber-400" /> 100% Privacy • Direct WhatsApp Advice • No Spam
                 </p>
               </div>
             </div>
@@ -366,9 +338,9 @@ export default function MansarovarLanding() {
       </div>
 
       {/* 3. YATRA OPTIONS / PACKAGES */}
-      <section id="packages" className="py-24 bg-gray-50 dark:bg-gray-950">
+      <section id="packages" className="py-20 sm:py-24 bg-gray-50 dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-14 sm:mb-16">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-4 border border-amber-200 dark:border-amber-800">
               <Compass className="w-3.5 h-3.5" />
               <span>Available Packages</span>
@@ -422,7 +394,7 @@ export default function MansarovarLanding() {
                   </div>
 
                   <div className="p-6 flex flex-col flex-grow">
-                    {/* Inclusions */}
+                    {/* Authentic Inclusions */}
                     <div className="space-y-2 mb-6 text-xs text-gray-600 dark:text-gray-300 font-medium">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -734,7 +706,7 @@ export default function MansarovarLanding() {
       </section>
 
       {/* 10. FINAL CONVERTING CTA */}
-      <section className="relative py-24 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 text-center px-4 overflow-hidden mb-[70px] md:mb-0">
+      <section className="relative py-20 sm:py-24 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 text-center px-4 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-multiply"></div>
         <div className="relative max-w-3xl mx-auto z-10">
           <h2
@@ -763,7 +735,10 @@ export default function MansarovarLanding() {
         </div>
       </section>
 
-      {/* 11. STICKY MOBILE ACTION BAR */}
+      {/* 11. ORIGINAL SITE FOOTER */}
+      <Footer />
+
+      {/* 12. STICKY MOBILE ACTION BAR */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 z-[9999] flex gap-3 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_20px_rgba(0,0,0,0.2)]">
         <button
           onClick={() =>
@@ -790,7 +765,7 @@ export default function MansarovarLanding() {
           }}
           className="flex-1 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transition-colors shadow-md"
         >
-          <PhoneCall className="w-5 h-5" />
+          <Phone className="w-5 h-5" />
           Call Now
         </button>
       </div>
