@@ -24,17 +24,24 @@ export const metadata: Metadata = {
   ),
   title: {
     default:
-      "Shree Ananta Travels - Kailash and Adi Kailash Yatra Agency in India",
+      "Shree Ananta Travels — Yatras, Domestic & International Tours",
     template: "%s | Shree Ananta Travels",
   },
   description:
     "Shree Ananta Travels: Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized tour packages.",
+  alternates: {
+    canonical: "/",
+    languages: {
+      "en-IN": "https://www.shreeanantatravels.com",
+      "x-default": "https://www.shreeanantatravels.com",
+    },
+  },
   openGraph: {
     siteName: "Shree Ananta Travels",
     type: "website",
-    title: "Shree Ananta Travels — Journeys That Connect",
+    title: "Shree Ananta Travels — Yatras, Domestic & International Tours",
     description:
-      "Leading Kailash & Adi Kailash Yatra agency in India. Sacred pilgrimages, Char Dham, and curated tour packages.",
+      "Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized tour packages.",
     images: [
       {
         url: "/icon.png",
@@ -46,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shree Ananta Travels — Journeys That Connect",
+    title: "Shree Ananta Travels — Yatras, Domestic & International Tours",
     description:
-      "Leading Kailash & Adi Kailash Yatra agency in India. Sacred pilgrimages, Char Dham, and curated tour packages.",
+      "Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized tour packages.",
     images: ["/icon.png"],
   },
   robots: {

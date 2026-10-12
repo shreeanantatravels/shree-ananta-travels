@@ -36,8 +36,8 @@ export function WhyTrustUs() {
     },
     {
       icon: Globe,
-      title: 'Curated Domestic & Global Tours',
-      desc: 'Handcrafted holiday packages across India, Himalayan spiritual yatras, and popular international getaways.',
+      title: 'Curated Domestic & International Tours',
+      desc: 'Handcrafted tour packages across India, Himalayan spiritual yatras, and popular international getaways.',
       badge: 'Curated Circuits',
       badgeColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
     }

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import AgentMarketplacePage from '@website/app/pages/AgentMarketplacePage';
 
 export const metadata: Metadata = {
-  title: 'Spiritual & Pilgrimage Yatra Packages',
+  title: {
+    absolute: 'Spiritual & Pilgrimage Yatra Packages | Shree Ananta Travels',
+  },
   description:
     'Book sacred Himalayan yatras: Kailash Mansarovar, Adi Kailash, Om Parvat & Char Dham with Shree Ananta Travels. Certified guides & pure veg meals.',
   alternates: {

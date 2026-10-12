@@ -9,11 +9,20 @@ function formatDestination(dest: string): string {
 export async function generateMetadata({ params }: { params: Promise<{ dest: string }> }): Promise<Metadata> {
   const { dest } = await params;
   const destination = formatDestination(dest);
-  const title = `${destination} Tour Packages | Shree Ananta Travels`;
+  let title = `Top ${destination} Tour Packages from India | Shree Ananta Travels`;
+  if (title.length < 58) {
+    title = `Explore ${destination} Tour Packages from India | Shree Ananta Travels`;
+  }
+  if (title.length > 65) {
+    title = title.slice(0, 62).trim() + '...';
+  }
+
   const description = `Discover international ${destination} tour packages with Shree Ananta Travels. Handcrafted itineraries, curated accommodations, and seamless travel concierge support.`;
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
     alternates: {
       canonical: `/international/${dest}`,
@@ -69,7 +78,7 @@ export default async function InternationalDestinationPage({ params }: { params:
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <AgentMarketplacePage initialCategory="international" initialSearch={destination} />
+      <AgentMarketplacePage initialCategory="international" initialSearch={destination} initialDestinationTitle={formattedTitle} />
     </>
   );
 }

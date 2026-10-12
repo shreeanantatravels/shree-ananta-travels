@@ -2,14 +2,16 @@ import type { Metadata } from 'next';
 import AboutUs from '@website/app/pages/AboutUs';
 
 export const metadata: Metadata = {
-  title: 'About Us — Journeys That Connect',
+  title: {
+    absolute: 'About Shree Ananta Travels | Sacred Yatras & Tour Specialist',
+  },
   description:
     'Discover Shree Ananta Travels: where every journey is more than an itinerary. Dedicated travel planning, sacred yatras, and curated tour packages.',
   alternates: {
     canonical: '/about',
   },
   openGraph: {
-    title: 'About Us | Shree Ananta Travels — Journeys That Connect',
+    title: 'About Shree Ananta Travels | Sacred Yatras & Tour Specialist',
     description:
       'Discover Shree Ananta Travels: where every journey is more than an itinerary. Dedicated travel planning, sacred yatras, and curated tour packages.',
     url: '/about',
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About Us | Shree Ananta Travels — Journeys That Connect',
+    title: 'About Shree Ananta Travels | Sacred Yatras & Tour Specialist',
     description:
       'Discover Shree Ananta Travels: where every journey is more than an itinerary. Dedicated travel planning, sacred yatras, and curated tour packages.',
     images: ['/icon.png'],

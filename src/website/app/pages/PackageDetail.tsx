@@ -398,9 +398,9 @@ export default function PackageDetail() {
                   <p className="text-xs uppercase tracking-widest font-semibold text-amber-300 mb-1">
                     Featured Destination
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-bold">
+                  <p className="text-2xl sm:text-3xl font-bold">
                     {packageData.title}
-                  </h3>
+                  </p>
                 </div>
                 {packageData.images?.length > 1 && (
                   <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold border border-white/30">
@@ -649,12 +649,12 @@ export default function PackageDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Inclusions Card */}
               <div className="bg-gradient-to-br from-emerald-50/70 via-emerald-50/30 to-white dark:from-emerald-950/40 dark:via-emerald-950/20 dark:to-gray-900 rounded-3xl p-6 sm:p-7 border border-emerald-200/70 dark:border-emerald-900/60 shadow-md">
-                <h3 className="text-lg font-black text-emerald-900 dark:text-emerald-300 mb-5 flex items-center gap-3">
+                <h2 className="text-lg font-black text-emerald-900 dark:text-emerald-300 mb-5 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/20">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <span>Package Inclusions</span>
-                </h3>
+                </h2>
                 <ul className="space-y-3">
                   {packageData.inclusions && packageData.inclusions.length > 0 ? (
                     packageData.inclusions.map((inc: string, index: number) => (
@@ -680,12 +680,12 @@ export default function PackageDetail() {
 
               {/* Exclusions Card */}
               <div className="bg-gradient-to-br from-rose-50/70 via-rose-50/30 to-white dark:from-rose-950/40 dark:via-rose-950/20 dark:to-gray-900 rounded-3xl p-6 sm:p-7 border border-rose-200/70 dark:border-rose-900/60 shadow-md">
-                <h3 className="text-lg font-black text-rose-900 dark:text-rose-300 mb-5 flex items-center gap-3">
+                <h2 className="text-lg font-black text-rose-900 dark:text-rose-300 mb-5 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold shadow-md shadow-rose-500/20">
                     <XCircle className="w-5 h-5" />
                   </div>
                   <span>Package Exclusions</span>
-                </h3>
+                </h2>
                 <ul className="space-y-3">
                   {packageData.exclusions && packageData.exclusions.length > 0 ? (
                     packageData.exclusions.map((exc: string, index: number) => (

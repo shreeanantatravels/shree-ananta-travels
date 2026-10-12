@@ -4,17 +4,15 @@ import Home from "@website/app/pages/Home";
 export const metadata: Metadata = {
   title: {
     absolute:
-      "Shree Ananta Travels — Journeys That Connect",
+      "Shree Ananta Travels — Yatras, Domestic & International Tours",
   },
   description:
-    "Shree Ananta Travels: Leading Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, curated tour packages, pure veg food & permits.",
+    "Shree Ananta Travels: Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized tour packages.",
   keywords: [
-    "Kailash and Adi Kailash Yatra Agency in India",
+    "Shree Ananta Travels",
     "Kailash Mansarovar Yatra",
     "Adi Kailash Yatra",
-    "Om Parvat Yatra",
     "Char Dham Yatra",
-    "Shree Ananta Travels",
     "spiritual tour packages",
     "domestic tour packages",
     "international tour packages",
@@ -25,9 +23,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title:
-      "Shree Ananta Travels — Journeys That Connect",
+      "Shree Ananta Travels — Yatras, Domestic & International Tours",
     description:
-      "Leading Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, curated tour packages, pure veg food & permits.",
+      "Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized tour packages.",
     url: "/",
     siteName: "Shree Ananta Travels",
     type: "website",
@@ -55,9 +53,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "Shree Ananta Travels — Journeys That Connect",
+      "Shree Ananta Travels — Yatras, Domestic & International Tours",
     description:
-      "Leading Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, curated tour packages, pure veg food & permits.",
+      "Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized tour packages.",
     images: ["/icon.png"],
   },
 };

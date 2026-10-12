@@ -17,15 +17,27 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       };
     }
 
-    const title = pkg.title;
-    const fullTitle = `${pkg.title} | Shree Ananta Travels`;
+    const rawTitle = pkg.title || 'Tour Package';
+    let fullTitle = `${rawTitle} | Shree Ananta Travels`;
+    if (fullTitle.length < 58) {
+      fullTitle = `${rawTitle} Tour Package | Shree Ananta Travels`;
+    }
+    if (fullTitle.length < 58) {
+      fullTitle = `Book ${rawTitle} Tour Package | Shree Ananta Travels`;
+    }
+    if (fullTitle.length > 65) {
+      fullTitle = fullTitle.slice(0, 62).trim() + '...';
+    }
+
     const description = pkg.description
       ? pkg.description.slice(0, 160)
       : `Book ${pkg.title} (${pkg.duration || 'Custom Duration'}) in ${pkg.location || 'India'} with Shree Ananta Travels. Personalized itineraries and dedicated concierge assistance.`;
     const image = pkg.imageUrl1 || pkg.imageUrl2 || '';
 
     return {
-      title,
+      title: {
+        absolute: fullTitle,
+      },
       description,
       alternates: {
         canonical: `/package/${id}`,
@@ -46,7 +58,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
   } catch {
     return {
-      title: 'Tour Package',
+      title: {
+        absolute: 'Explore Curated Tour Packages | Shree Ananta Travels',
+      },
       description: 'Explore curated travel packages with Shree Ananta Travels.',
     };
   }

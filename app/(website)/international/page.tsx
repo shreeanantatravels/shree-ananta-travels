@@ -2,24 +2,26 @@ import type { Metadata } from 'next';
 import DestinationsCategoryPage from '@website/app/pages/DestinationsCategoryPage';
 
 export const metadata: Metadata = {
-  title: 'International Tour Packages',
+  title: {
+    absolute: 'International Tour Packages from India | Shree Ananta Travels',
+  },
   description:
-    'Plan seamless international holidays to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
+    'Plan seamless international trips to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
   alternates: {
     canonical: '/international',
   },
   openGraph: {
-    title: 'International Tour Packages | Shree Ananta Travels',
+    title: 'International Tour Packages from India | Shree Ananta Travels',
     description:
-      'Plan seamless international holidays to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
+      'Plan seamless international trips to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
     url: '/international',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'International Tour Packages | Shree Ananta Travels',
+    title: 'International Tour Packages from India | Shree Ananta Travels',
     description:
-      'Plan seamless international holidays to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
+      'Plan seamless international trips to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
   },
 };
 

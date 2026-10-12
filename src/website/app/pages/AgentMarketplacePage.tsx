@@ -20,13 +20,17 @@ const THEMES: Record<string, { primary: string; gradient: string; accent: string
 
 const ITEMS_PER_PAGE = 16;
 
+const STOP_WORDS = new Set(['and', '&', 'the', 'for', 'with', 'via', 'from', 'in', 'of', 'to', 'trip', 'trips', 'package', 'packages', 'tour', 'tours', 'yatra', 'yatras']);
+
 /* ── Main Page ───────────────────────────────────────────────────── */
 export default function AgentMarketplacePage({ 
   initialCategory, 
-  initialSearch 
+  initialSearch,
+  initialDestinationTitle,
 }: { 
   initialCategory?: 'all' | 'domestic' | 'international' | 'trending';
   initialSearch?: string;
+  initialDestinationTitle?: string;
 } = {}) {
   const { agent, packages, siteConfig } = useAgent();
   const [filter, setFilter] = useState<'all' | 'domestic' | 'international' | 'trending'>(initialCategory || 'all');
@@ -63,30 +67,31 @@ export default function AgentMarketplacePage({
     const title = (pkg.title || '').toLowerCase().trim();
     const desc = (pkg.description || '').toLowerCase().trim();
     const pkgType = (pkg.packageType || '').toLowerCase().trim();
+    const combined = `${title} ${loc} ${desc} ${pkgType}`;
 
-    // 1. Substring match
-    if (title.includes(q) || loc.includes(q) || desc.includes(q) || pkgType.includes(q)) {
+    // 1. Direct phrase or substring match
+    if (combined.includes(q)) {
       return true;
     }
 
-    // 2. Reverse Match: Query contains package location (e.g. "kailash abcd" contains "kailash")
-    if (loc && loc.length >= 3 && q.includes(loc)) {
-      return true;
+    // 2. Meaningful keywords match (ignoring common stop words like "and")
+    const queryWords = q
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+
+    if (queryWords.length === 0) {
+      // If query was ONLY stop words (e.g. "and"), do exact word boundary check
+      const rawWords = q.split(/\s+/).filter(Boolean);
+      return rawWords.some(w => new RegExp(`\\b${w}\\b`, 'i').test(combined));
     }
 
-    // 3. Tokenized Word Match: Any word in query matches location, title, or type
-    const queryWords = q.split(/\s+/).filter(w => w.length >= 3);
-    for (const word of queryWords) {
-      if (
-        (loc && (loc.includes(word) || word.includes(loc))) ||
-        title.includes(word) ||
-        pkgType.includes(word)
-      ) {
-        return true;
-      }
-    }
-
-    return false;
+    // 3. Word boundary or prefix match for significant keywords
+    // e.g. "andaman" matches "Andaman" or "Andamans", but "and" won't match "Chandrashila"
+    return queryWords.some(word => {
+      const regex = new RegExp(`\\b${word}`, 'i');
+      return regex.test(combined);
+    });
   };
 
   // Filter across ALL packages in the entire database
@@ -226,21 +231,12 @@ export default function AgentMarketplacePage({
             {(() => {
               const q = search.trim().toLowerCase();
               
-              let searchDestination = '';
-              if (q) {
-                const foundPkg = filtered.find(p => {
-                  const loc = (p.location || '').toLowerCase().trim();
-                  return loc && loc.length >= 3 && (q.includes(loc) || loc.includes(q));
-                });
-
-                if (foundPkg && foundPkg.location) {
-                  searchDestination = foundPkg.location.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-                } else {
-                  const noiseWords = new Set(['package', 'packages', 'tour', 'tours', 'trip', 'trips', 'luxury', 'best', 'deal', 'deals']);
-                  const cleanWords = search.trim().split(/\s+/).filter(w => !noiseWords.has(w.toLowerCase()));
-                  const targetStr = cleanWords.length > 0 ? cleanWords.join(' ') : search.trim();
-                  searchDestination = targetStr.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-                }
+              let searchDestination = initialDestinationTitle || '';
+              if (!searchDestination && q) {
+                const noiseWords = new Set(['package', 'packages', 'tour', 'tours', 'trip', 'trips', 'luxury', 'best', 'deal', 'deals']);
+                const cleanWords = search.trim().split(/\s+/).filter(w => !noiseWords.has(w.toLowerCase()));
+                const targetStr = cleanWords.length > 0 ? cleanWords.join(' ') : search.trim();
+                searchDestination = targetStr.split(/\s+/).map(w => w.toLowerCase() === 'and' ? '&' : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
               }
 
               const pageTitle = searchDestination
@@ -258,7 +254,7 @@ export default function AgentMarketplacePage({
                 : (filter === 'domestic' 
                     ? 'Immerse yourself in rich heritage, diverse cultures, and breathtaking landscapes with our hand-crafted domestic itineraries.' 
                     : filter === 'international' 
-                      ? 'Cross borders and experience the extraordinary. From tropical paradises to bustling global metropolis, your adventure awaits.' 
+                      ? 'Cross borders and experience the extraordinary. From tropical paradises to bustling world-renowned metropolis, your adventure awaits.' 
                       : filter === 'trending'
                         ? 'Discover the most popular and highly sought-after travel experiences chosen by thousands of travelers.'
                         : agent?.tagline || `Discover the best travel experiences crafted by ${displayName}`);
@@ -337,6 +333,7 @@ export default function AgentMarketplacePage({
         {/* Packages Grid */}
         {filtered.length > 0 ? (
           <>
+            <h2 className="sr-only">Available Packages</h2>
             <div className={`pkg-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 ${filtered.length === 1 ? 'justify-items-center' : ''}`}>
               {paginatedPackages.map(pkg => (
                 <div key={pkg._id} className={filtered.length === 1 ? 'w-full max-w-[340px] sm:max-w-md mx-auto' : 'w-full'}>
@@ -404,7 +401,7 @@ export default function AgentMarketplacePage({
         ) : (
           <div className="py-14 px-4 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl shadow-sm max-w-md mx-auto my-6">
             <div className="text-5xl mb-3">🏝️</div>
-            <h3 className="text-lg font-extrabold text-gray-800 dark:text-white mb-1">No packages found</h3>
+            <h2 className="text-lg font-extrabold text-gray-800 dark:text-white mb-1">No packages found</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
               We couldn't find any packages for "{search || filter}". Try clearing your search query or switching category filter.
             </p>

@@ -2,14 +2,16 @@ import type { Metadata } from 'next';
 import ContactUs from '@website/app/pages/ContactUs';
 
 export const metadata: Metadata = {
-  title: 'Contact Us - Delhi Office',
+  title: {
+    absolute: 'Contact Us | Shree Ananta Travels Delhi Office & Booking Desk',
+  },
   description:
     'Get in touch with Shree Ananta Travels at our Delhi office in East of Kailash. Speak directly with our travel experts via phone, WhatsApp, or contact inquiry.',
   alternates: {
     canonical: '/contact',
   },
   openGraph: {
-    title: 'Contact Us | Shree Ananta Travels Delhi Office',
+    title: 'Contact Us | Shree Ananta Travels Delhi Office & Booking Desk',
     description:
       'Get in touch with Shree Ananta Travels at our Delhi office in East of Kailash. Speak directly with our travel experts via phone, WhatsApp, or contact inquiry.',
     url: '/contact',
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Contact Us | Shree Ananta Travels Delhi Office',
+    title: 'Contact Us | Shree Ananta Travels Delhi Office & Booking Desk',
     description:
       'Get in touch with Shree Ananta Travels at our Delhi office in East of Kailash. Speak directly with our travel experts via phone, WhatsApp, or contact inquiry.',
   },

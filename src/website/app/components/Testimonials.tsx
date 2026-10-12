@@ -139,7 +139,7 @@ export function Testimonials() {
                     {item.initials}
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-base">{item.name}</h4>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base">{item.name}</h3>
                     {item.destination && (
                       <p className="text-xs text-[var(--theme-primary)] font-medium">Traveled to {item.destination}</p>
                     )}

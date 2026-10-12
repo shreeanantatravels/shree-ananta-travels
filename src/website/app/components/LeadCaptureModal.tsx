@@ -147,7 +147,7 @@ export function LeadCaptureModal() {
                   <IndianRupee size={16} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white leading-snug">Best Price Guarantee</h4>
+                  <p className="text-xs font-bold text-white leading-snug">Best Price Guarantee</p>
                   <p className="text-[10px] text-white/60 hidden sm:block">No hidden charges</p>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function LeadCaptureModal() {
                   <Headset size={16} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white leading-snug">Dedicated Support</h4>
+                  <p className="text-xs font-bold text-white leading-snug">Dedicated Support</p>
                   <p className="text-[10px] text-white/60 hidden sm:block">Here to assist your journey</p>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export function LeadCaptureModal() {
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto mb-4 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 size={30} />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1">Inquiry Received! 🎉</h3>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1">Inquiry Received! 🎉</p>
               <p className="text-xs text-gray-600 dark:text-gray-400 max-w-xs mx-auto leading-relaxed">
                 Thank you, <span className="font-semibold text-gray-900 dark:text-white">{formData.name || 'Traveler'}</span>! Our travel expert will call you shortly with custom quotes for {formData.destination}.
               </p>
@@ -216,9 +216,9 @@ export function LeadCaptureModal() {
                 >
                   GET A FREE QUOTE
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                <p className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                   Plan Your Trip
-                </h3>
+                </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1 max-w-xs">
                   Share your details & get a custom package quote!
                 </p>

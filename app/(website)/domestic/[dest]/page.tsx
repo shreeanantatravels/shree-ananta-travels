@@ -9,11 +9,20 @@ function formatDestination(dest: string): string {
 export async function generateMetadata({ params }: { params: Promise<{ dest: string }> }): Promise<Metadata> {
   const { dest } = await params;
   const destination = formatDestination(dest);
-  const title = `${destination} Tour Packages | Shree Ananta Travels`;
-  const description = `Explore curated ${destination} holiday and tour packages with Shree Ananta Travels. Personalized itineraries, authentic stays, and dedicated concierge assistance.`;
+  let title = `Best ${destination} Tour Packages in India | Shree Ananta Travels`;
+  if (title.length < 58) {
+    title = `Explore ${destination} Tour Packages in India | Shree Ananta Travels`;
+  }
+  if (title.length > 65) {
+    title = title.slice(0, 62).trim() + '...';
+  }
+
+  const description = `Explore curated ${destination} tour packages with Shree Ananta Travels. Personalized itineraries, authentic stays, and dedicated concierge assistance.`;
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
     alternates: {
       canonical: `/domestic/${dest}`,
@@ -69,7 +78,7 @@ export default async function DomesticDestinationPage({ params }: { params: Prom
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <AgentMarketplacePage initialCategory="domestic" initialSearch={destination} />
+      <AgentMarketplacePage initialCategory="domestic" initialSearch={destination} initialDestinationTitle={formattedTitle} />
     </>
   );
 }

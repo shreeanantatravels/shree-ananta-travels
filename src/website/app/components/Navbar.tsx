@@ -204,10 +204,10 @@ export function Navbar() {
                         <div className="bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                           {/* Dropdown Header */}
                           <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
-                            <h3 className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
+                            <div className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
                               <MapPin className="w-4 h-4" />
                               {dropCategory === 'domestic' ? 'Domestic Destinations' : 'International Destinations'}
-                            </h3>
+                            </div>
                             <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-0.5">
                               Tour Packages
                             </span>
@@ -238,7 +238,7 @@ export function Navbar() {
                           {/* Dropdown Footer */}
                           <div className="bg-gray-50/80 dark:bg-gray-800/60 px-6 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold">
                             <span className="text-gray-500 dark:text-gray-400">
-                              Explore all {dropCategory === 'domestic' ? 'Domestic' : 'Global'} Destinations
+                              Explore all {dropCategory === 'domestic' ? 'Domestic' : 'International'} Destinations
                             </span>
                             <Link
                               href={pageUrl}

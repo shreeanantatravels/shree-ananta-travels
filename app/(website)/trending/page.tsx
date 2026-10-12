@@ -2,24 +2,26 @@ import type { Metadata } from 'next';
 import AgentMarketplacePage from '@website/app/pages/AgentMarketplacePage';
 
 export const metadata: Metadata = {
-  title: 'Trending Holiday Tour Packages',
+  title: {
+    absolute: 'Explore Trending Tour Packages in India | Shree Ananta Travels',
+  },
   description:
-    'Explore top trending domestic and international holiday tour packages curated by Shree Ananta Travels. Best-rated vacation itineraries with transparent pricing.',
+    'Explore top trending domestic and international tour packages curated by Shree Ananta Travels. Best-rated vacation itineraries with transparent pricing.',
   alternates: {
     canonical: '/trending',
   },
   openGraph: {
-    title: 'Trending Holiday Tour Packages | Shree Ananta Travels',
+    title: 'Explore Trending Tour Packages in India | Shree Ananta Travels',
     description:
-      'Explore top trending domestic and international holiday tour packages curated by Shree Ananta Travels.',
+      'Explore top trending domestic and international tour packages curated by Shree Ananta Travels.',
     url: '/trending',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trending Holiday Tour Packages | Shree Ananta Travels',
+    title: 'Explore Trending Tour Packages in India | Shree Ananta Travels',
     description:
-      'Explore top trending domestic and international holiday tour packages curated by Shree Ananta Travels.',
+      'Explore top trending domestic and international tour packages curated by Shree Ananta Travels.',
   },
 };
 

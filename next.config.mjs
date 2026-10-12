@@ -34,8 +34,42 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/domestic/manali-himachal',
+        destination: '/domestic/manali-and-himachal',
+        permanent: true,
+      },
+      {
         source: '/domestic/andaman-%26-nicobar',
         destination: '/domestic/andaman-and-nicobar',
+        permanent: true,
+      },
+      {
+        source: '/domestic/andaman-nicobar',
+        destination: '/domestic/andaman-and-nicobar',
+        permanent: true,
+      },
+      {
+        source: '/packages',
+        has: [
+          {
+            type: 'query',
+            key: 'category',
+            value: 'trending',
+          },
+        ],
+        destination: '/trending',
+        permanent: true,
+      },
+      {
+        source: '/packages',
+        has: [
+          {
+            type: 'query',
+            key: 'category',
+            value: 'spiritual',
+          },
+        ],
+        destination: '/spiritual',
         permanent: true,
       },
     ];
