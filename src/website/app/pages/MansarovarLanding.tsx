@@ -17,7 +17,9 @@ import {
   HeartPulse,
   ExternalLink,
   Calendar,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useAgent } from "../context/AgentContext";
 import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
@@ -90,22 +92,57 @@ export default function MansarovarLanding() {
     package: "Helicopter Route (10 Days via Lucknow)",
     month: "May - June 2026",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      toast.error("Please enter your name and 10-digit mobile number.");
+      return;
+    }
+
+    setIsSubmitting(true);
     if (typeof window !== "undefined" && (window as any).dataLayer) {
       (window as any).dataLayer.push({ event: "mansarovar_form_submit" });
     }
+
     const msg = `ॐ नमः शिवाय!
 Hello Shree Ananta Travels, I want to inquire for Kailash Mansarovar Yatra:
 
-• Name: ${formData.name}
-• Phone: +91 ${formData.phone}
+• Name: ${formData.name.trim()}
+• Phone: +91 ${formData.phone.trim()}
 • Preferred Route: ${formData.package}
 • Preferred Month: ${formData.month}
 
 Please share the detailed itinerary, available departure slots, and all-inclusive pricing quote.`;
-    window.open(buildWhatsAppUrl(msg), "_blank");
+
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          destination: "Kailash Mansarovar",
+          toLocation: "Kailash Mansarovar",
+          packageName: formData.package,
+          specialRequests: `Preferred Month: ${formData.month}`,
+          adults: 2,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setIsSubmitted(true);
+        toast.success("Inquiry saved to Dashboard! Opening WhatsApp...");
+      }
+    } catch (err) {
+      console.error("Lead submission error:", err);
+    } finally {
+      setIsSubmitting(false);
+      window.open(buildWhatsAppUrl(msg), "_blank");
+    }
   };
 
   // Filter Kailash packages from database or fallback
@@ -300,10 +337,25 @@ Please share the detailed itinerary, available departure slots, and all-inclusiv
 
                   <button
                     type="submit"
-                    className="w-full py-4 mt-3 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-[0_4px_16px_0_rgba(37,211,102,0.45)] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+                    disabled={isSubmitting}
+                    className="w-full py-4 mt-3 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-[0_4px_16px_0_rgba(37,211,102,0.45)] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:opacity-75 disabled:pointer-events-none"
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    GET DETAILS ON WHATSAPP
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>SAVING TO DASHBOARD...</span>
+                      </>
+                    ) : isSubmitted ? (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 text-white" />
+                        <span>INQUIRY SAVED! REDIRECTING...</span>
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="w-5 h-5" />
+                        <span>GET DETAILS ON WHATSAPP</span>
+                      </>
+                    )}
                   </button>
                 </form>
 
