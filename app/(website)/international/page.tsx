@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import DestinationsCategoryPage from '@website/app/pages/DestinationsCategoryPage';
 
 export const metadata: Metadata = {
-  title: 'International Tour Packages | Shree Ananta Travels',
+  title: 'International Tour Packages',
   description:
     'Plan seamless international holidays to Dubai, Bali, Thailand, and beyond. Tailored itineraries, flight assistance, and direct travel concierge support.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function InternationalPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

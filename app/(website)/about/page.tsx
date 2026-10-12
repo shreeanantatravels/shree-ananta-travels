@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import AboutUs from '@website/app/pages/AboutUs';
 
 export const metadata: Metadata = {
-  title: 'About Us | Shree Ananta Travels Delhi',
+  title: 'About Us',
   description:
     'Learn about Shree Ananta Travels, our commitment to personalized travel planning, curated accommodations, and dedicated guest concierge support.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

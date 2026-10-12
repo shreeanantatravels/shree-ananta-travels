@@ -202,28 +202,32 @@ export function TrendingPackages() {
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Header */}
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
             <p
-              className="text-xs font-semibold uppercase tracking-widest mb-1.5"
+              className="text-xs font-bold uppercase tracking-widest mb-1.5"
               style={{ color: 'var(--theme-primary)' }}
             >
-                         </p>
-            <h2
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+              Curated Itineraries &amp; Holy Yatras
+            </p>
+            <h1
+              className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              Trending{' '}
+              Tour Packages for{' '}
               <span
                 className="text-transparent bg-clip-text"
                 style={{ backgroundImage: 'var(--theme-gradient)' }}
               >
-                Packages
-                              </span>
-            </h2>
+                Domestic and International
+              </span>
+            </h1>
+            <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
+              Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.
+            </p>
           </div>
           <Link href="/packages"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:opacity-80"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:opacity-80 flex-shrink-0"
             style={{ color: 'var(--theme-primary)' }}
           >
             View All Packages <ArrowUpRight size={15} />

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import MansarovarLanding from '@website/app/pages/MansarovarLanding';
 
 export const metadata: Metadata = {
-  title: 'Kailash Mansarovar Yatra 2027 Packages & Booking | Shree Ananta Travels',
+  title: 'Kailash Mansarovar Yatra 2027 Packages & Booking',
   description:
     'Plan your sacred Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Lhasa air route, China visa, Tibet permits, and pure vegetarian meals.',
   keywords: [
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export default function KailashMansarovarPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -119,8 +119,19 @@ export default function KailashMansarovarPage() {
     touristType: ['Pilgrims', 'Devotees', 'Spiritual Seekers'],
     provider: {
       '@type': 'TravelAgency',
+      '@id': 'https://www.shreeanantatravels.com/#organization',
       name: 'Shree Ananta Travels',
       url: baseUrl,
+      telephone: '+91 7289037447',
+      email: 'shreeanantatravels@gmail.com',
+      image: `${baseUrl}/uploads/shree-ananta-logo.jpg`,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'E91, East of Kailash',
+        addressLocality: 'Delhi',
+        postalCode: '110065',
+        addressCountry: 'IN',
+      },
     },
     itinerary: {
       '@type': 'ItemList',

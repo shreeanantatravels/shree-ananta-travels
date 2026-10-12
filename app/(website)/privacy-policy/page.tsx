@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import PrivacyPolicy from '@website/app/pages/PrivacyPolicy';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Shree Ananta Travels',
+  title: 'Privacy Policy',
   description:
     'Read the privacy policy of Shree Ananta Travels. Learn how we handle, protect, and respect your personal travel information.',
   alternates: {

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import DestinationsCategoryPage from '@website/app/pages/DestinationsCategoryPage';
 
 export const metadata: Metadata = {
-  title: 'Domestic Tour Packages in India | Shree Ananta Travels',
+  title: 'Domestic Tour Packages in India',
   description:
     'Explore scenic holiday destinations across India with Shree Ananta Travels. Curated family, romantic, and spiritual itineraries with transparent pricing.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function DomesticPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

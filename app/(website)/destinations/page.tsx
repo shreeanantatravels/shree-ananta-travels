@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import DestinationsPage from '@website/app/pages/DestinationsPage';
 
 export const metadata: Metadata = {
-  title: 'Top Travel Destinations | Shree Ananta Travels',
+  title: 'Top Travel Destinations',
   description:
     'Discover top tourist destinations across India and worldwide. Plan your next vacation with Shree Ananta Travels\' curated travel guides and itineraries.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

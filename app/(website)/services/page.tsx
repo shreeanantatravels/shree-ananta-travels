@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Services from '@website/app/pages/Services';
 
 export const metadata: Metadata = {
-  title: 'Travel Services & Custom Tours | Shree Ananta Travels',
+  title: 'Travel Services & Custom Tours',
   description:
     'Comprehensive travel planning services by Shree Ananta Travels: customized tour itineraries, hotel reservations, transfers, and pilgrimage support.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function ServicesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

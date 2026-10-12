@@ -11,13 +11,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     if (!pkg || pkg.isActive === false) {
       return {
-        title: 'Package Not Found | Shree Ananta Travels',
+        title: 'Package Not Found',
         description: 'The requested tour package could not be found or has been discontinued.',
         robots: { index: false, follow: true },
       };
     }
 
-    const title = `${pkg.title} | Shree Ananta Travels`;
+    const title = pkg.title;
+    const fullTitle = `${pkg.title} | Shree Ananta Travels`;
     const description = pkg.description
       ? pkg.description.slice(0, 160)
       : `Book ${pkg.title} (${pkg.duration || 'Custom Duration'}) in ${pkg.location || 'India'} with Shree Ananta Travels. Personalized itineraries and dedicated concierge assistance.`;
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         canonical: `/package/${id}`,
       },
       openGraph: {
-        title,
+        title: fullTitle,
         description,
         url: `/package/${id}`,
         type: 'website',
@@ -38,14 +39,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       },
       twitter: {
         card: 'summary_large_image',
-        title,
+        title: fullTitle,
         description,
         ...(image ? { images: [image] } : {}),
       },
     };
   } catch {
     return {
-      title: 'Tour Package | Shree Ananta Travels',
+      title: 'Tour Package',
       description: 'Explore curated travel packages with Shree Ananta Travels.',
     };
   }
@@ -79,8 +80,10 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
         ...(pkg.location ? { itinerary: { '@type': 'ItemList', name: pkg.location } } : {}),
         provider: {
           '@type': 'TravelAgency',
+          '@id': 'https://www.shreeanantatravels.com/#organization',
           name: 'Shree Ananta Travels',
-          url: 'https://shreeanantatravels.com',
+          url: 'https://www.shreeanantatravels.com',
+          image: 'https://www.shreeanantatravels.com/uploads/shree-ananta-logo.jpg',
           telephone: '+91 7289037447',
           email: 'shreeanantatravels@gmail.com',
           address: {
@@ -96,7 +99,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
             '@type': 'Offer',
             price: price,
             priceCurrency: 'INR',
-            url: `https://shreeanantatravels.com/package/${id}`,
+            url: `https://www.shreeanantatravels.com/package/${id}`,
           },
         } : {}),
       };
@@ -109,19 +112,19 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://shreeanantatravels.com',
+            item: 'https://www.shreeanantatravels.com',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: 'Tour Packages',
-            item: 'https://shreeanantatravels.com/packages',
+            item: 'https://www.shreeanantatravels.com/packages',
           },
           {
             '@type': 'ListItem',
             position: 3,
             name: pkg.title,
-            item: `https://shreeanantatravels.com/package/${id}`,
+            item: `https://www.shreeanantatravels.com/package/${id}`,
           },
         ],
       };

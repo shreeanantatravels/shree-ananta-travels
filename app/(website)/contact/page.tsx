@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import ContactUs from '@website/app/pages/ContactUs';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | Shree Ananta Travels Delhi Office',
+  title: 'Contact Us - Delhi Office',
   description:
     'Get in touch with Shree Ananta Travels at our Delhi office in East of Kailash. Speak directly with our travel experts via phone, WhatsApp, or contact inquiry.',
   alternates: {
@@ -30,8 +30,11 @@ const contactSchema = {
   description: 'Official contact details for Shree Ananta Travels Delhi office.',
   mainEntity: {
     '@type': 'TravelAgency',
+    '@id': 'https://www.shreeanantatravels.com/#organization',
     name: 'Shree Ananta Travels',
-    url: 'https://shreeanantatravels.com',
+    url: 'https://www.shreeanantatravels.com',
+    logo: 'https://www.shreeanantatravels.com/uploads/shree-ananta-logo.jpg',
+    image: 'https://www.shreeanantatravels.com/uploads/shree-ananta-logo.jpg',
     telephone: '+91 7289037447',
     email: 'shreeanantatravels@gmail.com',
     address: {

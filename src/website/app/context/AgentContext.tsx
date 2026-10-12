@@ -102,15 +102,30 @@ const AgentContext = createContext<AgentContextType>({
   error: null,
 });
 
-export function AgentProvider({ children }: { children: React.ReactNode }) {
-  const [agent, setAgent] = useState<AgentProfile | null>(null);
-  const [packages, setPackages] = useState<AgentPackage[]>([]);
-  const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+interface AgentProviderProps {
+  children: React.ReactNode;
+  initialPackages?: AgentPackage[];
+  initialSiteConfig?: SiteConfig | null;
+  initialAgent?: AgentProfile | null;
+}
+
+export function AgentProvider({
+  children,
+  initialPackages = [],
+  initialSiteConfig = null,
+  initialAgent = null,
+}: AgentProviderProps) {
+  const [agent, setAgent] = useState<AgentProfile | null>(initialAgent);
+  const [packages, setPackages] = useState<AgentPackage[]>(initialPackages);
+  const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(initialSiteConfig);
+  const [isLoading, setIsLoading] = useState(!initialPackages.length);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
+    // If not pre-hydrated, show loading state
+    if (!packages.length || !siteConfig) {
+      setIsLoading(true);
+    }
 
     Promise.all([
       fetch('/api/auth/me', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ success: false })),

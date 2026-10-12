@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import AgentMarketplacePage from '@website/app/pages/AgentMarketplacePage';
 
 export const metadata: Metadata = {
-  title: 'Explore Holiday Tour Packages | Shree Ananta Travels',
+  title: 'Explore Holiday Tour Packages',
   description:
     'Browse curated domestic and international travel packages from Shree Ananta Travels. Filter by category, duration, and personalized travel preferences.',
   alternates: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function PackagesPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

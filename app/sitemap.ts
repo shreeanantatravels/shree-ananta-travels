@@ -4,7 +4,7 @@ import Package from '@/lib/db/models/Package';
 import SiteConfig from '@/lib/db/models/SiteConfig';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [

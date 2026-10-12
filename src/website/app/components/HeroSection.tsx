@@ -16,7 +16,7 @@ export function HeroSection() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Dynamic Title & Subtitle with fallbacks
-  const heroHeading = siteConfig?.heroTitle?.trim() || 'Tour Packages for India and Abroad';
+  const heroHeading = siteConfig?.heroTitle?.trim() || 'Tour Packages for Domestic and International';
   const heroSubtitle = siteConfig?.heroSubtitle?.trim() || 'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.';
 
   const images = useMemo(() => {
@@ -241,37 +241,6 @@ export function HeroSection() {
     </div>
   );
 
-  const renderHeroHeading = (isRoyalGold = false) => {
-    return (
-      <div className="max-w-4xl mx-auto text-center pt-8 pb-4 px-4 sm:px-6">
-        <h1
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          {heroHeading === 'Tour Packages for India and Abroad' ? (
-            <>
-              Tour Packages for{' '}
-              <span
-                className={
-                  isRoyalGold
-                    ? "text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3d375] to-[#c59b27]"
-                    : "text-transparent bg-clip-text"
-                }
-                style={isRoyalGold ? undefined : { backgroundImage: 'var(--theme-gradient)' }}
-              >
-                India and Abroad
-              </span>
-            </>
-          ) : (
-            heroHeading
-          )}
-        </h1>
-        <p className="mt-2.5 text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-          {heroSubtitle}
-        </p>
-      </div>
-    );
-  };
 
   if (layoutVariant === 'centered') {
     return (
@@ -323,8 +292,6 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Primary Page Heading (H1) for SEO */}
-        {renderHeroHeading()}
       </div>
     );
   }
@@ -379,8 +346,6 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Primary Page Heading (H1) for SEO */}
-        {renderHeroHeading()}
       </div>
     );
   }
@@ -435,8 +400,6 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Primary Page Heading (H1) for SEO */}
-        {renderHeroHeading(true)}
       </div>
     );
   }
@@ -490,8 +453,6 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Primary Page Heading (H1) for SEO */}
-      {renderHeroHeading()}
     </div>
   );
 }

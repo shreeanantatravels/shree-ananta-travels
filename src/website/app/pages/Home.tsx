@@ -12,6 +12,7 @@ import { PlanTourForm } from '../components/PlanTourForm';
 import { WhyTrustUs } from '../components/WhyTrustUs';
 import { Testimonials } from '../components/Testimonials';
 import { FAQ } from '../components/FAQ';
+import { SeoOverviewSection } from '../components/SeoOverviewSection';
 import { Footer } from '../components/Footer';
 import { LeadCaptureModal } from '../components/LeadCaptureModal';
 import { ChatbotButton } from '../components/ChatbotButton';
@@ -33,6 +34,7 @@ export default function Home() {
         <WhyTrustUs />
         <Testimonials />
         <FAQ />
+        <SeoOverviewSection />
       </main>
       <Footer />
       <LeadCaptureModal />

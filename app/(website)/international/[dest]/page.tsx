@@ -39,7 +39,7 @@ export default async function InternationalDestinationPage({ params }: { params:
   const { dest } = await params;
   const destination = decodeURIComponent(dest).replace(/-/g, ' ');
   const formattedTitle = formatDestination(dest);
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
