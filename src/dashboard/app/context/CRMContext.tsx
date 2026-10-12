@@ -42,6 +42,7 @@ export interface PackageLead extends BaseLead {
 
 export type Lead = PopupLead | FormLead | PackageLead;
 
+
 // ── Mock Data ──────────────────────────────────────────────────────────────────
 export const initialMockLeads: Lead[] = [];
 
