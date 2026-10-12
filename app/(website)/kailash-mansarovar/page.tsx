@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import MansarovarLanding from '@website/app/pages/MansarovarLanding';
+import KailashPage from '@website/app/pages/KailashPage';
 
 export const metadata: Metadata = {
   title: 'Kailash Mansarovar Yatra 2026 - 2027 Packages | Shree Ananta Travels',
@@ -59,7 +59,7 @@ export default function KailashMansarovarPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <MansarovarLanding />
+      <KailashPage />
     </>
   );
 }
