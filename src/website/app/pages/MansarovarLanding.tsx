@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Calendar,
   Loader2,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAgent } from "../context/AgentContext";
@@ -107,16 +108,6 @@ export default function MansarovarLanding() {
       (window as any).dataLayer.push({ event: "mansarovar_form_submit" });
     }
 
-    const msg = `ॐ नमः शिवाय!
-Hello Shree Ananta Travels, I want to inquire for Kailash Mansarovar Yatra:
-
-• Name: ${formData.name.trim()}
-• Phone: +91 ${formData.phone.trim()}
-• Preferred Route: ${formData.package}
-• Preferred Month: ${formData.month}
-
-Please share the detailed itinerary, available departure slots, and all-inclusive pricing quote.`;
-
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
@@ -135,13 +126,15 @@ Please share the detailed itinerary, available departure slots, and all-inclusiv
       const data = await res.json();
       if (data.success) {
         setIsSubmitted(true);
-        toast.success("Inquiry saved to Dashboard! Opening WhatsApp...");
+        toast.success("Enquiry received! Your details have been sent to our dashboard.");
+      } else {
+        toast.error(data.message || "Failed to submit enquiry. Please try again.");
       }
     } catch (err) {
       console.error("Lead submission error:", err);
+      toast.error("Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
-      window.open(buildWhatsAppUrl(msg), "_blank");
     }
   };
 
@@ -234,130 +227,154 @@ Please share the detailed itinerary, available departure slots, and all-inclusiv
                   Get Yatra Details
                 </h2>
                 <p className="text-gray-300 text-xs sm:text-sm mb-5 relative z-10 font-medium leading-relaxed">
-                  Share your details to receive route comparison, 2026-2027 season departure advisory, and pricing instantly on WhatsApp.
+                  Share your details to receive customized route comparison, 2026-2027 season departure advisory, and pricing details from our experts.
                 </p>
 
-                <form
-                  onSubmit={handleFormSubmit}
-                  className="space-y-3.5 relative z-10"
-                >
-                  <div>
-                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
-                      <User className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                      <input
-                        required
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        placeholder="Full Name"
-                        className="bg-transparent w-full text-white placeholder-gray-400 text-sm outline-none font-medium"
-                      />
+                {isSubmitted ? (
+                  <div className="py-8 text-center space-y-3 relative z-10 animate-in fade-in duration-300">
+                    <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30 shadow-lg">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                     </div>
+                    <h3 className="text-2xl font-bold text-white tracking-tight">
+                      Enquiry Received!
+                    </h3>
+                    <p className="text-sm text-gray-300 max-w-sm mx-auto leading-relaxed">
+                      Thank you! Your Kailash Mansarovar enquiry has been sent to our dashboard. Our pilgrimage specialist will call you shortly with complete details.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        setFormData({
+                          name: "",
+                          phone: "",
+                          package: "Helicopter Route (10 Days via Lucknow)",
+                          month: "May - June 2026",
+                        });
+                      }}
+                      className="mt-4 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold uppercase tracking-wider transition-colors border border-white/20"
+                    >
+                      Submit Another Enquiry
+                    </button>
                   </div>
-                  <div>
-                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
-                      <Phone className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                      <span className="text-gray-300 text-sm font-bold mr-2">
-                        +91
-                      </span>
-                      <input
-                        required
-                        type="tel"
-                        pattern="[0-9]{10}"
-                        maxLength={10}
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        placeholder="Mobile Number"
-                        className="bg-transparent w-full text-white placeholder-gray-400 text-sm outline-none font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
-                      <Compass className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                      <select
-                        value={formData.package}
-                        onChange={(e) =>
-                          setFormData({ ...formData, package: e.target.value })
-                        }
-                        className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
-                      >
-                        <option value="Helicopter Route (10 Days via Lucknow)">
-                          Helicopter Route (10 Days via Lucknow)
-                        </option>
-                        <option value="Overland Kailash Yatra (14 Days via Kyirong)">
-                          Overland Kailash Yatra (14 Days via Kyirong)
-                        </option>
-                        <option value="Lhasa Air Route (15 Days with Potala Palace)">
-                          Lhasa Air Route (15 Days with Potala Palace)
-                        </option>
-                        <option value="Aerial Darshan Flight (1 Day Scenic Darshan)">
-                          Aerial Darshan Flight (1 Day Scenic Darshan)
-                        </option>
-                        <option value="Not Sure - Need Guidance">
-                          Not Sure - Need Guidance
-                        </option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
-                      <Calendar className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                      <select
-                        value={formData.month}
-                        onChange={(e) =>
-                          setFormData({ ...formData, month: e.target.value })
-                        }
-                        className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
-                      >
-                        <option value="May - June 2026 (Buddha / Jyeshtha Purnima)">
-                          May - June 2026 (Buddha / Jyeshtha Purnima)
-                        </option>
-                        <option value="July 2026 (Guru Purnima)">
-                          July 2026 (Guru Purnima)
-                        </option>
-                        <option value="August 2026 (Shravan / Raksha Bandhan)">
-                          August 2026 (Shravan / Raksha Bandhan)
-                        </option>
-                        <option value="September 2026 (Bhadrapada Purnima)">
-                          September 2026 (Bhadrapada Purnima)
-                        </option>
-                        <option value="2027 Advance Booking">
-                          2027 Advance Registration
-                        </option>
-                      </select>
-                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 mt-3 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-[0_4px_16px_0_rgba(37,211,102,0.45)] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:opacity-75 disabled:pointer-events-none"
+                ) : (
+                  <form
+                    onSubmit={handleFormSubmit}
+                    className="space-y-3.5 relative z-10"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>SAVING TO DASHBOARD...</span>
-                      </>
-                    ) : isSubmitted ? (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 text-white" />
-                        <span>INQUIRY SAVED! REDIRECTING...</span>
-                      </>
-                    ) : (
-                      <>
-                        <MessageCircle className="w-5 h-5" />
-                        <span>GET DETAILS ON WHATSAPP</span>
-                      </>
-                    )}
-                  </button>
-                </form>
+                    <div>
+                      <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                        <User className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                        <input
+                          required
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
+                          placeholder="Full Name"
+                          className="bg-transparent w-full text-white placeholder-gray-400 text-sm outline-none font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                        <Phone className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                        <span className="text-gray-300 text-sm font-bold mr-2">
+                          +91
+                        </span>
+                        <input
+                          required
+                          type="tel"
+                          pattern="[0-9]{10}"
+                          maxLength={10}
+                          value={formData.phone}
+                          onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                          }
+                          placeholder="Mobile Number"
+                          className="bg-transparent w-full text-white placeholder-gray-400 text-sm outline-none font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                        <Compass className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                        <select
+                          value={formData.package}
+                          onChange={(e) =>
+                            setFormData({ ...formData, package: e.target.value })
+                          }
+                          className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
+                        >
+                          <option value="Helicopter Route (10 Days via Lucknow)">
+                            Helicopter Route (10 Days via Lucknow)
+                          </option>
+                          <option value="Overland Kailash Yatra (14 Days via Kyirong)">
+                            Overland Kailash Yatra (14 Days via Kyirong)
+                          </option>
+                          <option value="Lhasa Air Route (15 Days with Potala Palace)">
+                            Lhasa Air Route (15 Days with Potala Palace)
+                          </option>
+                          <option value="Aerial Darshan Flight (1 Day Scenic Darshan)">
+                            Aerial Darshan Flight (1 Day Scenic Darshan)
+                          </option>
+                          <option value="Not Sure - Need Guidance">
+                            Not Sure - Need Guidance
+                          </option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
+                        <Calendar className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                        <select
+                          value={formData.month}
+                          onChange={(e) =>
+                            setFormData({ ...formData, month: e.target.value })
+                          }
+                          className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
+                        >
+                          <option value="May - June 2026 (Buddha / Jyeshtha Purnima)">
+                            May - June 2026 (Buddha / Jyeshtha Purnima)
+                          </option>
+                          <option value="July 2026 (Guru Purnima)">
+                            July 2026 (Guru Purnima)
+                          </option>
+                          <option value="August 2026 (Shravan / Raksha Bandhan)">
+                            August 2026 (Shravan / Raksha Bandhan)
+                          </option>
+                          <option value="September 2026 (Bhadrapada Purnima)">
+                            September 2026 (Bhadrapada Purnima)
+                          </option>
+                          <option value="2027 Advance Booking">
+                            2027 Advance Registration
+                          </option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-4 mt-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:opacity-75 disabled:pointer-events-none"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>SUBMITTING TO DASHBOARD...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5" />
+                          <span>SUBMIT ENQUIRY</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
 
                 <p className="text-xs text-gray-300 text-center mt-4 flex items-center justify-center gap-1.5 font-medium">
                   <ShieldCheck className="w-4 h-4 text-amber-400" /> 100% Privacy • Direct WhatsApp Advice • No Spam
