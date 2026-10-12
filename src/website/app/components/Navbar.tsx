@@ -281,9 +281,11 @@ export function Navbar() {
           <div className="lg:hidden flex items-center gap-2">
             <button
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
               className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <span className="sr-only">{isOpen ? "Close menu" : "Open menu"}</span>
             </button>
           </div>
         </div>

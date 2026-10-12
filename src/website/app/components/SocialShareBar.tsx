@@ -147,6 +147,7 @@ export function SocialShareBar({
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-xs ${s.color}`}
           >
             <FontAwesomeIcon icon={s.icon} className="w-4 h-4" />
+            <span className="sr-only">{s.name}</span>
           </a>
         ))}
         <button

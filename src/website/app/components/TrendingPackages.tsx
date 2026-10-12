@@ -41,6 +41,7 @@ function DealCard({ deal, className = '', height = 'h-48' }: DealCardProps) {
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10 group-hover:from-black/85 transition-all duration-300" />
+        <span className="sr-only">{deal.headline}</span>
       </Link>
 
       {/* Tag */}
@@ -59,6 +60,7 @@ function DealCard({ deal, className = '', height = 'h-48' }: DealCardProps) {
         style={{ background: 'var(--theme-primary)' }}
       >
         <ArrowUpRight size={15} />
+        <span className="sr-only">View {deal.headline}</span>
       </Link>
 
       {/* Content */}
@@ -141,15 +143,19 @@ function BentoCarousel({ slides }: { slides: any[] }) {
       {/* Prev / Next */}
       <button
         onClick={() => go(idx - 1)}
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors"
+        aria-label="Previous trending slide"
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors cursor-pointer"
       >
         <ChevronLeft size={14} />
+        <span className="sr-only">Previous slide</span>
       </button>
       <button
         onClick={() => go(idx + 1)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors"
+        aria-label="Next trending slide"
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors cursor-pointer"
       >
         <ChevronRight size={14} />
+        <span className="sr-only">Next slide</span>
       </button>
 
       {/* Content */}

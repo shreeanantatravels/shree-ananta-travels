@@ -97,18 +97,42 @@ export function Footer() {
   const SocialBlock = () => (
     <div className="flex items-center gap-3">
       {facebookHref && facebookHref !== '#' && (
-        <a href={facebookHref} target="_blank" rel="noopener noreferrer" className={`${socialIconBaseClass} bg-white/10 hover:bg-[#1877f2] text-white shadow-md`}>
+        <a
+          href={facebookHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Follow Shree Ananta Travels on Facebook"
+          title="Facebook"
+          className={`${socialIconBaseClass} bg-white/10 hover:bg-[#1877f2] text-white shadow-md`}
+        >
           <FaFacebook className="w-5 h-5" />
+          <span className="sr-only">Follow us on Facebook</span>
         </a>
       )}
       {instagramHref && instagramHref !== '#' && (
-        <a href={instagramHref} target="_blank" rel="noopener noreferrer" className={`${socialIconBaseClass} bg-white/10 hover:bg-gradient-to-tr hover:from-amber-500 hover:to-purple-600 text-white shadow-md`}>
+        <a
+          href={instagramHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Follow Shree Ananta Travels on Instagram"
+          title="Instagram"
+          className={`${socialIconBaseClass} bg-white/10 hover:bg-gradient-to-tr hover:from-amber-500 hover:to-purple-600 text-white shadow-md`}
+        >
           <FaInstagram className="w-5 h-5" />
+          <span className="sr-only">Follow us on Instagram</span>
         </a>
       )}
       {whatsappLink && (
-        <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className={`${socialIconBaseClass} bg-white/10 hover:bg-emerald-500 text-white shadow-md`}>
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with Shree Ananta Travels on WhatsApp"
+          title="WhatsApp"
+          className={`${socialIconBaseClass} bg-white/10 hover:bg-emerald-500 text-white shadow-md`}
+        >
           <MessageCircle className="w-5 h-5" />
+          <span className="sr-only">Chat with us on WhatsApp</span>
         </a>
       )}
     </div>

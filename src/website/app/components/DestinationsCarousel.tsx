@@ -57,15 +57,19 @@ function CarouselSection({ subtitle, title, destinations }: CarouselSectionProps
         <div className="flex items-center gap-2">
           <button
             onClick={() => scroll('left')}
-            className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-[var(--theme-primary)] hover:text-white hover:border-transparent transition-all shadow-sm"
+            aria-label="Scroll left to previous destinations"
+            className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-[var(--theme-primary)] hover:text-white hover:border-transparent transition-all shadow-sm cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
+            <span className="sr-only">Scroll previous destinations</span>
           </button>
           <button
             onClick={() => scroll('right')}
-            className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-[var(--theme-primary)] hover:text-white hover:border-transparent transition-all shadow-sm"
+            aria-label="Scroll right to next destinations"
+            className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-[var(--theme-primary)] hover:text-white hover:border-transparent transition-all shadow-sm cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
+            <span className="sr-only">Scroll next destinations</span>
           </button>
         </div>
       </div>
@@ -85,6 +89,7 @@ function CarouselSection({ subtitle, title, destinations }: CarouselSectionProps
             <Link
               key={index}
               href={cardHref}
+              aria-label={`Explore tour packages for ${dest.name}`}
               className="flex-shrink-0 group flex flex-col items-center cursor-pointer"
               style={{ scrollSnapAlign: 'start' }}
             >
