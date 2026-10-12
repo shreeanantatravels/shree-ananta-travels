@@ -69,10 +69,14 @@ export function DestinationsStrip() {
               </h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {internationalDests.map((dest) => (
+              {internationalDests.map((dest) => {
+                const isKailash = (dest || '').toLowerCase().includes('kailash');
+                const destSlug = encodeURIComponent((dest || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                const targetUrl = isKailash ? '/kailash-mansarovar' : `/international/${destSlug}`;
+                return (
                 <a
                   key={dest}
-                  href={`/packages?search=${encodeURIComponent(dest)}`}
+                  href={targetUrl}
                   className="group flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-transparent hover:text-white transition-all duration-200"
                   onMouseEnter={e => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--theme-gradient)';
@@ -86,7 +90,8 @@ export function DestinationsStrip() {
                   <MapPin className="w-3 h-3 opacity-50 group-hover:opacity-100" />
                   {dest}
                 </a>
-              ))}
+                );
+              })}
             </div>
           </div>
           )}
@@ -105,10 +110,14 @@ export function DestinationsStrip() {
               </h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {domesticDests.map((dest) => (
+              {domesticDests.map((dest) => {
+                const isKailash = (dest || '').toLowerCase().includes('kailash');
+                const destSlug = encodeURIComponent((dest || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                const targetUrl = isKailash ? '/kailash-mansarovar' : `/domestic/${destSlug}`;
+                return (
                 <a
                   key={dest}
-                  href={`/packages?search=${encodeURIComponent(dest)}`}
+                  href={targetUrl}
                   className="group flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 px-3 py-1.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:text-white transition-all duration-200"
                   onMouseEnter={e => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--theme-gradient)';
@@ -122,7 +131,8 @@ export function DestinationsStrip() {
                   <MapPin className="w-3 h-3 opacity-50 group-hover:opacity-100" />
                   {dest}
                 </a>
-              ))}
+                );
+              })}
             </div>
           </div>
           )}

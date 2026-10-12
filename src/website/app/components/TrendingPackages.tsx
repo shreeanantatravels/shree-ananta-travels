@@ -222,11 +222,11 @@ export function TrendingPackages() {
                               </span>
             </h2>
           </div>
-          <Link href="/packages?category=trending"
+          <Link href="/packages"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:opacity-80"
             style={{ color: 'var(--theme-primary)' }}
           >
-            View All <ArrowUpRight size={15} />
+            View All Packages <ArrowUpRight size={15} />
           </Link>
         </div>
 

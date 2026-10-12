@@ -249,10 +249,15 @@ export default function DestinationsPage() {
         {/* Unique Destinations Cards Grid */}
         {filteredDestinations.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredDestinations.map(dest => (
+            {filteredDestinations.map(dest => {
+              const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+              const cat = dest.category === 'international' ? 'international' : 'domestic';
+              const destSlug = (dest as any).slug || encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+              const cardHref = isKailash ? '/kailash-mansarovar' : `/${cat}/${destSlug}`;
+              return (
               <Link
                 key={dest.name}
-                href={`/packages?search=${encodeURIComponent(dest.name)}`}
+                href={cardHref}
                 className="group relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
               >
                 {/* Cover Image Container */}
@@ -315,7 +320,8 @@ export default function DestinationsPage() {
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20 text-gray-400">

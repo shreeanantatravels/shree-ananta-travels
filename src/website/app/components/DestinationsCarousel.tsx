@@ -73,30 +73,37 @@ function CarouselSection({ subtitle, title, destinations }: CarouselSectionProps
         className="flex gap-6 overflow-x-auto scrollbar-none py-4 px-2"
         style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {destinations.map((dest, index) => (
-          <a
-            key={index}
-            href={`/packages?search=${encodeURIComponent(dest.name)}`}
-            className="flex-shrink-0 group flex flex-col items-center cursor-pointer"
-            style={{ scrollSnapAlign: 'start' }}
-          >
-            <div
-              className="w-36 h-36 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-2 p-1.5 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 group-hover:border-[var(--theme-primary)]"
+        {destinations.map((dest, index) => {
+          const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+          const isIntlDest = INTL_KEYWORDS.some(k => (dest.name || '').toLowerCase().includes(k));
+          const catPrefix = isIntlDest ? '/international' : '/domestic';
+          const destSlug = encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+          const cardHref = isKailash ? '/kailash-mansarovar' : `${catPrefix}/${destSlug}`;
+          return (
+            <a
+              key={index}
+              href={cardHref}
+              className="flex-shrink-0 group flex flex-col items-center cursor-pointer"
+              style={{ scrollSnapAlign: 'start' }}
             >
-              <div className="w-full h-full rounded-full overflow-hidden relative">
-                <img
-                  src={dest.image}
-                  alt={dest.name}
-                  className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/15 group-hover:bg-black/0 transition-colors" />
+              <div
+                className="w-36 h-36 md:w-48 md:h-48 rounded-full overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-2 p-1.5 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 group-hover:border-[var(--theme-primary)]"
+              >
+                <div className="w-full h-full rounded-full overflow-hidden relative">
+                  <img
+                    src={dest.image}
+                    alt={dest.name}
+                    className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/15 group-hover:bg-black/0 transition-colors" />
+                </div>
               </div>
-            </div>
-            <span className="mt-3 text-base md:text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-[var(--theme-primary)] transition-colors text-center">
-              {dest.name}
-            </span>
-          </a>
-        ))}
+              <span className="mt-3 text-base md:text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-[var(--theme-primary)] transition-colors text-center">
+                {dest.name}
+              </span>
+            </a>
+          );
+        })}
       </div>
     </div>
   );

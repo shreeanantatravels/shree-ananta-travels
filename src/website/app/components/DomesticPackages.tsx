@@ -83,11 +83,11 @@ export function DomesticPackages() {
               Explore the beauty of India with our specially curated packages
             </p>
           </div>
-          <Link href="/packages?category=domestic"
+          <Link href="/domestic"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors hover:opacity-80"
             style={{ color: 'var(--theme-primary)' }}
           >
-            View All <ArrowUpRight size={15} />
+            View All Domestic Tours <ArrowUpRight size={15} />
           </Link>
         </div>
 

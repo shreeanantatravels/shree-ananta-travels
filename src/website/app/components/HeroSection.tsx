@@ -104,11 +104,15 @@ export function HeroSection() {
       const locLower = loc.toLowerCase();
       if (locLower.includes(q) && !seenLocations.has(locLower)) {
         seenLocations.add(locLower);
+        const isKailash = locLower.includes('kailash');
+        const cat = pkg.category === 'international' ? 'international' : 'domestic';
+        const destSlug = encodeURIComponent(loc.toLowerCase().replace(/\s+/g, '-'));
+        const targetUrl = isKailash ? '/kailash-mansarovar' : `/${cat}/${destSlug}`;
         results.push({
           type: 'destination',
           title: loc,
           subtitle: `${pkg.category || 'Tour'} Destination`,
-          url: `/packages?search=${encodeURIComponent(loc)}`,
+          url: targetUrl,
           image: pkg.imageUrl1,
         });
       }
@@ -121,11 +125,15 @@ export function HeroSection() {
       const locLower = loc.toLowerCase();
       if (locLower.includes(q) && !seenLocations.has(locLower)) {
         seenLocations.add(locLower);
+        const isKailash = locLower.includes('kailash');
+        const cat = d.category === 'international' ? 'international' : 'domestic';
+        const destSlug = encodeURIComponent(loc.toLowerCase().replace(/\s+/g, '-'));
+        const targetUrl = isKailash ? '/kailash-mansarovar' : `/${cat}/${destSlug}`;
         results.push({
           type: 'destination',
           title: loc,
           subtitle: `${d.category || 'Featured'} Destination`,
-          url: `/packages?search=${encodeURIComponent(loc)}`,
+          url: targetUrl,
           image: d.image,
         });
       }

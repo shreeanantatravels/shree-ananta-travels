@@ -194,17 +194,22 @@ export function Navbar() {
                           {/* Dropdown Destinations Grid (2 Columns) */}
                           <div className="p-5 max-h-[360px] overflow-y-auto custom-scrollbar">
                             <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                              {dropDestinations.map((dest: any) => (
-                                <Link 
-                                  key={dest.name} 
-                                  href={`/packages?category=${dropCategory}&search=${encodeURIComponent(dest.name)}`}
-                                  onClick={() => setActiveDropdown(null)}
-                                  className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
-                                >
-                                  <span className="truncate">{dest.name}</span>
-                                  <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
-                                </Link>
-                              ))}
+                              {dropDestinations.map((dest: any) => {
+                                const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                                const destSlug = encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                                const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                                return (
+                                  <Link 
+                                    key={dest.name} 
+                                    href={destUrl}
+                                    onClick={() => setActiveDropdown(null)}
+                                    className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
+                                  >
+                                    <span className="truncate">{dest.name}</span>
+                                    <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
+                                  </Link>
+                                );
+                              })}
                             </div>
                           </div>
 
@@ -297,16 +302,21 @@ export function Navbar() {
                     {activeDropdown === link.id && (
                       <div className="pl-4 pr-2 py-2 space-y-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                         <div className="grid grid-cols-2 gap-2">
-                          {dropDestinations.map((dest: any) => (
-                            <Link 
-                              key={dest.name} 
-                              href={`/packages?category=${dropCategory}&search=${encodeURIComponent(dest.name)}`}
-                              onClick={() => setIsOpen(false)}
-                              className="block px-2 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] rounded-lg transition-colors truncate"
-                            >
-                              {dest.name}
-                            </Link>
-                          ))}
+                          {dropDestinations.map((dest: any) => {
+                            const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                            const destSlug = encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+                            const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                            return (
+                              <Link 
+                                key={dest.name} 
+                                href={destUrl}
+                                onClick={() => setIsOpen(false)}
+                                className="block px-2 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] rounded-lg transition-colors truncate"
+                              >
+                                {dest.name}
+                              </Link>
+                            );
+                          })}
                         </div>
                         <div className="pt-2 border-t border-gray-200 dark:border-gray-700 text-right">
                           <Link 

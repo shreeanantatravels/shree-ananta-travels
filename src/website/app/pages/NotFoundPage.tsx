@@ -8,12 +8,12 @@ import { Compass, MapPin, Home as HomeIcon, Search, ArrowLeft, HelpCircle, Phone
 import { useAgent } from '../context/AgentContext';
 
 const QUICK_DESTINATIONS = [
-  { name: 'Kailash Yatra', href: '/packages?category=kailash' },
-  { name: 'Kashmir Valley', href: '/packages?search=Kashmir' },
-  { name: 'Bali Romance', href: '/packages?search=Bali' },
-  { name: 'Kerala Backwaters', href: '/packages?search=Kerala' },
-  { name: 'Dubai Luxury', href: '/packages?search=Dubai' },
-  { name: 'Rajasthan Forts', href: '/packages?search=Rajasthan' },
+  { name: 'Kailash Yatra', href: '/kailash-mansarovar' },
+  { name: 'Kashmir Valley', href: '/domestic/kashmir' },
+  { name: 'Bali Romance', href: '/international/bali' },
+  { name: 'Kerala Backwaters', href: '/domestic/kerala' },
+  { name: 'Dubai Luxury', href: '/international/dubai' },
+  { name: 'Rajasthan Forts', href: '/domestic/rajasthan' },
 ];
 
 export default function NotFoundPage() {

@@ -88,7 +88,7 @@ export function KailashPackages() {
             </p>
           </div>
           <Link 
-            href="/packages?category=kailash"
+            href="/kailash-mansarovar"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold hover:opacity-80 transition-opacity"
             style={{ color: 'var(--theme-primary)' }}
           >

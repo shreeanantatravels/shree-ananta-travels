@@ -51,8 +51,8 @@ const DEFAULT_THEMES: ThemeItem[] = [
 
 const getThemeHref = (theme: ThemeItem) => {
   const t = (theme.title || '').toLowerCase();
-  if (t.includes('pilgrim') || t.includes('sacred') || t.includes('kailash')) {
-    return '/packages?category=kailash';
+  if (t.includes('kailash')) {
+    return '/kailash-mansarovar';
   }
   if (t.includes('beach') || t.includes('island')) {
     return '/packages?search=Beach';

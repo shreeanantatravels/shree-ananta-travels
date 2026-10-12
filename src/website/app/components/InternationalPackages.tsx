@@ -81,11 +81,11 @@ export function InternationalPackages() {
               Discover breathtaking destinations around the globe
             </p>
           </div>
-          <Link href="/packages?category=international"
+          <Link href="/international"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors hover:opacity-80"
             style={{ color: 'var(--theme-primary)' }}
           >
-            View All <ArrowUpRight size={15} />
+            View All International Tours <ArrowUpRight size={15} />
           </Link>
         </div>
 
