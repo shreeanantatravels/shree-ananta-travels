@@ -127,7 +127,7 @@ export function LeadCaptureModal() {
             </h2>
 
             <p className="text-white/80 text-xs leading-relaxed mb-4 sm:mb-6 hidden sm:block">
-              Tell us a few details and we'll get you a free customized tour quote!
+              Tell us a few details and we&apos;ll get you a free customized tour quote!
             </p>
 
             {/* Features List (Compact grid on mobile, stacked on tablet/desktop) */}
@@ -157,8 +157,8 @@ export function LeadCaptureModal() {
                   <Headset size={16} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white leading-snug">24/7 Support</h4>
-                  <p className="text-[10px] text-white/60 hidden sm:block">We're with you, always</p>
+                  <h4 className="text-xs font-bold text-white leading-snug">Dedicated Support</h4>
+                  <p className="text-[10px] text-white/60 hidden sm:block">Here to assist your journey</p>
                 </div>
               </div>
             </div>
@@ -282,7 +282,7 @@ export function LeadCaptureModal() {
                     name="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="72890 37447"
+                    placeholder="Enter your 10-digit mobile number"
                     required
                     pattern="[0-9]{10}"
                     maxLength={10}

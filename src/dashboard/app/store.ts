@@ -7,8 +7,8 @@ import { packageApi } from './api/packageApi';
 import { leadsApi } from './api/leadsApi';
 import { testimonialApi } from './api/testimonialApi';
 import { contentSectionApi } from './api/contentSectionApi';
-
 import { siteConfigApi } from './api/siteConfigApi';
+import { faqsApi } from './api/faqsApi';
 
 export const store = configureStore({
   reducer: {
@@ -17,8 +17,8 @@ export const store = configureStore({
     [leadsApi.reducerPath]: leadsApi.reducer,
     [testimonialApi.reducerPath]: testimonialApi.reducer,
     [contentSectionApi.reducerPath]: contentSectionApi.reducer,
-
     [siteConfigApi.reducerPath]: siteConfigApi.reducer,
+    [faqsApi.reducerPath]: faqsApi.reducer,
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -28,8 +28,8 @@ export const store = configureStore({
       .concat(leadsApi.middleware)
       .concat(testimonialApi.middleware)
       .concat(contentSectionApi.middleware)
-
-      .concat(siteConfigApi.middleware),
+      .concat(siteConfigApi.middleware)
+      .concat(faqsApi.middleware),
 });
 
 setupListeners(store.dispatch);

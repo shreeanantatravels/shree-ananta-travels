@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   Globe,
   ChevronRight,
+  HelpCircle,
 } from 'lucide-react';
 
 const globalNavItems = [
@@ -30,10 +31,11 @@ const globalNavItems = [
 const contextData: Record<string, { title: string, description: string, items: { name: string, href: string, icon: any }[] }> = {
   'website': {
     title: 'Website Management',
-    description: 'Branding, content & testimonials',
+    description: 'Branding, content, FAQs & testimonials',
     items: [
       { name: 'Branding & Theme', href: '/admin/branding', icon: Palette },
       { name: 'Content Setup', href: '/admin/content', icon: FileText },
+      { name: 'FAQs Management', href: '/admin/faqs', icon: HelpCircle },
       { name: 'Testimonials', href: '/admin/testimonials', icon: Star },
     ]
   }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, MapPin, Package } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAgent } from '../context/AgentContext';
 
@@ -23,9 +23,14 @@ export function HeroSection() {
   const heroHeading = siteConfig?.heroTitle?.trim() || 'Tour Packages for India and Abroad';
   const heroSubtitle = siteConfig?.heroSubtitle?.trim() || 'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.';
 
-  const images = (siteConfig?.heroImages && siteConfig.heroImages.length > 0)
-    ? siteConfig.heroImages
-    : (isLoading ? ['/uploads/banners/isloarding.png'] : (themeConfig?.heroImages?.length ? themeConfig.heroImages : ['/uploads/banners/isloarding.png']));
+  const images = useMemo(() => {
+    if (siteConfig?.heroImages && siteConfig.heroImages.length > 0) {
+      return siteConfig.heroImages;
+    }
+    if (isLoading) return ['/uploads/banners/isloarding.png'];
+    if (themeConfig?.heroImages?.length) return themeConfig.heroImages;
+    return ['/uploads/banners/isloarding.png'];
+  }, [siteConfig?.heroImages, isLoading, themeConfig?.heroImages]);
 
   useEffect(() => {
     if (!images || images.length === 0) return;
@@ -69,13 +74,14 @@ export function HeroSection() {
     if (!isDeleting && animatedPlaceholder === currentPhrase) {
       speed = 2200;
     } else if (isDeleting && animatedPlaceholder === '') {
-      setIsDeleting(false);
-      setPhraseIndex((prev) => (prev + 1) % SEARCH_PHRASES.length);
       speed = 300;
     }
 
     const timer = setTimeout(() => {
-      if (!isDeleting && animatedPlaceholder !== currentPhrase) {
+      if (isDeleting && animatedPlaceholder === '') {
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % SEARCH_PHRASES.length);
+      } else if (!isDeleting && animatedPlaceholder !== currentPhrase) {
         setAnimatedPlaceholder(currentPhrase.slice(0, animatedPlaceholder.length + 1));
       } else if (isDeleting && animatedPlaceholder !== '') {
         setAnimatedPlaceholder(currentPhrase.slice(0, animatedPlaceholder.length - 1));
@@ -231,211 +237,13 @@ export function HeroSection() {
     </div>
   );
 
-  const renderHeroHeading = (isRoyalGold = false) => {
-    return (
-      <div className="max-w-4xl mx-auto text-center pt-8 pb-4 px-4 sm:px-6">
-        <h1
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          {heroHeading === 'Tour Packages for India and Abroad' ? (
-            <>
-              Tour Packages for{' '}
-              <span
-                className={
-                  isRoyalGold
-                    ? "text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3d375] to-[#c59b27]"
-                    : "text-transparent bg-clip-text"
-                }
-                style={isRoyalGold ? undefined : { backgroundImage: 'var(--theme-gradient)' }}
-              >
-                India and Abroad
-              </span>
-            </>
-          ) : (
-            heroHeading
-          )}
-        </h1>
-        <p className="mt-2.5 text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-          {heroSubtitle}
-        </p>
-      </div>
-    );
-  };
-
-  if (layoutVariant === 'centered') {
-    return (
-      <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
-        {/* Banner Image Container */}
-        <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-          <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Hero Banner ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                  index === currentImageIndex
-                    ? 'opacity-100 z-10'
-                    : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Search Bar - Compact Theme Glassmorphism */}
-        <div className="relative z-40 max-w-2xl md:max-w-3xl mx-auto px-3 sm:px-4 -mt-4 sm:-mt-6 md:-mt-8">
-          <div ref={searchRef} className="relative">
-            <form onSubmit={handleSearchSubmit} className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.15)] rounded-xl sm:rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 p-1.5 sm:p-2.5">
-              <div className="flex flex-row items-center gap-1.5 sm:gap-2">
-                <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-800/80 rounded-lg sm:rounded-xl md:rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 w-full border border-gray-200 dark:border-gray-700 focus-within:border-[var(--theme-primary)] transition-all">
-                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400 mr-2 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onFocus={() => setShowSuggestions(true)}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    placeholder={animatedPlaceholder || "Search destinations, packages..."}
-                    className="w-full bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 text-xs md:text-sm font-medium"
-                  />
-                </div>
-                <button type="submit" className="bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-extrabold px-3.5 py-1.5 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all text-[11px] sm:text-xs uppercase tracking-wider flex-shrink-0">
-                  Search
-                </button>
-              </div>
-              {renderPopularPlaces()}
-            </form>
-            {renderSuggestionsDropdown()}
-          </div>
-        </div>
-
-        {/* Primary Page Heading (H1) for SEO */}
-        {renderHeroHeading()}
-      </div>
-    );
-  }
-
-  if (layoutVariant === 'left-aligned') {
-    return (
-      <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
-        {/* Banner Image Container */}
-        <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-          <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Hero Banner ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                  index === currentImageIndex
-                    ? 'opacity-100 z-10'
-                    : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Search Bar - Compact Theme Glassmorphism */}
-        <div className="relative z-40 max-w-2xl md:max-w-3xl mx-auto px-3 sm:px-4 -mt-4 sm:-mt-6 md:-mt-8">
-          <div ref={searchRef} className="relative">
-            <form onSubmit={handleSearchSubmit} className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.15)] rounded-xl sm:rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 p-1.5 sm:p-2.5">
-              <div className="flex flex-row items-center gap-1.5 sm:gap-2">
-                <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-800/80 rounded-lg sm:rounded-xl md:rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 w-full border border-gray-200 dark:border-gray-700 focus-within:border-[var(--theme-primary)] transition-all">
-                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400 mr-2 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onFocus={() => setShowSuggestions(true)}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    placeholder={animatedPlaceholder || "Search destinations, packages..."}
-                    className="w-full bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 text-xs md:text-sm font-medium"
-                  />
-                </div>
-                <button type="submit" className="bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-extrabold px-3.5 py-1.5 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all text-[11px] sm:text-xs uppercase tracking-wider flex-shrink-0">
-                  Search
-                </button>
-              </div>
-              {renderPopularPlaces()}
-            </form>
-            {renderSuggestionsDropdown()}
-          </div>
-        </div>
-
-        {/* Primary Page Heading (H1) for SEO */}
-        {renderHeroHeading()}
-      </div>
-    );
-  }
-
-  if (layoutVariant === 'royal-gold') {
-    return (
-      <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
-        {/* Banner Image Container */}
-        <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden bg-[#0a1c3d]">
-          <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Hero Banner ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                  index === currentImageIndex
-                    ? 'opacity-100 z-10'
-                    : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Search Bar - Compact Royal Gold Theme */}
-        <div className="relative z-40 max-w-2xl md:max-w-3xl mx-auto px-3 sm:px-4 -mt-4 sm:-mt-6 md:-mt-8">
-          <div ref={searchRef} className="relative">
-            <form onSubmit={handleSearchSubmit} className="bg-[#0a1c3d]/95 dark:bg-black/90 backdrop-blur-2xl p-1.5 sm:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl border-2 border-[#d4af37]/50 shadow-xl shadow-[#0a1c3d]/80">
-              <div className="flex flex-row items-center gap-1.5 sm:gap-2">
-                <div className="flex-1 flex items-center bg-white/10 dark:bg-white/5 rounded-lg sm:rounded-xl md:rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 w-full border border-[#d4af37]/30 focus-within:border-[#d4af37] transition-all">
-                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#f3d375] mr-2 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onFocus={() => setShowSuggestions(true)}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    placeholder={animatedPlaceholder || "Search luxury holiday packages..."}
-                    className="w-full bg-transparent outline-none text-white placeholder-[#f3d375]/70 text-xs md:text-sm font-medium"
-                  />
-                </div>
-                <button type="submit" className="bg-gradient-to-r from-[#d4af37] via-[#e5c158] to-[#c59b27] text-[#0a1c3d] font-extrabold px-3.5 py-1.5 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-md hover:shadow-[#d4af37]/40 hover:scale-[1.03] transition-all text-[11px] sm:text-xs uppercase tracking-wider flex-shrink-0">
-                  Explore
-                </button>
-              </div>
-              {renderPopularPlaces(true)}
-            </form>
-            {renderSuggestionsDropdown()}
-          </div>
-        </div>
-
-        {/* Primary Page Heading (H1) for SEO */}
-        {renderHeroHeading(true)}
-      </div>
-    );
-  }
+  const isRoyal = layoutVariant === 'royal-gold';
 
   return (
-    <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
-      {/* Banner Image Container */}
-      <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-        <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
+    <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-16 sm:pb-20 lg:pb-24">
+      {/* ── Banner Image Slider Container ────────────────────────────── */}
+      <section className="relative w-full h-[220px] sm:h-[300px] md:h-[400px] lg:h-[460px] overflow-hidden bg-gray-900">
+        <div className="relative w-full h-full overflow-hidden">
           {images.map((image, index) => (
             <img
               key={index}
@@ -448,40 +256,118 @@ export function HeroSection() {
               }`}
             />
           ))}
+          {/* Subtle gradient vignette at bottom for seamless card blending */}
+          <div className="absolute inset-0 z-20 bg-gradient-to-t from-gray-950/75 via-gray-950/20 to-transparent pointer-events-none" />
         </div>
       </section>
 
-      {/* Search Bar - Compact Theme Glassmorphism */}
-      <div className="relative z-40 max-w-2xl md:max-w-3xl mx-auto px-3 sm:px-4 -mt-4 sm:-mt-6 md:-mt-8">
-        <div ref={searchRef} className="relative">
-          <form onSubmit={handleSearchSubmit} className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.15)] rounded-xl sm:rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-800 p-1.5 sm:p-2.5">
-            <div className="flex flex-row items-center gap-1.5 sm:gap-2">
-              <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-800/80 rounded-lg sm:rounded-xl md:rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 w-full border border-gray-200 dark:border-gray-700 focus-within:border-[var(--theme-primary)] transition-all">
-                <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400 mr-2 flex-shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onFocus={() => setShowSuggestions(true)}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  placeholder={animatedPlaceholder || "Search destinations, packages..."}
-                  className="w-full bg-transparent outline-none text-gray-900 dark:text-white placeholder-gray-400 text-xs md:text-sm font-medium"
-                />
+      {/* ── Elevated Hero Card: Title, Description, Search & Destinations in One Cohesive Unit ── */}
+      <div className="relative z-40 max-w-4xl lg:max-w-5xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-24 md:-mt-32">
+        <div
+          className={`backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-9 text-center transition-all ${
+            isRoyal
+              ? 'bg-[#0a1c3d]/95 dark:bg-black/90 border-2 border-[#d4af37]/50 shadow-2xl shadow-[#0a1c3d]/80'
+              : 'bg-white/95 dark:bg-gray-900/95 border border-gray-100 dark:border-gray-800 shadow-[0_20px_60px_rgba(0,0,0,0.14)]'
+          }`}
+        >
+          {/* Trust / Brand Badge */}
+          <div
+            className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-3.5 border shadow-2xs ${
+              isRoyal
+                ? 'bg-[#d4af37]/15 text-[#f3d375] border-[#d4af37]/40'
+                : 'bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] border-[var(--theme-primary)]/20'
+            }`}
+          >
+            <span>{badgeText}</span>
+          </div>
+
+          {/* Primary Page Heading (H1) for SEO */}
+          <h1
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {heroHeading === 'Tour Packages for India and Abroad' ? (
+              <>
+                Tour Packages for{' '}
+                <span
+                  className={
+                    isRoyal
+                      ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] via-[#f3d375] to-[#c59b27]'
+                      : 'text-transparent bg-clip-text'
+                  }
+                  style={isRoyal ? undefined : { backgroundImage: 'var(--theme-gradient)' }}
+                >
+                  India and Abroad
+                </span>
+              </>
+            ) : (
+              heroHeading
+            )}
+          </h1>
+
+          {/* Supporting Description */}
+          <p
+            className={`mt-3 text-xs sm:text-sm md:text-base max-w-2xl mx-auto leading-relaxed ${
+              isRoyal ? 'text-gray-200' : 'text-gray-600 dark:text-gray-300'
+            }`}
+          >
+            {heroSubtitle}
+          </p>
+
+          {/* Integrated Search Box */}
+          <div ref={searchRef} className="relative mt-6 max-w-2xl mx-auto">
+            <form
+              onSubmit={handleSearchSubmit}
+              className={`rounded-xl sm:rounded-2xl p-1.5 sm:p-2 border transition-all ${
+                isRoyal
+                  ? 'bg-white/10 dark:bg-white/5 border-[#d4af37]/40 focus-within:border-[#d4af37] shadow-inner'
+                  : 'bg-gray-50/90 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/20 shadow-inner'
+              }`}
+            >
+              <div className="flex flex-row items-center gap-1.5 sm:gap-2">
+                <div className="flex-1 flex items-center px-2.5 sm:px-3 py-1">
+                  <Search
+                    className={`w-4 h-4 sm:w-5 sm:h-5 mr-2.5 flex-shrink-0 ${
+                      isRoyal ? 'text-[#f3d375]' : 'text-gray-400'
+                    }`}
+                  />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onFocus={() => setShowSuggestions(true)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    placeholder={animatedPlaceholder || (isRoyal ? 'Search luxury holiday packages...' : 'Search destinations, holiday packages...')}
+                    className={`w-full bg-transparent outline-none text-xs sm:text-sm font-medium ${
+                      isRoyal
+                        ? 'text-white placeholder-[#f3d375]/70'
+                        : 'text-gray-900 dark:text-white placeholder-gray-400'
+                    }`}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className={`font-extrabold px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all text-xs uppercase tracking-wider flex-shrink-0 ${
+                    isRoyal
+                      ? 'bg-gradient-to-r from-[#d4af37] via-[#e5c158] to-[#c59b27] text-[#0a1c3d] hover:shadow-[#d4af37]/40'
+                      : 'bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white hover:shadow-lg'
+                  }`}
+                >
+                  {isRoyal ? 'Explore' : 'Search'}
+                </button>
               </div>
-              <button type="submit" className="bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white font-extrabold px-3.5 py-1.5 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all text-[11px] sm:text-xs uppercase tracking-wider flex-shrink-0">
-                Search
-              </button>
-            </div>
-            {renderPopularPlaces()}
-          </form>
-          {renderSuggestionsDropdown()}
+            </form>
+            {renderSuggestionsDropdown()}
+          </div>
+
+          {/* Popular Places Quick Tags */}
+          <div className="mt-4">
+            {renderPopularPlaces(isRoyal)}
+          </div>
         </div>
       </div>
-
-      {/* Primary Page Heading (H1) for SEO */}
-      {renderHeroHeading()}
     </div>
   );
 }

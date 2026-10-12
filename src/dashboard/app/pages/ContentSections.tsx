@@ -810,77 +810,14 @@ function WhyChooseUsTab() {
   );
 }
 
-// ── FAQ Tab (API-wired with per-item loading) ────────────────────────────────
+// ── FAQ Tab (Direct Database FAQ Management) ────────────────────────────────
+
+import { Faqs as FaqsManager } from './Faqs';
 
 function FAQTab() {
-  const { data, isLoading } = useGetContentSectionsQuery();
-  const [createSection, { isLoading: isCreating }] = useCreateContentSectionMutation();
-  const [deleteSection] = useDeleteContentSectionMutation();
-  const [updateSection] = useUpdateContentSectionMutation();
-
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-
-  const faqs = (data?.data || []).filter(s => s.sectionType === 'custom');
-
-  const handleAdd = async () => {
-    try {
-      await createSection({ sectionType: 'custom', title: 'New Question', content: 'Answer goes here...' }).unwrap();
-      toast.success('Question added!');
-    } catch (err: any) { toast.error(err?.data?.message || 'Failed to add'); }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Remove this question?')) return;
-    setDeletingId(id);
-    try { await deleteSection(id).unwrap(); toast.success('Removed!'); }
-    catch (err: any) { toast.error('Failed to remove'); }
-    finally { setDeletingId(null); }
-  };
-
-  const handleUpdate = async (id: string, updates: Partial<ContentSectionData>) => {
-    setUpdatingId(id);
-    try { await updateSection({ id, data: updates }).unwrap(); toast.success('Updated!'); }
-    catch (err: any) { toast.error('Failed to save'); }
-    finally { setUpdatingId(null); }
-  };
-
-  if (isLoading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-blue-600 animate-spin" /></div>;
-
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">Frequently asked questions — shown on marketplace</p>
-        <button onClick={handleAdd} disabled={isCreating}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm font-medium disabled:opacity-50">
-          {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Add Question
-        </button>
-      </div>
-      <div className="space-y-4">
-        {faqs.map(faq => (
-          <div key={faq._id} className="bg-white rounded-lg border border-gray-200 p-5 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Question</label>
-              <Input type="text" defaultValue={faq.title} placeholder="Question"
-                onBlur={e => { if (e.target.value !== faq.title) handleUpdate(faq._id, { title: e.target.value }); }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg h-auto bg-white" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Answer</label>
-              <Textarea rows={3} defaultValue={faq.content}
-                onBlur={(e: any) => { if (e.target.value !== faq.content) handleUpdate(faq._id, { content: e.target.value }); }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white" />
-            </div>
-            <button onClick={() => handleDelete(faq._id)} disabled={deletingId === faq._id}
-              className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors text-sm flex items-center gap-1 disabled:opacity-50">
-              {deletingId === faq._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Remove Question
-            </button>
-          </div>
-        ))}
-      </div>
-      {faqs.length === 0 && (
-        <div className="text-center py-8 text-sm text-gray-400">No FAQs yet — click <strong>Add Question</strong>.</div>
-      )}
+    <div className="bg-gray-50/50 rounded-2xl p-2 -m-2">
+      <FaqsManager />
     </div>
   );
 }
