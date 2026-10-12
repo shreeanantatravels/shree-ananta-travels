@@ -81,13 +81,6 @@ const DEFAULT_ROUTES_FALLBACK: KailashPackageItem[] = [
   },
 ];
 
-const DEPARTURE_BATCHES = [
-  { month: "May 2026", dates: "11 May, 22 May", purnima: "Buddha Purnima (29 May)", seats: "Filling Fast" },
-  { month: "June 2026", dates: "08 Jun, 19 Jun", purnima: "Jyeshtha Purnima (27 Jun)", seats: "Available" },
-  { month: "July 2026", dates: "06 Jul, 18 Jul", purnima: "Guru Purnima Special (27 Jul)", seats: "Filling Fast" },
-  { month: "August 2026", dates: "05 Aug, 16 Aug", purnima: "Shravan / Raksha Bandhan (25 Aug)", seats: "High Demand" },
-  { month: "September 2026", dates: "02 Sep, 14 Sep", purnima: "Bhadrapada Purnima (24 Sep)", seats: "Available" },
-];
 
 export default function KailashPage() {
   const { agent, siteConfig, packages: agentPackages } = useAgent();
@@ -133,7 +126,7 @@ export default function KailashPage() {
     name: "",
     phone: "",
     route: "Helicopter via Lucknow",
-    month: "July 2026 (Guru Purnima)",
+    month: "Flexible Dates (2026)",
     yatris: "2 Yatris",
   });
 
@@ -154,7 +147,7 @@ Hello Shree Ananta Travels, I want to inquire for Kailash Mansarovar Yatra:
 • Target Month: ${formData.month}
 • Group Size: ${formData.yatris}
 
-Please share available batch dates and pricing details.`;
+Please share package itinerary and customized pricing details.`;
     window.open(buildWhatsAppUrl(msg), "_blank");
   };
 
@@ -251,7 +244,7 @@ Please share available batch dates and pricing details.`;
                       Get Itinerary & Pricing
                     </h2>
                     <p className="text-xs text-gray-300 mt-0.5">
-                      Share your details to get day-wise plan & batch prices on WhatsApp.
+                      Share your details to get day-wise plan & price quote on WhatsApp.
                     </p>
                   </div>
 
@@ -315,12 +308,13 @@ Please share available batch dates and pricing details.`;
                             onChange={(e) => setFormData({ ...formData, month: e.target.value })}
                             className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
                           >
+                            <option value="Flexible Dates (2026)">Flexible Dates (2026)</option>
                             <option value="May 2026">May 2026</option>
                             <option value="June 2026">June 2026</option>
-                            <option value="July 2026 (Guru Purnima)">July 2026</option>
+                            <option value="July 2026">July 2026</option>
                             <option value="August 2026">August 2026</option>
                             <option value="September 2026">September 2026</option>
-                            <option value="2027 Advance">2027 Advance</option>
+                            <option value="2027 Season">2027 Season</option>
                           </select>
                           <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2 pointer-events-none" />
                         </div>
@@ -501,7 +495,7 @@ Please share available batch dates and pricing details.`;
                           <ExternalLink className="w-3 h-3" />
                         </Link>
                         <button
-                          onClick={() => handleWhatsAppClick("kailash_pkg_inquire", `ॐ नमः शिवाय! I want details for "${pkgTitle}". Please share itinerary and batch pricing.`)}
+                          onClick={() => handleWhatsAppClick("kailash_pkg_inquire", `ॐ नमः शिवाय! I want details for "${pkgTitle}". Please share itinerary and price quote.`)}
                           className="py-2 px-3 rounded-lg bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1 active:scale-95 shadow-sm"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
@@ -600,42 +594,8 @@ Please share available batch dates and pricing details.`;
           </div>
         </section>
 
-        {/* ── 5. FIXED DEPARTURES & PURNIMA DATES ── */}
-        <section className="py-14 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-8 max-w-xl mx-auto">
-              <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-1">
-                2026 - 2027 Schedule
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Upcoming Departure Batches
-              </h2>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {DEPARTURE_BATCHES.map((b, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white dark:bg-gray-950 p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-center flex flex-col justify-between shadow-xs"
-                >
-                  <div>
-                    <span className="text-xs font-black text-gray-900 dark:text-white block">{b.month}</span>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{b.dates}</p>
-                    <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-1.5">{b.purnima}</p>
-                  </div>
-                  <button
-                    onClick={() => handleWhatsAppClick("kailash_batch_slot", `Hello, I want to reserve a slot for the ${b.month} batch (${b.purnima}).`)}
-                    className="mt-3 py-1.5 px-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-[11px] font-bold uppercase transition-colors"
-                  >
-                    Reserve Slot
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 6. SPECIAL DESK FOR NRIs & INTERNATIONAL YATRIS ── */}
+        {/* ── 5. SPECIAL DESK FOR NRIs & INTERNATIONAL YATRIS ── */}
         <section className="py-12 bg-slate-900 text-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/5 border border-white/10 p-6 sm:p-8 rounded-2xl">
@@ -663,7 +623,7 @@ Please share available batch dates and pricing details.`;
           </div>
         </section>
 
-        {/* ── 7. CLEAN CONCISE FAQS ── */}
+        {/* ── 6. CLEAN CONCISE FAQS ── */}
         <section className="py-14 bg-white dark:bg-gray-950">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-8">
@@ -695,7 +655,7 @@ Please share available batch dates and pricing details.`;
                 },
                 {
                   q: "How many months in advance should I register?",
-                  a: "We recommend booking 3 to 6 months in advance so Tibet travel permits are secured comfortably before batch quotas close.",
+                  a: "We recommend planning 3 to 6 months in advance so Tibet travel permits and group visa formalities can be processed comfortably before the season begins.",
                 },
               ].map((faq, idx) => (
                 <details
@@ -715,7 +675,7 @@ Please share available batch dates and pricing details.`;
           </div>
         </section>
 
-        {/* ── 8. FINAL FAST ENQUIRY CTA ── */}
+        {/* ── 7. FINAL FAST ENQUIRY CTA ── */}
         <section className="py-14 bg-gradient-to-r from-amber-600 via-amber-700 to-slate-900 text-white text-center px-4">
           <div className="max-w-2xl mx-auto space-y-4">
             <h2 className="text-2xl sm:text-3xl font-black text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -746,7 +706,7 @@ Please share available batch dates and pricing details.`;
 
       <Footer />
 
-      {/* ── 9. STICKY MOBILE CTA BAR ── */}
+      {/* ── 8. STICKY MOBILE CTA BAR ── */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-2.5 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 z-50 flex gap-2.5 shadow-2xl">
         <button
           onClick={() => handleWhatsAppClick("kailash_mobile_quote", "ॐ नमः शिवाय! I need details and pricing for Kailash Mansarovar Yatra.")}
