@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
-  CheckCircle2,
   Star,
   ShieldCheck,
   MapPin,
@@ -10,15 +9,11 @@ import {
   Phone,
   ArrowRight,
   User,
-  Calendar,
-  Compass,
   ChevronDown,
   Mountain,
   HeartPulse,
   Utensils,
   Globe,
-  Clock,
-  Sparkles,
   ExternalLink,
   Users,
 } from "lucide-react";
@@ -38,10 +33,9 @@ interface KailashPackageItem {
   imageUrl?: string | null;
   category?: string | null;
   tag?: string | null;
-  highlights?: string[];
 }
 
-const DEFAULT_ROUTES_FALLBACK = [
+const DEFAULT_ROUTES_FALLBACK: KailashPackageItem[] = [
   {
     _id: "helicopter-lucknow",
     title: "Kailash Mansarovar Yatra by Helicopter via Lucknow",
@@ -51,79 +45,55 @@ const DEFAULT_ROUTES_FALLBACK = [
     originalPrice: 245000,
     imageUrl1: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200&auto=format&fit=crop",
     category: "kailash",
-    tag: "Most Popular for Seniors",
-    highlights: [
-      "Fastest route with minimum road travel",
-      "Scenic helicopter flight over Himalayan ranges",
-      "Stay in Nepalgunj, Simikot, Purang & Mansarovar",
-      "Doctor guidance & oxygen support included",
-    ],
+    tag: "Helicopter Route",
   },
   {
     _id: "overland-kyirong",
-    title: "Overland Kailash Mansarovar Yatra via Kyirong (Kathmandu)",
+    title: "Overland Kailash Mansarovar Yatra via Kyirong",
     location: "Kathmandu - Syabrubesi - Kyirong - Saga - Mansarovar",
     duration: "14 Days / 13 Nights",
     discountedPrice: 185000,
     originalPrice: 205000,
     imageUrl1: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop",
     category: "kailash",
-    tag: "Best for Acclimatization",
-    highlights: [
-      "Natural step-by-step altitude adjustment",
-      "Drive through scenic Tibetan plateau & Brahmaputra river",
-      "Full day Holy Mansarovar Snan & Hawan puja",
-      "Complete 3-Day Mount Kailash Parikrama (Kora)",
-    ],
+    tag: "Overland Route",
   },
   {
     _id: "lhasa-air-route",
-    title: "Kailash Mansarovar Yatra Via Lhasa – Air & Cultural Route",
+    title: "Kailash Mansarovar Yatra Via Lhasa – Air Route",
     location: "Kathmandu - Lhasa - Shigatse - Saga - Mansarovar",
     duration: "15 Days / 14 Nights",
     discountedPrice: 310000,
     originalPrice: 340000,
     imageUrl1: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
     category: "kailash",
-    tag: "Luxury & Cultural Sightseeing",
-    highlights: [
-      "Flight into Lhasa with Potala Palace & Jokhang Temple tour",
-      "Luxury 4-star hotels during Tibet transit",
-      "Scenic drive via Yamdrok Lake & Gyantse fortress",
-      "VIP medical team & English/Hindi speaking Tibetan guide",
-    ],
+    tag: "Air & Cultural Route",
   },
   {
     _id: "aerial-darshan",
     title: "Kailash Mansarovar Aerial Mountain Flight Darshan",
-    location: "Nepalgunj - Pithoragarh - Kailash Aerial View - Return",
+    location: "Nepalgunj - Mountain Flight - Lake Mansarovar View",
     duration: "1 Day Scenic Darshan",
     discountedPrice: 48000,
     originalPrice: 55000,
     imageUrl1: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop",
     category: "kailash",
-    tag: "Zero Trekking | No China Visa Needed",
-    highlights: [
-      "Chartered mountain flight close to Holy Mount Kailash",
-      "Darshan of Om Parvat & Lake Mansarovar from sky",
-      "Ideal for yatris who cannot trek or travel to Tibet",
-      "Complete darshan in single day from India/Nepal border",
-    ],
+    tag: "No Trekking | No China Visa",
   },
 ];
 
-const DEPARTURE_BATCHES_2026 = [
-  { month: "May 2026", dates: "11 May, 22 May", purnima: "29 May (Buddha Purnima)", status: "Filling Fast" },
-  { month: "June 2026", dates: "08 Jun, 19 Jun", purnima: "27 Jun (Jyeshtha Purnima)", status: "Popular" },
-  { month: "July 2026", dates: "06 Jul, 18 Jul", purnima: "27 Jul (Guru Purnima Special)", status: "Filling Fast" },
-  { month: "August 2026", dates: "05 Aug, 16 Aug", purnima: "25 Aug (Shravan / Raksha Bandhan)", status: "High Demand" },
-  { month: "September 2026", dates: "02 Sep, 14 Sep", purnima: "24 Sep (Bhadrapada Purnima)", status: "Open" },
+const DEPARTURE_BATCHES = [
+  { month: "May 2026", dates: "11 May, 22 May", purnima: "Buddha Purnima (29 May)", seats: "Filling Fast" },
+  { month: "June 2026", dates: "08 Jun, 19 Jun", purnima: "Jyeshtha Purnima (27 Jun)", seats: "Available" },
+  { month: "July 2026", dates: "06 Jul, 18 Jul", purnima: "Guru Purnima Special (27 Jul)", seats: "Filling Fast" },
+  { month: "August 2026", dates: "05 Aug, 16 Aug", purnima: "Shravan / Raksha Bandhan (25 Aug)", seats: "High Demand" },
+  { month: "September 2026", dates: "02 Sep, 14 Sep", purnima: "Bhadrapada Purnima (24 Sep)", seats: "Available" },
 ];
 
 export default function KailashPage() {
   const { agent, siteConfig, packages: agentPackages } = useAgent();
 
-  // Filter packages specifically for Kailash Mansarovar from DB
+  // Dynamically load Kailash packages from database
   const kailashPackages = useMemo(() => {
     const list = (agentPackages || []).filter((p: AgentPackage) => {
       const cat = (p.category || "").toLowerCase();
@@ -141,7 +111,7 @@ export default function KailashPage() {
     return (list.length > 0 ? list : DEFAULT_ROUTES_FALLBACK) as KailashPackageItem[];
   }, [agentPackages]);
 
-  // WhatsApp helper
+  // WhatsApp Helper
   const buildWhatsAppUrl = (message: string) => {
     const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "7289037447";
     const digits = rawNumber.replace(/\D/g, "");
@@ -159,12 +129,12 @@ export default function KailashPage() {
     window.open(buildWhatsAppUrl(message), "_blank");
   };
 
-  // Form State
+  // Quick Form State
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    route: "Kailash Yatra by Helicopter via Lucknow",
-    month: "July 2026 (Guru Purnima Special)",
+    route: "Helicopter via Lucknow",
+    month: "July 2026 (Guru Purnima)",
     yatris: "2 Yatris",
   });
 
@@ -173,11 +143,11 @@ export default function KailashPage() {
     if (typeof window !== "undefined") {
       const w = window as unknown as { dataLayer?: Array<Record<string, unknown>> };
       if (w.dataLayer) {
-        w.dataLayer.push({ event: "mansarovar_quote_submit" });
+        w.dataLayer.push({ event: "kailash_quick_quote" });
       }
     }
     const msg = `ॐ नमः शिवाय!
-Hello Shree Ananta Travels, I want to book/inquire for Kailash Mansarovar Yatra 2026-2027:
+Hello Shree Ananta Travels, I want to inquire for Kailash Mansarovar Yatra:
 
 • Name: ${formData.name}
 • Phone: ${formData.phone}
@@ -185,7 +155,7 @@ Hello Shree Ananta Travels, I want to book/inquire for Kailash Mansarovar Yatra 
 • Target Month: ${formData.month}
 • Group Size: ${formData.yatris}
 
-Please share available batch dates, detailed day-wise itinerary, and exact pricing.`;
+Please share available batch dates and pricing details.`;
     window.open(buildWhatsAppUrl(msg), "_blank");
   };
 
@@ -196,136 +166,117 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
       <Topbar />
       <Navbar />
 
-      {/* ── TOP NOTIFICATION TICKER (Competitor Benchmark) ── */}
-      <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-slate-900 text-white text-xs sm:text-sm py-2 px-4 shadow-sm border-b border-amber-500/20">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-          <div className="flex items-center gap-2 font-bold">
-            <span className="bg-red-600 text-white text-[10px] uppercase font-black px-2 py-0.5 rounded-full animate-pulse">
-              Open Now
-            </span>
-            <span>Kailash Mansarovar Yatra 2026 - 2027 Registrations Open | Full Moon (Purnima) Batches Filling Fast</span>
-          </div>
-          <div className="flex items-center gap-4 text-xs font-semibold">
-            <a href={`tel:${contactPhone.replace(/\s+/g, "")}`} className="hover:text-amber-200 transition-colors flex items-center gap-1">
-              <Phone className="w-3.5 h-3.5" /> Call Specialist: {contactPhone}
-            </a>
-          </div>
-        </div>
-      </div>
-
       <main className="flex-1">
-        {/* ── 1. HERO SECTION WITH EMBEDDED QUICK QUOTE FORM ── */}
-        <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center bg-slate-950 overflow-hidden py-16 lg:py-24">
-          {/* Background image & atmospheric overlay */}
+        {/* ── 1. CLEAN HIGH-CONVERTING HERO SECTION ── */}
+        <section className="relative min-h-[80vh] lg:min-h-[85vh] flex items-center bg-slate-950 overflow-hidden py-12 lg:py-20">
+          {/* Background image & gradient */}
           <div className="absolute inset-0 z-0">
             <img
               src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2500&auto=format&fit=crop"
-              alt="Holy Mount Kailash and Sacred Lake Mansarovar"
-              className="w-full h-full object-cover object-center scale-105 filter brightness-70 contrast-110"
+              alt="Mount Kailash and Lake Mansarovar"
+              className="w-full h-full object-cover object-center filter brightness-60"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/60" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30" />
           </div>
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               
-              {/* Left Column: Value Proposition */}
-              <div className="lg:col-span-7 text-left space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs sm:text-sm font-extrabold uppercase tracking-wider backdrop-blur-md">
+              {/* Left Column: Direct Spiritual Appeal */}
+              <div className="lg:col-span-7 text-left space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs sm:text-sm font-extrabold uppercase tracking-wider backdrop-blur-md">
                   <Mountain className="w-4 h-4 text-amber-400" />
                   <span>ॐ नमः शिवाय | Authorized Pilgrimage Partner</span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Kailash Mansarovar <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-yellow-300">
                     Yatra 2026 - 2027
                   </span>
                 </h1>
 
-                <p className="text-base sm:text-lg text-gray-200 max-w-2xl leading-relaxed font-normal">
-                  Experience the ultimate sacred Parikrama of Mount Kailash (Gang Rinpoche) and the holy dip in Lake Mansarovar. 
-                  Comprehensive China/Tibet permits, certified high-altitude Sherpas, daily sattvic Indian meals, and 24/7 medical oxygen care.
+                <p className="text-sm sm:text-base text-gray-200 max-w-xl leading-relaxed">
+                  Undertake the sacred Parikrama of Mount Kailash and the holy bath at Lake Mansarovar with Shree Ananta Travels. 
+                  End-to-end permits, certified Sherpas, pure vegetarian meals, and 24/7 medical care.
                 </p>
 
-                {/* 4 Pillars Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 pt-2 max-w-xl">
-                  <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-white text-xs sm:text-sm font-bold">
-                    <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" />
-                    <span>100% Tibet Travel Permit Assistance</span>
+                {/* 4 Clean Trust Pills */}
+                <div className="grid grid-cols-2 gap-2.5 max-w-lg pt-1">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 text-white text-xs font-semibold">
+                    <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>Tibet Permits Handled</span>
                   </div>
-                  <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-white text-xs sm:text-sm font-bold">
-                    <HeartPulse className="w-5 h-5 text-amber-400 shrink-0" />
-                    <span>Oxygen Kit & Doctor Support</span>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 text-white text-xs font-semibold">
+                    <HeartPulse className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>Oxygen & Medical Support</span>
                   </div>
-                  <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-white text-xs sm:text-sm font-bold">
-                    <Utensils className="w-5 h-5 text-amber-400 shrink-0" />
-                    <span>Pure Veg & Jain Sattvic Food</span>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 text-white text-xs font-semibold">
+                    <Utensils className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>Pure Vegetarian Food</span>
                   </div>
-                  <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-white text-xs sm:text-sm font-bold">
-                    <Globe className="w-5 h-5 text-amber-400 shrink-0" />
-                    <span>NRI & Foreign Passport Support</span>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 text-white text-xs font-semibold">
+                    <Globe className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>NRI Yatra Assistance</span>
                   </div>
                 </div>
 
-                {/* Action buttons */}
-                <div className="flex flex-wrap items-center gap-4 pt-3">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
                   <a
-                    href="#routes"
-                    className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-sm uppercase tracking-wider hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl hover:scale-102 flex items-center gap-2"
+                    href="#packages"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider hover:from-amber-400 hover:to-amber-500 transition-all shadow-md flex items-center gap-1.5"
                   >
-                    <span>View All Packages</span>
+                    <span>View Packages</span>
                     <ArrowRight className="w-4 h-4" />
                   </a>
                   <button
-                    onClick={() => handleWhatsAppClick("mansarovar_hero_whatsapp", "ॐ नमः शिवाय! I want full details and batch dates for Kailash Mansarovar Yatra 2026-2027.")}
-                    className="px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20BA5A] text-white font-black text-sm uppercase tracking-wider transition-all shadow-xl hover:scale-102 flex items-center gap-2"
+                    onClick={() => handleWhatsAppClick("kailash_hero_chat", "ॐ नमः शिवाय! I want details for Kailash Mansarovar Yatra 2026-2027.")}
+                    className="px-6 py-3 rounded-xl bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5"
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    <span>Instant WhatsApp Inquiry</span>
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Chat on WhatsApp</span>
                   </button>
                 </div>
               </div>
 
-              {/* Right Column: High-Converting Embedded Form */}
+              {/* Right Column: Clean Compact 1-Click Inquiry Form */}
               <div className="lg:col-span-5">
-                <div className="bg-slate-900/90 backdrop-blur-2xl border-2 border-amber-400/40 p-6 sm:p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/15 blur-3xl pointer-events-none rounded-full" />
-                  
-                  <div className="mb-5 relative z-10">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20 inline-block mb-2">
-                      Priority Booking 2026-2027
+                <div className="bg-slate-900/95 backdrop-blur-xl border border-amber-400/30 p-6 sm:p-7 rounded-3xl shadow-2xl relative">
+                  <div className="mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20 inline-block mb-1">
+                      Quick Inquiry
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Get Yatra Itinerary & Quote
+                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Get Itinerary & Pricing
                     </h2>
-                    <p className="text-xs sm:text-sm text-gray-300 mt-1">
-                      Fill the form to receive day-wise itinerary, dates, and prices on WhatsApp within 10 minutes.
+                    <p className="text-xs text-gray-300 mt-0.5">
+                      Share your details to get day-wise plan & batch prices on WhatsApp.
                     </p>
                   </div>
 
-                  <form onSubmit={handleFormSubmit} className="space-y-3.5 relative z-10">
+                  <form onSubmit={handleFormSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-xs font-bold text-gray-300 mb-1">Full Name</label>
-                      <div className="relative flex items-center bg-black/40 border border-white/20 rounded-xl px-3.5 py-2.5 focus-within:border-amber-400 transition-all">
-                        <User className="w-4 h-4 text-amber-400 mr-2.5 shrink-0" />
+                      <label className="block text-[11px] font-bold text-gray-300 mb-1">Your Name</label>
+                      <div className="flex items-center bg-black/40 border border-white/15 rounded-xl px-3 py-2 focus-within:border-amber-400 transition-all">
+                        <User className="w-3.5 h-3.5 text-amber-400 mr-2 shrink-0" />
                         <input
                           required
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="Your Full Name"
-                          className="bg-transparent w-full text-white placeholder-gray-400 text-xs sm:text-sm outline-none font-medium"
+                          placeholder="Full Name"
+                          className="bg-transparent w-full text-white placeholder-gray-400 text-xs outline-none font-medium"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-300 mb-1">WhatsApp Mobile Number</label>
-                      <div className="relative flex items-center bg-black/40 border border-white/20 rounded-xl px-3.5 py-2.5 focus-within:border-amber-400 transition-all">
-                        <Phone className="w-4 h-4 text-amber-400 mr-2.5 shrink-0" />
-                        <span className="text-gray-400 text-xs sm:text-sm font-bold mr-1.5">+91</span>
+                      <label className="block text-[11px] font-bold text-gray-300 mb-1">WhatsApp Number</label>
+                      <div className="flex items-center bg-black/40 border border-white/15 rounded-xl px-3 py-2 focus-within:border-amber-400 transition-all">
+                        <Phone className="w-3.5 h-3.5 text-amber-400 mr-2 shrink-0" />
+                        <span className="text-gray-400 text-xs font-bold mr-1">+91</span>
                         <input
                           required
                           type="tel"
@@ -334,86 +285,75 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           placeholder="10 Digit Number"
-                          className="bg-transparent w-full text-white placeholder-gray-400 text-xs sm:text-sm outline-none font-medium"
+                          className="bg-transparent w-full text-white placeholder-gray-400 text-xs outline-none font-medium"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <div>
-                        <label className="block text-xs font-bold text-gray-300 mb-1">Preferred Route</label>
-                        <div className="relative flex items-center bg-black/40 border border-white/20 rounded-xl px-3 py-2.5 focus-within:border-amber-400 transition-all">
+                        <label className="block text-[11px] font-bold text-gray-300 mb-1">Route</label>
+                        <div className="relative flex items-center bg-black/40 border border-white/15 rounded-xl px-2.5 py-2">
                           <select
                             value={formData.route}
                             onChange={(e) => setFormData({ ...formData, route: e.target.value })}
-                            className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900 [&>option]:bg-white"
+                            className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
                           >
-                            <option value="Kailash Yatra by Helicopter via Lucknow">Helicopter (via Lucknow)</option>
-                            <option value="Overland Kailash Yatra via Kyirong">Overland (via Kyirong)</option>
-                            <option value="Kailash Yatra via Lhasa (Air Route)">Lhasa Air Route</option>
-                            <option value="Kailash Aerial Darshan (Flight)">Aerial Darshan Flight</option>
-                            <option value="Need Specialist Guidance">Not Sure - Guide Me</option>
+                            <option value="Helicopter via Lucknow">Helicopter Route</option>
+                            <option value="Overland via Kyirong">Overland Route</option>
+                            <option value="Lhasa Air Route">Lhasa Air Route</option>
+                            <option value="Aerial Darshan Flight">Aerial Darshan</option>
                           </select>
-                          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 pointer-events-none" />
+                          <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2 pointer-events-none" />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-300 mb-1">Target Month / Batch</label>
-                        <div className="relative flex items-center bg-black/40 border border-white/20 rounded-xl px-3 py-2.5 focus-within:border-amber-400 transition-all">
+                        <label className="block text-[11px] font-bold text-gray-300 mb-1">Month</label>
+                        <div className="relative flex items-center bg-black/40 border border-white/15 rounded-xl px-2.5 py-2">
                           <select
                             value={formData.month}
                             onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                            className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900 [&>option]:bg-white"
+                            className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
                           >
-                            <option value="May 2026 (Buddha Purnima)">May 2026 (Buddha Purnima)</option>
-                            <option value="June 2026 (Jyeshtha Purnima)">June 2026</option>
-                            <option value="July 2026 (Guru Purnima Special)">July 2026 (Guru Purnima)</option>
-                            <option value="August 2026 (Shravan / Raksha Bandhan)">August 2026 (Shravan)</option>
-                            <option value="September 2026 (Bhadrapada Purnima)">September 2026</option>
-                            <option value="Advance 2027 Booking">2027 Advance Booking</option>
+                            <option value="May 2026">May 2026</option>
+                            <option value="June 2026">June 2026</option>
+                            <option value="July 2026 (Guru Purnima)">July 2026</option>
+                            <option value="August 2026">August 2026</option>
+                            <option value="September 2026">September 2026</option>
+                            <option value="2027 Advance">2027 Advance</option>
                           </select>
-                          <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 pointer-events-none" />
+                          <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2 pointer-events-none" />
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-300 mb-1">Number of Yatris</label>
-                      <div className="relative flex items-center bg-black/40 border border-white/20 rounded-xl px-3 py-2.5 focus-within:border-amber-400 transition-all">
-                        <Users className="w-4 h-4 text-amber-400 mr-2 shrink-0" />
+                      <label className="block text-[11px] font-bold text-gray-300 mb-1">Group Size</label>
+                      <div className="relative flex items-center bg-black/40 border border-white/15 rounded-xl px-2.5 py-2">
+                        <Users className="w-3.5 h-3.5 text-amber-400 mr-2 shrink-0" />
                         <select
                           value={formData.yatris}
                           onChange={(e) => setFormData({ ...formData, yatris: e.target.value })}
-                          className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900 [&>option]:bg-white"
+                          className="bg-transparent w-full text-white text-xs outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
                         >
                           <option value="1 Yatri (Solo)">1 Yatri (Solo)</option>
-                          <option value="2 Yatris (Couple / Friends)">2 Yatris</option>
-                          <option value="3-4 Yatris (Family)">3 - 4 Yatris</option>
-                          <option value="5-8 Yatris (Group)">5 - 8 Yatris</option>
-                          <option value="9+ Yatris (Large Group)">9+ Yatris (Corporate / Sangh)</option>
+                          <option value="2 Yatris">2 Yatris</option>
+                          <option value="3-4 Yatris">3 - 4 Yatris (Family)</option>
+                          <option value="5+ Yatris">5+ Yatris (Group)</option>
                         </select>
-                        <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 pointer-events-none" />
+                        <ChevronDown className="w-3 h-3 text-gray-400 absolute right-2 pointer-events-none" />
                       </div>
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full py-3.5 mt-2 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-[0_6px_20px_rgba(37,211,102,0.4)] flex items-center justify-center gap-2 hover:scale-102 active:scale-98"
+                      className="w-full py-3 mt-1 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 active:scale-98"
                     >
-                      <MessageCircle className="w-5 h-5" />
-                      <span>Get Itinerary & Pricing on WhatsApp</span>
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Get Details on WhatsApp</span>
                     </button>
                   </form>
-
-                  <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> 100% Privacy Protected
-                    </span>
-                    <span className="flex items-center gap-1 text-amber-300 font-bold">
-                      <Clock className="w-3.5 h-3.5" /> Quote in ~10 mins
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -421,47 +361,46 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
           </div>
         </section>
 
-        {/* ── 2. TRUST & STATS STRIP ── */}
-        <section className="bg-amber-500 text-slate-950 py-6 border-y border-amber-600/30 shadow-inner">
+        {/* ── 2. TRUST HIGHLIGHT STRIP ── */}
+        <section className="bg-amber-500 text-slate-950 py-4 shadow-xs">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-              <div className="border-r border-slate-950/15 last:border-none">
-                <p className="text-2xl sm:text-3xl font-black">10+ Years</p>
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 mt-0.5">Yatra Leadership</p>
-              </div>
-              <div className="border-r border-slate-950/15 last:border-none">
-                <p className="text-2xl sm:text-3xl font-black">1,500+</p>
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 mt-0.5">Devotees Guided</p>
-              </div>
-              <div className="border-r border-slate-950/15 last:border-none">
-                <p className="text-2xl sm:text-3xl font-black">100%</p>
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 mt-0.5">Sattvic Indian Meals</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <p className="text-xl sm:text-2xl font-black">10+ Years</p>
+                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Yatra Experience</p>
               </div>
               <div>
-                <p className="text-2xl sm:text-3xl font-black">24x7</p>
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 mt-0.5">Oxygen & Medical Care</p>
+                <p className="text-xl sm:text-2xl font-black">1,500+</p>
+                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Devotees Guided</p>
+              </div>
+              <div>
+                <p className="text-xl sm:text-2xl font-black">100%</p>
+                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Pure Veg Indian Food</p>
+              </div>
+              <div>
+                <p className="text-xl sm:text-2xl font-black">24x7</p>
+                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Oxygen & Sherpa Care</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 3. DYNAMIC PACKAGES SECTION (Directly Loaded from Database) ── */}
-        <section id="routes" className="py-20 bg-gray-50 dark:bg-gray-900">
+        {/* ── 3. CLEAN DYNAMIC PACKAGES SECTION (No Cluttered Hardcoded Bullets) ── */}
+        <section id="packages" className="py-16 bg-gray-50 dark:bg-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-14 max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-extrabold uppercase tracking-widest mb-3 border border-amber-400/20">
-                <Compass className="w-3.5 h-3.5" />
-                <span>Curated Pilgrimage Packages</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Kailash Mansarovar <span className="text-amber-600 dark:text-amber-400">Yatra Packages</span>
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+              <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-2">
+                Available Packages
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Kailash Mansarovar Tour Packages
               </h2>
-              <p className="text-base text-gray-600 dark:text-gray-300 mt-3 font-medium">
-                Choose the route that fits your schedule, age group, and physical comfort. Every package includes government permit handling, accommodation, meals, and medical coverage.
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-2 font-medium">
+                Tap on any package to view the full itinerary or enquire directly on WhatsApp.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {kailashPackages.map((pkg: KailashPackageItem) => {
                 const pkgTitle = pkg.title || "Kailash Mansarovar Tour Package";
                 const pkgDuration = pkg.duration || "12 Days";
@@ -472,105 +411,78 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
                 return (
                   <div
                     key={pkg._id}
-                    className="bg-white dark:bg-gray-950 rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col group hover:-translate-y-1.5"
+                    className="bg-white dark:bg-gray-950 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-1"
                   >
-                    {/* Image Container */}
-                    <div className="relative h-60 w-full overflow-hidden bg-slate-900">
+                    {/* Image */}
+                    <div className="relative h-48 w-full overflow-hidden bg-slate-900">
                       <img
                         src={pkgImg}
                         alt={pkgTitle}
-                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                      {/* Tag */}
-                      <div className="absolute top-3.5 left-3.5 bg-amber-500 text-slate-950 font-black text-[11px] uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
-                        {pkg.tag || "Spiritual Special"}
-                      </div>
-
-                      {/* Duration */}
-                      <div className="absolute top-3.5 right-3.5 bg-black/70 backdrop-blur-md text-white font-bold text-xs px-3 py-1 rounded-full border border-white/20">
+                      {/* Duration Badge */}
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-white font-bold text-[11px] px-2.5 py-1 rounded-full border border-white/20">
                         {pkgDuration}
                       </div>
 
-                      {/* Title overlay */}
-                      <div className="absolute bottom-3 left-4 right-4">
-                        <h3 className="text-xl font-black text-white leading-tight line-clamp-2">
+                      {/* Tag if any */}
+                      {pkg.tag && (
+                        <div className="absolute top-3 left-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                          {pkg.tag}
+                        </div>
+                      )}
+
+                      {/* Title & Location on Image */}
+                      <div className="absolute bottom-2.5 left-3 right-3">
+                        <h3 className="text-base font-black text-white leading-tight line-clamp-2">
                           {pkgTitle}
                         </h3>
-                        <p className="text-xs text-gray-300 flex items-center gap-1 mt-1 font-medium">
-                          <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <p className="text-[11px] text-gray-300 flex items-center gap-1 mt-0.5 font-medium truncate">
+                          <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
                           <span className="truncate">{pkgLocation}</span>
                         </p>
                       </div>
                     </div>
 
-                    {/* Body */}
-                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                      {/* Price Section */}
-                      <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+                    {/* Card Footer: Clean Price + Actions */}
+                    <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-[11px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">Package Price</p>
-                          <div className="flex items-baseline gap-2">
+                          <span className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 block">Starting From</span>
+                          <div className="flex items-baseline gap-1.5">
                             {pkgPrice && pkgPrice > 0 ? (
-                              <>
-                                <span className="text-2xl font-black text-gray-900 dark:text-white">
-                                  ₹{pkgPrice.toLocaleString()}
-                                </span>
-                                {pkg.originalPrice && pkg.originalPrice > pkgPrice && (
-                                  <span className="text-xs text-gray-400 line-through">
-                                    ₹{pkg.originalPrice.toLocaleString()}
-                                  </span>
-                                )}
-                              </>
+                              <span className="text-xl font-black text-gray-900 dark:text-white">
+                                ₹{pkgPrice.toLocaleString()}
+                              </span>
                             ) : (
-                              <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                                Price on Request / 2026 Batch
+                              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                Price on Request
                               </span>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1 rounded-lg">
-                          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                          <span className="text-xs font-bold text-amber-700 dark:text-amber-300">4.9/5</span>
+                        <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-md text-xs font-bold text-amber-700 dark:text-amber-300">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          <span>4.9</span>
                         </div>
                       </div>
 
-                      {/* Inclusions list */}
-                      <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300 font-medium">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                          <span>China Group Visa & Tibet Travel Permit</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                          <span>Pure Vegetarian Food prepared by Indian Cook</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                          <span>Oxygen Cylinders & High-Altitude Medical Kit</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                          <span>Dedicated Hindi/English Speaking Tour Leader</span>
-                        </div>
-                      </div>
-
-                      {/* CTA Buttons */}
-                      <div className="pt-2 flex items-center gap-2.5">
+                      {/* Action Buttons: 2 Clean Buttons */}
+                      <div className="flex items-center gap-2 pt-1">
                         <Link
                           href={`/package/${pkg._id}`}
-                          className="flex-1 py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider text-center transition-all flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2 px-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider text-center transition-colors flex items-center justify-center gap-1"
                         >
-                          <span>View Itinerary</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Details</span>
+                          <ExternalLink className="w-3 h-3" />
                         </Link>
                         <button
-                          onClick={() => handleWhatsAppClick("mansarovar_card_whatsapp", `ॐ नमः शिवाय! I want full itinerary & pricing for "${pkgTitle}". Please assist.`)}
-                          className="py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 active:scale-95"
-                          title="Inquire on WhatsApp"
+                          onClick={() => handleWhatsAppClick("kailash_pkg_inquire", `ॐ नमः शिवाय! I want details for "${pkgTitle}". Please share itinerary and batch pricing.`)}
+                          className="py-2 px-3 rounded-lg bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1 active:scale-95 shadow-sm"
                         >
-                          <MessageCircle className="w-4 h-4" />
+                          <MessageCircle className="w-3.5 h-3.5" />
                           <span>Inquire</span>
                         </button>
                       </div>
@@ -582,123 +494,118 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
           </div>
         </section>
 
-        {/* ── 4. TRIP TO TEMPLES BENCHMARK: ROUTE COMPARISON MATRIX ── */}
-        <section className="py-20 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12 max-w-3xl mx-auto">
-              <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3.5 py-1 rounded-full border border-amber-500/20">
-                Route Comparison Guide
+        {/* ── 4. KEY ROUTES AT A GLANCE (Compact Visual Cards) ── */}
+        <section className="py-16 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+              <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-2">
+                Route Comparison
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight mt-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Which Kailash Yatra Route Is Best For You?
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Choose the Right Route for Your Travel Style
               </h2>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
-                Understanding the key differences in duration, travel mode, and physical fitness needed for each route.
-              </p>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800">
-                <thead>
-                  <tr className="bg-slate-900 text-white text-xs uppercase tracking-wider">
-                    <th className="p-4 sm:p-5">Feature</th>
-                    <th className="p-4 sm:p-5 text-amber-400">Helicopter Route</th>
-                    <th className="p-4 sm:p-5">Overland via Kyirong</th>
-                    <th className="p-4 sm:p-5">Lhasa Air Route</th>
-                    <th className="p-4 sm:p-5">Aerial Darshan</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-xs sm:text-sm font-medium">
-                  <tr>
-                    <td className="p-4 font-bold text-gray-900 dark:text-white">Starting Point</td>
-                    <td className="p-4 text-amber-600 dark:text-amber-400 font-semibold">Lucknow / Nepalgunj</td>
-                    <td className="p-4">Kathmandu</td>
-                    <td className="p-4">Kathmandu / Lhasa</td>
-                    <td className="p-4">Nepalgunj Airport</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-bold text-gray-900 dark:text-white">Duration</td>
-                    <td className="p-4 font-bold">10 Days / 9 Nights</td>
-                    <td className="p-4">14 Days / 13 Nights</td>
-                    <td className="p-4">15 Days / 14 Nights</td>
-                    <td className="p-4 font-bold text-emerald-600">1 Day Return</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-bold text-gray-900 dark:text-white">Physical Trekking</td>
-                    <td className="p-4">3 Days (Pony option available)</td>
-                    <td className="p-4">3 Days (Pony option available)</td>
-                    <td className="p-4">3 Days (Pony option available)</td>
-                    <td className="p-4 font-bold text-emerald-600">0 Km (No Trekking)</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-bold text-gray-900 dark:text-white">China Visa / Permit</td>
-                    <td className="p-4">Group Visa & Tibet Permit</td>
-                    <td className="p-4">Group Visa & Tibet Permit</td>
-                    <td className="p-4">Group Visa & Tibet Permit</td>
-                    <td className="p-4 font-bold text-emerald-600">No China Visa Required</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-bold text-gray-900 dark:text-white">Best Suited For</td>
-                    <td className="p-4 font-semibold text-gray-900 dark:text-white">Seniors & Busy Professionals</td>
-                    <td className="p-4">Scenic Lovers & Fit Yatris</td>
-                    <td className="p-4">Luxury & Cultural Travelers</td>
-                    <td className="p-4">Seniors Who Cannot Trek</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-50 dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">Fast & Popular</span>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mt-1">Helicopter Route</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">
+                    Lucknow to Nepalgunj, Simikot, and Hilsa. 10 Days total. Lowest road journey, ideal for senior citizens.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleWhatsAppClick("kailash_route_heli", "Hello, I want details for Kailash Yatra by Helicopter via Lucknow.")}
+                  className="mt-4 text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 hover:underline text-left"
+                >
+                  <span>Inquire Helicopter</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Scenic Drive</span>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mt-1">Overland via Kyirong</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">
+                    Kathmandu to Kyirong border by coach. 14 Days total. Best natural step-by-step altitude adjustment.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleWhatsAppClick("kailash_route_overland", "Hello, I want details for Overland Kailash Yatra via Kyirong.")}
+                  className="mt-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 hover:underline text-left"
+                >
+                  <span>Inquire Overland</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider">Comfort & Culture</span>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mt-1">Lhasa Air Route</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">
+                    Flight to Lhasa with visits to Potala Palace. 15 Days total. Deluxe accommodation and scenic plateau transit.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleWhatsAppClick("kailash_route_lhasa", "Hello, I want details for Kailash Mansarovar via Lhasa Air Route.")}
+                  className="mt-4 text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1 hover:underline text-left"
+                >
+                  <span>Inquire Lhasa Route</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">Zero Trekking</span>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mt-1">Aerial Darshan Flight</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">
+                    Mountain flight close to Mount Kailash. 1 Day return. No trekking and no China visa required.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleWhatsAppClick("kailash_route_aerial", "Hello, I want details for Kailash Aerial Mountain Flight Darshan.")}
+                  className="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline text-left"
+                >
+                  <span>Inquire Aerial Flight</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── 5. TRIP TO TEMPLES BENCHMARK: DEPARTURE BATCHES & FULL MOON (PURNIMA) CALENDAR ── */}
-        <section id="batches" className="py-20 bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12 max-w-3xl mx-auto">
-              <span className="text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/30 px-3.5 py-1 rounded-full border border-emerald-400/20">
-                Fixed Departures 2026 - 2027
+        {/* ── 5. FIXED DEPARTURES & PURNIMA DATES ── */}
+        <section className="py-14 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-8 max-w-xl mx-auto">
+              <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-1">
+                2026 - 2027 Schedule
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight mt-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Upcoming Departure Batches & Full Moon Dates
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Upcoming Departure Batches
               </h2>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
-                Doing sacred Snan at Lake Mansarovar on Purnima (Full Moon) is considered most auspicious. Reserve your slot early as permits take 35-45 days.
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {DEPARTURE_BATCHES_2026.map((batch, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {DEPARTURE_BATCHES.map((b, idx) => (
                 <div
                   key={idx}
-                  className="bg-white dark:bg-gray-950 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-md hover:border-amber-400/50 transition-all flex flex-col justify-between"
+                  className="bg-white dark:bg-gray-950 p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-center flex flex-col justify-between shadow-xs"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-lg font-black text-gray-900 dark:text-white">{batch.month}</span>
-                      <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
-                        batch.status === "Filling Fast" ? "bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400" : "bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
-                      }`}>
-                        {batch.status}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-xs font-medium text-gray-600 dark:text-gray-300 mb-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-amber-500 shrink-0" />
-                        <span>Batches: <strong className="text-gray-900 dark:text-white">{batch.dates}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                        <span>Full Moon: <strong className="text-amber-600 dark:text-amber-400">{batch.purnima}</strong></span>
-                      </div>
-                    </div>
+                    <span className="text-xs font-black text-gray-900 dark:text-white block">{b.month}</span>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{b.dates}</p>
+                    <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-1.5">{b.purnima}</p>
                   </div>
-
                   <button
-                    onClick={() => handleWhatsAppClick("mansarovar_batch_click", `Hello, I want to book my slot for the ${batch.month} (${batch.purnima}) batch of Kailash Mansarovar Yatra.`)}
-                    className="w-full py-2.5 rounded-xl bg-gray-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-bold text-xs uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5"
+                    onClick={() => handleWhatsAppClick("kailash_batch_slot", `Hello, I want to reserve a slot for the ${b.month} batch (${b.purnima}).`)}
+                    className="mt-3 py-1.5 px-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-[11px] font-bold uppercase transition-colors"
                   >
-                    <span>Reserve Batch Slot</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    Reserve Slot
                   </button>
                 </div>
               ))}
@@ -706,272 +613,78 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
           </div>
         </section>
 
-        {/* ── 6. SPECIAL DESK FOR NRIs & INTERNATIONAL DEVOTEES ── */}
-        <section id="nri-desk" className="py-20 bg-gradient-to-br from-slate-900 via-slate-950 to-black text-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              <div className="lg:col-span-8 space-y-5">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider border border-blue-400/30">
+        {/* ── 6. SPECIAL DESK FOR NRIs & INTERNATIONAL YATRIS ── */}
+        <section className="py-12 bg-slate-900 text-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/5 border border-white/10 p-6 sm:p-8 rounded-2xl">
+              <div className="space-y-2 text-center md:text-left">
+                <div className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-bold uppercase">
                   <Globe className="w-4 h-4" />
-                  <span>Dedicated NRI & Foreign Passport Desk</span>
+                  <span>NRI & Foreign Passport Support</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Special Assistance for NRIs & International Devotees
-                </h2>
-                <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                  Holding a USA, UK, Canadian, Australian, Singaporean, or European Passport? 
-                  Shree Ananta Travels provides complete end-to-end liaison with the Tibet Tourism Bureau (TTB), Foreign Affairs Office, and Chinese Embassy in Kathmandu for your Tibet Travel Permit and China Group Visa.
+                <h3 className="text-xl sm:text-2xl font-black text-white">
+                  Traveling from USA, UK, Canada, Australia or Singapore?
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-300 max-w-xl">
+                  Shree Ananta Travels provides complete liaison for China Group Visa and Tibet Travel Permits for foreign passport holders.
                 </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
-                    <p className="font-bold text-amber-400 text-sm">Hassle-Free Visa</p>
-                    <p className="text-xs text-gray-300 mt-1">Kathmandu Embassy group biometric & visa endorsement assistance.</p>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
-                    <p className="font-bold text-amber-400 text-sm">US/UK/Canada Friendly</p>
-                    <p className="text-xs text-gray-300 mt-1">Direct wire transfer options & NRI advisory helpline.</p>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
-                    <p className="font-bold text-amber-400 text-sm">Kathmandu Concierge</p>
-                    <p className="text-xs text-gray-300 mt-1">Airport pickup, 5-star transit hotel, and Pashupatinath VIP darshan.</p>
-                  </div>
-                </div>
               </div>
 
-              <div className="lg:col-span-4 bg-white/10 backdrop-blur-xl p-6 rounded-3xl border border-white/15 text-center space-y-4">
-                <Globe className="w-12 h-12 text-amber-400 mx-auto" />
-                <h3 className="text-xl font-bold text-white">Speak with an NRI Yatra Specialist</h3>
-                <p className="text-xs text-gray-300">
-                  Call our international desk directly or message us on WhatsApp with your passport country for custom guidelines.
-                </p>
-                <div className="space-y-2.5 pt-2">
-                  <button
-                    onClick={() => handleWhatsAppClick("mansarovar_nri_whatsapp", "Namaste! I am an NRI holding a foreign passport. I need details for Kailash Mansarovar Yatra permit and visa process.")}
-                    className="w-full py-3 bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="w-4 h-4" /> WhatsApp NRI Desk
-                  </button>
-                  <a
-                    href="tel:+917289037447"
-                    className="w-full py-3 bg-white hover:bg-gray-100 text-slate-900 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 block"
-                  >
-                    <Phone className="w-4 h-4" /> Call: +91 7289037447
-                  </a>
-                </div>
-              </div>
+              <button
+                onClick={() => handleWhatsAppClick("kailash_nri_desk", "Namaste! I am an NRI / Foreign Passport holder. Please share guidelines for Kailash Mansarovar Yatra.")}
+                className="py-3 px-6 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors shrink-0 flex items-center gap-2 shadow-md"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Contact NRI Desk</span>
+              </button>
             </div>
           </div>
         </section>
 
-        {/* ── 7. THE SACRED 6-STEP YATRA JOURNEY FLOW ── */}
-        <section id="journey" className="py-20 bg-white dark:bg-gray-950">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-14 max-w-3xl mx-auto">
-              <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                Pilgrimage Flow
+        {/* ── 7. CLEAN CONCISE FAQS ── */}
+        <section className="py-14 bg-white dark:bg-gray-950">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-8">
+              <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-block mb-1">
+                Common Questions
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight mt-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Your Sacred Journey from Start to Finish
-              </h2>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2 font-medium">
-                Step-by-step guidance so you can focus entirely on your spiritual devotion without logistics worries.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { step: "01", title: "Registration & Permit Filing", desc: "Submit passport copy and advance deposit. We file your name with Tibet Tourism Bureau." },
-                { step: "02", title: "Assembly & Medical Briefing", desc: "Arrive in Kathmandu/Lucknow. Meet fellow yatris, tour leader, and undergo acclimatization briefing." },
-                { step: "03", title: "Tibet Entry & Acclimatization", desc: "Cross the border into Tibet. Rest days at Kyirong/Purang to adapt naturally to high altitude." },
-                { step: "04", title: "Mansarovar Snan & Puja", desc: "Arrive at Sacred Lake Mansarovar (15,000 ft). Perform holy snan, Hawan, and view Mount Kailash." },
-                { step: "05", title: "3-Day Kailash Parikrama (Kora)", desc: "Trek from Yam Dwar through Dirapuk (North Face), Dolma La Pass (18,600 ft), and Zuthulphuk. Ponies & porters available." },
-                { step: "06", title: "Safe Return with Divine Blessings", desc: "Conclude the yatra, receive holy Gangajal from Mansarovar, and return safely to India." },
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all"
-                >
-                  <span className="text-3xl font-black text-amber-500 block mb-2">{item.step}</span>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{item.title}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 8. MEDICAL & FITNESS PREPARATION GUIDELINES ── */}
-        <section className="py-16 bg-gray-100 dark:bg-gray-900/60 border-t border-gray-200 dark:border-gray-800">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-              <div className="md:col-span-5 space-y-4">
-                <span className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-950 px-3 py-1 rounded-full">
-                  Health & Safety Protocol
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  High-Altitude Medical Care & Preparation
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-                  Mount Kailash Parikrama reaches a maximum elevation of 18,600 feet at Dolma La Pass. 
-                  Our experienced medical protocol ensures safety for every devotee.
-                </p>
-                <div className="pt-2">
-                  <a
-                    href={`tel:${contactPhone.replace(/\s+/g, "")}`}
-                    className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 hover:underline"
-                  >
-                    <span>Talk to our medical consultant</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
-                  <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
-                    <HeartPulse className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">Oxygen & Gamow Bags</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Continuous supply of oxygen cylinders and hyperbaric chambers carried in support vehicles.</p>
-                </div>
-                <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
-                  <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">Age Eligibility (18-70 Yrs)</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Yatris between 18 and 70 years in normal physical health are eligible under Tibet Tourism regulations.</p>
-                </div>
-                <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
-                  <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-                    <Utensils className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">Hygienic Sattvic Cooking</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Hot nutritious khichdi, dal, roti, soups prepared fresh twice a day to maintain body warmth and stamina.</p>
-                </div>
-                <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
-                  <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-1">Emergency Evacuation</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Arrangements with Nepalese and Chinese authorities for immediate helicopter retrieval if required.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 9. DEVOTEE TESTIMONIALS & TRUST ── */}
-        <section className="py-20 bg-white dark:bg-gray-950">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                Devotee Experiences
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight mt-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-                What Yatris Say About Shree Ananta Travels
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Kailash Mansarovar FAQs
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  quote: "Our helicopter yatra via Lucknow was completely effortless. The Sherpa team took care of my 62-year-old mother with extraordinary devotion. The hot Indian food in Tibet was a blessing.",
-                  name: "Rajesh & Savita Sharma",
-                  city: "Delhi NCR",
-                  route: "Helicopter Route 2024",
-                },
-                {
-                  quote: "As an NRI from California, I was worried about my US passport visa. Shree Ananta Travels handled all approvals smoothly in Kathmandu. Mount Kailash darshan changed my life.",
-                  name: "Dr. Vikram Patel",
-                  city: "San Jose, USA",
-                  route: "NRI Desk Yatri",
-                },
-                {
-                  quote: "Doing Parikrama and Mansarovar Snan on Guru Purnima was my lifelong dream. The oxygen monitoring and warm sleeping bags made us feel safe throughout.",
-                  name: "Smt. Meenakshi Iyer",
-                  city: "Bengaluru",
-                  route: "Overland via Kyirong",
-                },
-              ].map((t, i) => (
-                <div key={i} className="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between shadow-sm">
-                  <div className="space-y-3">
-                    <div className="flex text-amber-500">
-                      {[...Array(5)].map((_, idx) => (
-                        <Star key={idx} className="w-4 h-4 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed">
-                      &ldquo;{t.quote}&rdquo;
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">{t.name}</p>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">{t.city} • <span className="text-amber-600 dark:text-amber-400 font-bold">{t.route}</span></p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 10. COMPREHENSIVE KAILASH FAQS ACCORDION ── */}
-        <section id="faqs" className="py-20 bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <span className="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                Frequently Asked Questions
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight mt-3" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Answers for Kailash Mansarovar Yatris
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Clear and transparent answers to the most common queries.
-              </p>
-            </div>
-
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {[
                 {
                   q: "What is the best route for senior citizens or parents?",
-                  a: "The Helicopter Route via Lucknow / Nepalgunj is the most recommended for seniors because it minimizes long road transit. For seniors who cannot trek at high altitude, the 1-Day Aerial Darshan flight is the safest option requiring zero physical exertion and no China visa.",
+                  a: "The Helicopter Route via Lucknow / Nepalgunj minimizes road transit and is best for seniors. For seniors who cannot trek at all, the 1-Day Aerial Darshan flight offers mountain darshan without entering Tibet.",
                 },
                 {
-                  q: "How are the China Group Visa and Tibet Travel Permit arranged?",
-                  a: "You only need to submit your original passport (with at least 6 months validity) and photographs. Shree Ananta Travels handles the entire processing with the Tibet Tourism Bureau and the Chinese Embassy in Kathmandu.",
+                  q: "How are Tibet Travel Permits and China Visas handled?",
+                  a: "You only provide your passport copy. Shree Ananta Travels manages the complete group documentation with the Tibet Tourism Bureau and Embassy.",
                 },
                 {
-                  q: "Can I do the Mount Kailash Parikrama on horse or pony?",
-                  a: "Yes. For yatris who find the 42 km 3-day parikrama difficult on foot, local Tibetan ponies and porters are arranged at Yam Dwar on a direct rental basis to assist you comfortably across the pass.",
+                  q: "Can I rent a pony / horse for the 3-day Parikrama?",
+                  a: "Yes, local Tibetan ponies and porters are arranged at Yam Dwar on a direct rental basis to comfortably assist yatris who cannot trek the full distance on foot.",
                 },
                 {
-                  q: "What type of food is provided during the yatra?",
-                  a: "We deploy experienced Indian kitchen staff who prepare fresh, hot vegetarian and Jain food daily (poha, porridge, khichdi, dal, rice, chapati, soups, tea, and warm water).",
+                  q: "What kind of food is provided during the yatra?",
+                  a: "Fresh, hot pure vegetarian and Jain meals (dal, rice, roti, sabzi, khichdi, porridge, soups, and warm water) are prepared daily by our dedicated Indian cooks.",
                 },
                 {
-                  q: "What happens if someone feels altitude sickness (AMS)?",
-                  a: "Our tour managers carry oxygen cylinders, pulse oximeters, and first-aid kits at all times. If a yatri experiences severe symptoms, they are immediately brought down to lower altitude by our support vehicle with dedicated escorts.",
-                },
-                {
-                  q: "How many months in advance should I book my Kailash Yatra?",
-                  a: "It is strongly advised to book 3 to 6 months in advance. The Chinese authorities issue permits based on fixed batch quotas, and Purnima (Full Moon) batches fill up very quickly.",
-                },
-                {
-                  q: "What is the cancellation and refund policy?",
-                  a: "In case border regulations change or unforeseen geopolitical reasons prevent travel, the advance deposit is either refunded after nominal processing fees or adjusted towards the subsequent batch as per devotee preference.",
+                  q: "How many months in advance should I register?",
+                  a: "We recommend booking 3 to 6 months in advance so Tibet travel permits are secured comfortably before batch quotas close.",
                 },
               ].map((faq, idx) => (
                 <details
                   key={idx}
-                  className="group bg-white dark:bg-gray-950 rounded-2xl border border-gray-200 dark:border-gray-800 [&_summary::-webkit-details-marker]:hidden overflow-hidden shadow-xs"
+                  className="group bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 [&_summary::-webkit-details-marker]:hidden overflow-hidden"
                 >
-                  <summary className="flex cursor-pointer items-center justify-between gap-3 p-5 sm:p-6 text-gray-900 dark:text-white font-bold text-base sm:text-lg outline-none select-none">
+                  <summary className="flex cursor-pointer items-center justify-between gap-3 p-4 text-gray-900 dark:text-white font-bold text-sm outline-none select-none">
                     <span>{faq.q}</span>
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0 group-open:bg-amber-100 dark:group-open:bg-amber-900/40 transition-colors">
-                      <ChevronDown className="w-4 h-4 transition duration-300 group-open:-rotate-180 text-gray-600 dark:text-gray-300 group-open:text-amber-600" />
-                    </div>
+                    <ChevronDown className="w-4 h-4 transition duration-300 group-open:-rotate-180 text-gray-500 group-open:text-amber-600 shrink-0" />
                   </summary>
-                  <div className="px-5 pb-5 sm:px-6 sm:pb-6 text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium bg-gray-50/50 dark:bg-gray-900/40">
+                  <div className="px-4 pb-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
                     {faq.a}
                   </div>
                 </details>
@@ -980,31 +693,28 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
           </div>
         </section>
 
-        {/* ── 11. FINAL HIGH-CONVERSION CTA ── */}
-        <section className="relative py-20 bg-gradient-to-r from-amber-600 via-amber-700 to-slate-900 text-white text-center px-4 overflow-hidden">
-          <div className="relative max-w-3xl mx-auto z-10 space-y-6">
-            <span className="text-xs font-black uppercase tracking-widest bg-white/20 px-3.5 py-1 rounded-full border border-white/20">
-              ॐ नमः शिवाय
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Begin Your Journey to the Abode of Lord Shiva
+        {/* ── 8. FINAL FAST ENQUIRY CTA ── */}
+        <section className="py-14 bg-gradient-to-r from-amber-600 via-amber-700 to-slate-900 text-white text-center px-4">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-black text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Ready to Plan Your Sacred Yatra?
             </h2>
-            <p className="text-amber-100 text-base sm:text-lg max-w-xl mx-auto font-medium">
-              Join hundreds of blessed devotees on Kailash Mansarovar Yatra 2026-2027. Speak directly with our pilgrimage specialists now.
+            <p className="text-xs sm:text-sm text-amber-100 max-w-md mx-auto">
+              Speak directly with our pilgrimage specialists for personalized dates, group discounts, and route selection.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
-                onClick={() => handleWhatsAppClick("mansarovar_footer_whatsapp", "ॐ नमः शिवाय! I am ready to plan my Kailash Mansarovar Yatra. Please assist me with packages.")}
-                className="w-full sm:w-auto px-8 py-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-xl hover:scale-102 flex items-center justify-center gap-2.5 active:scale-95"
+                onClick={() => handleWhatsAppClick("kailash_footer_chat", "ॐ नमः शिवाय! I am ready to plan my Kailash Mansarovar Yatra. Please assist me with packages.")}
+                className="w-full sm:w-auto px-6 py-3 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2 active:scale-95"
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-4 h-4" />
                 <span>Chat on WhatsApp</span>
               </button>
               <a
                 href={`tel:${contactPhone.replace(/\s+/g, "")}`}
-                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-100 text-slate-950 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-xl hover:scale-102 flex items-center justify-center gap-2.5"
+                className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-100 text-slate-950 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2"
               >
-                <Phone className="w-5 h-5" />
+                <Phone className="w-4 h-4" />
                 <span>Call Specialist: {contactPhone}</span>
               </a>
             </div>
@@ -1014,18 +724,18 @@ Please share available batch dates, detailed day-wise itinerary, and exact prici
 
       <Footer />
 
-      {/* ── 12. STICKY MOBILE CTA BAR ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 z-50 flex gap-3 shadow-2xl">
+      {/* ── 9. STICKY MOBILE CTA BAR ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-2.5 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 z-50 flex gap-2.5 shadow-2xl">
         <button
-          onClick={() => handleWhatsAppClick("mansarovar_sticky_whatsapp", "ॐ नमः शिवाय! I need details and pricing for Kailash Mansarovar Yatra.")}
-          className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-wider flex justify-center items-center gap-2 transition-colors shadow-md"
+          onClick={() => handleWhatsAppClick("kailash_mobile_quote", "ॐ नमः शिवाय! I need details and pricing for Kailash Mansarovar Yatra.")}
+          className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex justify-center items-center gap-1.5 transition-colors shadow-md"
         >
           <MessageCircle className="w-4 h-4" />
           <span>WhatsApp Quote</span>
         </button>
         <a
           href={`tel:${contactPhone.replace(/\s+/g, "")}`}
-          className="flex-1 bg-slate-900 hover:bg-black text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-wider flex justify-center items-center gap-2 transition-colors shadow-md"
+          className="flex-1 bg-slate-900 hover:bg-black text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex justify-center items-center gap-1.5 transition-colors shadow-md"
         >
           <Phone className="w-4 h-4" />
           <span>Call Specialist</span>
