@@ -43,17 +43,7 @@ export interface PackageLead extends BaseLead {
 export type Lead = PopupLead | FormLead | PackageLead;
 
 // ── Mock Data ──────────────────────────────────────────────────────────────────
-export const initialMockLeads: Lead[] = [
-  {
-    id: 1, status: 'pending', priority: 'high',
-    name: 'Rahul Sharma (Demo)', phone: '+91 98765 43210', email: 'rahul@example.com',
-    fromCity: 'Mumbai',
-    destination: 'Bali', startDate: '2026-04-15', duration: '7 nights',
-    travelers: 2, budget: '₹40,000 – ₹50,000',
-    message: 'Looking for a honeymoon package with beach resort.',
-    date: '2026-03-25',
-  }
-];
+export const initialMockLeads: Lead[] = [];
 
 // ── Context Setup ──────────────────────────────────────────────────────────────
 interface CRMContextType {
@@ -71,15 +61,11 @@ export function CRMProvider({ children }: { children: ReactNode }) {
   const { data: leadsResponse, isLoading } = useGetLeadsQuery(undefined, {
     pollingInterval: 5000,
   });
-  const [leadsData, setLeadsData] = useState<Lead[]>(initialMockLeads);
+  const [leadsData, setLeadsData] = useState<Lead[]>([]);
   
-  const [leadStatuses, setLeadStatuses] = useState<Record<string | number, string>>(
-    initialMockLeads.reduce((acc, l) => ({ ...acc, [l.id]: l.status }), {})
-  );
+  const [leadStatuses, setLeadStatuses] = useState<Record<string | number, string>>({});
 
-  const [dealValues, setDealValues] = useState<Record<string | number, number>>(
-    initialMockLeads.reduce((acc, l) => ({ ...acc, [l.id]: l.dealValue || 0 }), {})
-  );
+  const [dealValues, setDealValues] = useState<Record<string | number, number>>({});
 
   useEffect(() => {
     if (leadsResponse?.success && leadsResponse.data) {
@@ -114,8 +100,9 @@ export function CRMProvider({ children }: { children: ReactNode }) {
         setLeadStatuses(statuses);
         setDealValues(values);
       } else {
-        // If no real leads, show the demo lead
-        setLeadsData(initialMockLeads);
+        setLeadsData([]);
+        setLeadStatuses({});
+        setDealValues({});
       }
     }
   }, [leadsResponse]);

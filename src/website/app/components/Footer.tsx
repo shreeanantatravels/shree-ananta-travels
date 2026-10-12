@@ -14,14 +14,14 @@ export function Footer() {
   const displayName   = siteConfig?.companyName || agent?.businessName || agent?.name || 'Shree Ananta Travels';
   const tagline       = agent?.tagline || 'Your trusted partner for unforgettable travel experiences around the world. Creating memories that last a lifetime.';
   
-  const phone         = siteConfig?.contactPhone || agent?.whatsapp || '+91 98765 43210';
-  const email         = siteConfig?.contactEmail || 'info@shreeanantatravels.com';
-  const address       = siteConfig?.address || '2nd floor Varun Villa, UCO Bank Building, Dhalli Shimla -12, 171012';
+  const phone         = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const email         = siteConfig?.contactEmail || '';
+  const address       = siteConfig?.address || '';
   
-  const rawWhatsapp   = agent?.whatsapp || phone;
+  const rawWhatsapp   = agent?.whatsapp || siteConfig?.contactPhone || '';
   const cleanWhatsapp = rawWhatsapp.replace(/\D/g, '');
   const whatsappMsg   = encodeURIComponent(`Hi ${displayName}! I'm looking for travel packages and details.`);
-  const whatsappLink  = `https://wa.me/${cleanWhatsapp}?text=${whatsappMsg}`;
+  const whatsappLink  = cleanWhatsapp.length >= 10 ? `https://wa.me/${cleanWhatsapp}?text=${whatsappMsg}` : '';
 
   const facebookHref  = siteConfig?.facebookUrl || '#';
   const instagramHref = siteConfig?.instagramUrl || '#';
@@ -132,15 +132,17 @@ export function Footer() {
               <span>Request a Callback</span>
             </button>
             
-            <a 
-              href={whatsappLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="w-full sm:w-auto bg-white/10 hover:bg-emerald-600/90 border border-white/20 px-7 py-3.5 rounded-2xl text-white font-bold text-sm hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2.5 backdrop-blur-md whitespace-nowrap shadow-md"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
-              <span>Chat on WhatsApp</span>
-            </a>
+            {whatsappLink && (
+              <a 
+                href={whatsappLink} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-full sm:w-auto bg-white/10 hover:bg-emerald-600/90 border border-white/20 px-7 py-3.5 rounded-2xl text-white font-bold text-sm hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2.5 backdrop-blur-md whitespace-nowrap shadow-md"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-400" />
+                <span>Chat on WhatsApp</span>
+              </a>
+            )}
           </div>
         </div>
 
@@ -157,17 +159,20 @@ export function Footer() {
             <h4 className="text-sm font-extrabold mb-5 text-[#d4af37] uppercase tracking-wider">Navigation</h4>
             <ul className="space-y-3 text-sm text-gray-300">
               <li><Link href="/" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Home</Link></li>
-              <li><Link href="/destinations" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Destinations</Link></li>
+              <li><Link href="/landing/kailash-mansarovar" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Kailash Mansarovar</Link></li>
+              <li><Link href="/domestic" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Domestic Holidays</Link></li>
+              <li><Link href="/international" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> International Tours</Link></li>
+              <li><Link href="/destinations" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> All Destinations</Link></li>
               <li><Link href="/packages" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Tour Packages</Link></li>
-              <li><Link href="/packages?category=trending" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Trending Packages</Link></li>
-              <li><Link href="/about" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> About Us</Link></li>
-              <li><Link href="/services" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Our Services</Link></li>
+              <li><Link href="/services" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Travel Services</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-sm font-extrabold mb-5 text-[#d4af37] uppercase tracking-wider">Legal Standards</h4>
+            <h4 className="text-sm font-extrabold mb-5 text-[#d4af37] uppercase tracking-wider">Company & Legal</h4>
             <ul className="space-y-3 text-sm text-gray-300">
+              <li><Link href="/about" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Contact Office</Link></li>
               <li><Link href="/terms-and-conditions" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Terms & Conditions</Link></li>
               <li><Link href="/privacy-policy" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Privacy Policy</Link></li>
             </ul>

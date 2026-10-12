@@ -30,6 +30,9 @@ export interface AgentProfile {
   logo: string;
   theme: string;
   whatsapp: string;
+  phone?: string;
+  email?: string;
+  address?: string;
 }
 
 export interface NavLinkItem {

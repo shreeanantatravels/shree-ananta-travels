@@ -38,7 +38,8 @@ export default function MansarovarLanding() {
   const buildWhatsAppUrl = (message: string) => {
     const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "";
     const digits = rawNumber.replace(/\D/g, "");
-    const whatsappNumber = digits.startsWith("91") ? digits : `91${digits}`;
+    if (!digits) return "/contact";
+    const whatsappNumber = digits.startsWith("91") ? digits : (digits.length === 10 ? `91${digits}` : digits);
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   };
 
@@ -61,7 +62,7 @@ export default function MansarovarLanding() {
     if (typeof window !== "undefined" && (window as any).dataLayer) {
       (window as any).dataLayer.push({ event: "mansarovar_form_submit" });
     }
-    const msg = `Helllo, I want details for Kailash Mansarovar Yatra.\n\nName: ${formData.name}\nPhone: ${formData.phone}\nPreference: ${formData.package}\n\nPlease share itinerary, available dates and pricing.`;
+    const msg = `Hello, I want details for Kailash Mansarovar Yatra.\n\nName: ${formData.name}\nPhone: ${formData.phone}\nPreference: ${formData.package}\n\nPlease share itinerary, available dates and pricing.`;
     window.open(buildWhatsAppUrl(msg), "_blank");
   };
 
@@ -76,7 +77,12 @@ export default function MansarovarLanding() {
     }
     const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "";
     const digits = rawNumber.replace(/\D/g, "");
-    window.location.href = `tel:+91${digits.replace(/^91/, "")}`;
+    if (!digits) {
+      window.location.href = "/contact";
+      return;
+    }
+    const cleanTel = digits.startsWith("91") ? digits : (digits.length === 10 ? `91${digits}` : digits);
+    window.location.href = `tel:+${cleanTel}`;
   };
 
   const rawLogo = siteConfig?.logoUrl || agent?.logo || '/uploads/shree-ananta-logo.jpg';

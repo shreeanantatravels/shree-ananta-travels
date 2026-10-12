@@ -299,6 +299,22 @@ export function BrandingSettings() {
   };
 
   const handleSaveCompany = async () => {
+    // Client-side phone validation
+    if (contactPhone && contactPhone.trim()) {
+      const cleanPhone = contactPhone.replace(/[\s\-()]/g, '');
+      if (!/^\+?[1-9]\d{9,14}$/.test(cleanPhone)) {
+        toast.error('Please enter a valid 10-15 digit phone number (e.g. +91 7289037447).');
+        return;
+      }
+    }
+    // Client-side email validation
+    if (contactEmail && contactEmail.trim()) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) {
+        toast.error('Please enter a valid business email address.');
+        return;
+      }
+    }
+
     setIsSavingCompany(true);
     try {
       await updateConfig({
@@ -489,7 +505,7 @@ export function BrandingSettings() {
                 type="email"
                 value={contactEmail}
                 onChange={e => setContactEmail(e.target.value)}
-                placeholder="info@anantatravel.com"
+                placeholder="e.g. shreeanantatravels@gmail.com"
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-auto"
               />
             </div>
@@ -502,7 +518,7 @@ export function BrandingSettings() {
                 type="tel"
                 value={contactPhone}
                 onChange={e => setContactPhone(e.target.value)}
-                placeholder="+91 98765 43210"
+                placeholder="e.g. +91 7289037447"
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-auto"
               />
             </div>
@@ -530,7 +546,7 @@ export function BrandingSettings() {
               rows={2}
               value={address}
               onChange={e => setAddress(e.target.value)}
-              placeholder="123 Travel Street, Mumbai, Maharashtra 400001"
+              placeholder="e.g. E91, East of Kailash, Delhi 110065"
               className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>

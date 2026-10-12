@@ -139,6 +139,7 @@ export interface EnquiryFormProps {
   onSubmitSuccess?: () => void;
   compact?: boolean;
   hideHeader?: boolean;
+  source?: string;
 }
 
 const initialFormData: EnquiryFormData = {
@@ -390,7 +391,7 @@ export function EnquiryForm({
                     className={inputInsideClass}
                     onChange={handleChange}
                     value={formData.phone}
-                    placeholder="+91 98765 43210"
+                    placeholder="e.g. +91 7289037447"
                     required
                   />
                 </div>

@@ -48,7 +48,7 @@ export default function AboutUs() {
 
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/#contact"
+              href="/contact"
               className="inline-flex items-center gap-2.5 font-bold text-base px-8 py-4 rounded-full text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
               style={{ background: 'var(--theme-gradient)' }}
             >
@@ -56,7 +56,7 @@ export default function AboutUs() {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
-              href="/#destinations"
+              href="/destinations"
               className="inline-flex items-center gap-2.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-base px-8 py-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
             >
               <Compass className="w-5 h-5 text-[var(--theme-primary)]" />
@@ -315,7 +315,7 @@ export default function AboutUs() {
 
               <div className="pt-8 text-center">
                 <Link
-                  href="/#contact"
+                  href="/contact"
                   className="inline-flex items-center gap-3 font-bold text-lg px-10 py-5 rounded-full text-white shadow-[0_0_40px_rgba(var(--theme-primary-rgb),0.4)] hover:shadow-[0_0_60px_rgba(var(--theme-primary-rgb),0.6)] transition-all duration-300 hover:scale-105 active:scale-95"
                   style={{ background: 'var(--theme-gradient)' }}
                 >

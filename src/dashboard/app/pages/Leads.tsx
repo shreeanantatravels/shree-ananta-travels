@@ -51,7 +51,7 @@ export function Leads() {
   const cardRefs = useRef<Record<string | number, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    const state = location.state as { highlightId?: number } | null;
+    const state = (location as any)?.state as { highlightId?: number } | null;
     if (!state?.highlightId) return;
 
     const targetId = state.highlightId;
@@ -66,7 +66,7 @@ export function Leads() {
 
     window.history.replaceState({}, '');
     return () => clearTimeout(timer);
-  }, [location.state]);
+  }, [(location as any)?.state]);
 
   // ── Status change handler ──────────────────────────────────────────────────
   const handleStatusChange = async (leadId: string | number, newStatus: string) => {

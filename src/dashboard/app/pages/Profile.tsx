@@ -46,6 +46,13 @@ export function Profile() {
          toast.error("Name and Email are required");
          return;
       }
+      if (profileForm.whatsapp && profileForm.whatsapp.trim()) {
+        const cleanWa = profileForm.whatsapp.replace(/[\s\-()]/g, '');
+        if (!/^\+?[1-9]\d{9,14}$/.test(cleanWa)) {
+          toast.error("Please enter a valid 10-15 digit WhatsApp number (e.g. +91 7289037447).");
+          return;
+        }
+      }
       await updateProfile({
         name: fullName,
         email: profileForm.email,
@@ -164,7 +171,7 @@ export function Profile() {
                       type="tel" 
                       value={profileForm.whatsapp}
                       onChange={(e) => setProfileForm({...profileForm, whatsapp: e.target.value})}
-                      placeholder="+91 98765 43210"
+                      placeholder="e.g. +91 7289037447"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-auto" 
                     />
                   </div>

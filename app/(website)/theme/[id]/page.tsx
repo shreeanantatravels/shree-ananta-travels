@@ -1,5 +1,6 @@
-import { ThemeDetail } from '@website/app/pages/ThemeDetail';
+import { notFound } from 'next/navigation';
 
 export default function ThemeDetailPage() {
-  return <ThemeDetail />;
+  notFound();
 }
+

@@ -17,14 +17,14 @@ export async function GET(req: Request) {
     }
 
     const defaultNavLinks = [
-      { id: 'kailash', label: 'Kailash Mansarovar', url: '/packages?category=kailash', isActive: true, canDelete: false, order: 1 },
+      { id: 'kailash', label: 'Kailash Mansarovar', url: '/landing/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
       { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
       { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
       { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
       { id: 'spiritual', label: 'Spiritual', url: '/packages?category=spiritual', isActive: true, canDelete: false, order: 5 },
       { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
       { id: 'trending', label: 'Trending', url: '/packages?category=trending', isActive: true, canDelete: false, order: 7 },
-      { id: 'blogs', label: 'Blogs', url: '/blogs', isActive: true, canDelete: false, order: 8 },
+      { id: 'contact', label: 'Contact', url: '/contact', isActive: true, canDelete: false, order: 8 },
     ];
 
     const hasOldNavDefaults = config.navLinks?.some((l: any) => l.id === 'home' || l.id === 'destinations' || l.id === 'packages');
@@ -108,6 +108,28 @@ export async function PUT(req: Request) {
     // Ensure we don't mess with the singleton flag
     delete body._singleton;
     delete body._id;
+
+    // Isolated validation: validate contactPhone only if supplied in update payload
+    if (body.contactPhone !== undefined && body.contactPhone !== null && body.contactPhone !== '') {
+      const cleanPhone = String(body.contactPhone).replace(/[\s\-()]/g, '');
+      if (!/^\+?[1-9]\d{9,14}$/.test(cleanPhone)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid business phone number. Please provide a valid 10-15 digit number (e.g. +91 7289037447 or 7289037447).' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Isolated validation: validate contactEmail only if supplied in update payload
+    if (body.contactEmail !== undefined && body.contactEmail !== null && body.contactEmail !== '') {
+      const cleanEmail = String(body.contactEmail).trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid business contact email address.' },
+          { status: 400 }
+        );
+      }
+    }
 
     let config = await SiteConfig.findOne({ _singleton: true });
     

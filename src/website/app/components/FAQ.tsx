@@ -5,40 +5,40 @@ import { ChevronDown } from 'lucide-react';
 const defaultFaqs = [
   {
     question: 'How do I book a travel package?',
-    answer: 'You can book a package by clicking on the package card, reviewing the details, and clicking the "Book Now" button. Alternatively, you can fill out the Plan Tour Form and our team will contact you.',
+    answer: 'You can book a package by reviewing your preferred destination or package details, and submitting an inquiry. Our travel specialist will connect with you to personalize your itinerary and payment plan.',
   },
   {
     question: 'What payment methods do you accept?',
-    answer: 'We accept all major credit/debit cards, UPI, net banking, and EMI options. All payments are processed through secure payment gateways.',
+    answer: 'We accept major credit/debit cards, UPI, and bank transfers. All payments are processed through secure payment channels with official invoices provided.',
   },
   {
     question: 'Can I customize my travel package?',
-    answer: 'Yes! We offer complete customization. You can modify the itinerary, accommodation, and activities according to your preferences. Contact our team for personalized packages.',
+    answer: 'Yes! We offer complete customization. You can modify the itinerary, duration, hotel category, and sightseeing activities according to your preferences.',
   },
   {
     question: 'What is your cancellation policy?',
-    answer: 'Cancellation charges vary by package and time of cancellation. Generally, cancellations made 30+ days before departure receive 80% refund, 15-30 days receive 50%, and less than 15 days are non-refundable.',
+    answer: 'Cancellation terms depend on airline, hotel, and local ground provider policies. Exact cancellation terms and schedules are specified in your customized itinerary quotation before payment.',
   },
   {
     question: 'Do you provide visa assistance?',
-    answer: 'Yes, we provide complete visa assistance for international travel including documentation support, application submission, and tracking.',
+    answer: 'Yes, we provide visa guidance and documentation assistance for international holiday destinations and Kailash Mansarovar Yatra permits.',
   },
   {
-    question: 'Are travel insurance included in packages?',
-    answer: 'Basic travel insurance is included in all international packages. You can also opt for comprehensive insurance coverage at additional cost.',
+    question: 'Is travel insurance included in packages?',
+    answer: 'Travel insurance is available as an optional add-on for domestic and international itineraries. We recommend securing travel insurance prior to departure.',
   },
   {
-    question: 'What happens if there is a flight delay?',
-    answer: 'In case of flight delays, our 24/7 support team will assist you with rebooking and accommodation arrangements. Terms depend on airline policies.',
+    question: 'What happens if there is a flight delay or schedule change?',
+    answer: 'In case of flight delays or schedule adjustments, our concierge team coordinates with local ground transportation to realign your pickup and itinerary seamlessly where feasible.',
   },
   {
-    question: 'Can I make group bookings?',
-    answer: 'Absolutely! We offer special discounts for group bookings of 10+ travelers. Contact our sales team for customized group packages and pricing.',
+    question: 'Can I make group or family bookings?',
+    answer: 'Absolutely. We specialize in customized family trips, couple getaways, and spiritual group yatras with vehicle sizes tailored to your group requirement.',
   },
 ];
 
 export function FAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [apiContent, setApiContent] = useState<any[] | null>(null);
 
   useEffect(() => {
@@ -76,33 +76,36 @@ export function FAQ() {
         </div>
 
         <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden"
-            >
-              <button
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+            return (
+              <div
+                key={index}
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden"
               >
-                <span className="text-lg font-semibold text-gray-900 dark:text-white pr-8">
-                  {faq.question}
-                </span>
-                <ChevronDown
-                  className={`w-5 h-5 text-[var(--theme-primary)] flex-shrink-0 transition-transform ${
-                    openIndex === index ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {openIndex === index && (
-                <div className="px-6 pb-6">
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                  aria-expanded={isOpen}
+                  className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                >
+                  <span className="text-lg font-semibold text-gray-900 dark:text-white pr-8">
+                    {faq.question}
+                  </span>
+                  <ChevronDown
+                    className={`w-5 h-5 text-[var(--theme-primary)] flex-shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <div className={`px-6 pb-6 ${isOpen ? 'block' : 'hidden'}`}>
                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                     {faq.answer}
                   </p>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

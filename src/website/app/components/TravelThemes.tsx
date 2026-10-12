@@ -49,6 +49,26 @@ const DEFAULT_THEMES: ThemeItem[] = [
   },
 ];
 
+const getThemeHref = (theme: ThemeItem) => {
+  const t = (theme.title || '').toLowerCase();
+  if (t.includes('pilgrim') || t.includes('sacred') || t.includes('kailash')) {
+    return '/packages?category=kailash';
+  }
+  if (t.includes('beach') || t.includes('island')) {
+    return '/packages?search=Beach';
+  }
+  if (t.includes('heritage') || t.includes('culture')) {
+    return '/packages?search=Heritage';
+  }
+  if (t.includes('adventure') || t.includes('trek')) {
+    return '/packages?search=Adventure';
+  }
+  if (t.includes('honeymoon') || t.includes('romance')) {
+    return '/packages?search=Honeymoon';
+  }
+  return `/packages?search=${encodeURIComponent(theme.title)}`;
+};
+
 export function TravelThemes() {
   const [themesList, setThemesList] = useState<ThemeItem[]>(DEFAULT_THEMES);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -187,7 +207,7 @@ export function TravelThemes() {
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {displayThemes.map((theme, index) => (
-                <Link key={`${theme.id}-${index}`} href={`/theme/${theme.id}`}
+                <Link key={`${theme.id}-${index}`} href={getThemeHref(theme)}
                   className={`group relative rounded-2xl overflow-hidden border border-white/30 dark:border-gray-800 bg-gray-950 shadow-lg hover:shadow-2xl transition-all duration-500 hover:rotate-0 hover:scale-108 hover:z-20 flex flex-col justify-between p-4.5 h-[260px] w-[220px] shrink-0 cursor-pointer ${theme.rotateClass}`}
                 >
                   {/* Background Image */}

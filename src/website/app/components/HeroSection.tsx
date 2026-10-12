@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Search, MapPin, Package } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAgent } from '../context/AgentContext';
@@ -214,13 +215,10 @@ export function HeroSection() {
         Popular Places:
       </span>
       {popularPlaces.map((tag) => (
-        <button
+        <Link
           key={tag}
-          type="button"
-          onClick={() => {
-            setShowSuggestions(false);
-            router.push(`/packages?search=${encodeURIComponent(tag)}`);
-          }}
+          href={`/packages?search=${encodeURIComponent(tag)}`}
+          onClick={() => setShowSuggestions(false)}
           className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-all border ${
             isDark
               ? 'bg-[#d4af37]/15 hover:bg-[#d4af37]/35 border-[#d4af37]/40 text-white'
@@ -228,7 +226,7 @@ export function HeroSection() {
           }`}
         >
           {tag}
-        </button>
+        </Link>
       ))}
     </div>
   );

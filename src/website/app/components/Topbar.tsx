@@ -6,8 +6,8 @@ import Link from 'next/link';
 export function Topbar() {
   const { agent, siteConfig } = useAgent();
 
-  const phone = siteConfig?.contactPhone || agent?.phone || '+91 98765 43210';
-  const email = siteConfig?.contactEmail || agent?.email || 'info@shreeanantatravels.com';
+  const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const email = siteConfig?.contactEmail || '';
 
   const offerText = siteConfig?.topbarOffer?.text?.trim() || "";
 

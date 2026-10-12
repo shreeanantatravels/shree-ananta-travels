@@ -45,16 +45,16 @@ export interface SiteConfigData {
   heroImages?: string[];
   navLinks?: NavLinkItem[];
   customNavLink?: CustomNavLink;
-  topbarOffer: {
-    text: string;
-    ctaText: string;
-    ctaLink: string;
-    isActive: boolean;
+  topbarOffer?: {
+    text?: string;
+    ctaText?: string;
+    ctaLink?: string;
+    isActive?: boolean;
   };
-  cardOffer: {
-    text: string;
-    bgColor: string;
-    isActive: boolean;
+  cardOffer?: {
+    text?: string;
+    bgColor?: string;
+    isActive?: boolean;
   };
   destinations: DestinationData[];
   createdAt: string;

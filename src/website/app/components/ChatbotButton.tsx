@@ -19,7 +19,11 @@ export function ChatbotButton({ hidden = false }: ChatbotButtonProps) {
     const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || '';
     // Strip non-digits, ensure country code
     const digits = rawNumber.replace(/\D/g, '');
-    const whatsappNumber = digits.startsWith('91') ? digits : `91${digits}`;
+    if (!digits) {
+      window.location.href = '/contact';
+      return;
+    }
+    const whatsappNumber = digits.startsWith('91') ? digits : (digits.length === 10 ? `91${digits}` : digits);
     const message = siteConfig?.defaultWhatsappMessage || "Hello! I need help with travel planning.";
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };

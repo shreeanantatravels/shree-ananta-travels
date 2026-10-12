@@ -14,6 +14,27 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
 
+    // Isolated validation: validate whatsapp/phone only if provided in update payload
+    if (body.whatsapp !== undefined && body.whatsapp !== null && body.whatsapp !== '') {
+      const cleanWa = String(body.whatsapp).replace(/[\s\-()]/g, '');
+      if (!/^\+?[1-9]\d{9,14}$/.test(cleanWa)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid WhatsApp number format. Please provide a valid 10 digit phone number (e.g. +91 7289037447 or 7289037447).' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (body.phone !== undefined && body.phone !== null && body.phone !== '') {
+      const cleanPhone = String(body.phone).replace(/[\s\-()]/g, '');
+      if (!/^\+?[1-9]\d{9,14}$/.test(cleanPhone)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid phone number format. Please provide a valid 10 digit phone number.' },
+          { status: 400 }
+        );
+      }
+    }
+
     const updatedUser = await AdminUser.findByIdAndUpdate(
       userId,
       { $set: body },

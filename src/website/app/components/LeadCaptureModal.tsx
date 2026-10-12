@@ -282,7 +282,7 @@ export function LeadCaptureModal() {
                     name="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="98765 43210"
+                    placeholder="72890 37447"
                     required
                     pattern="[0-9]{10}"
                     maxLength={10}

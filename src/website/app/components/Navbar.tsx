@@ -28,14 +28,14 @@ const DEFAULT_INTL_FALLBACKS = [
 ];
 
 const DEFAULT_NAV_LINKS = [
-  { id: 'kailash', label: 'Kailash Mansarovar', url: '/packages?category=kailash', isActive: true, canDelete: false, order: 1 },
+  { id: 'kailash', label: 'Kailash Mansarovar', url: '/landing/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
   { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
   { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
   { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
   { id: 'spiritual', label: 'Spiritual', url: '/packages?category=spiritual', isActive: true, canDelete: false, order: 5 },
   { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
   { id: 'trending', label: 'Trending', url: '/packages?category=trending', isActive: true, canDelete: false, order: 7 },
-  { id: 'blogs', label: 'Blogs', url: '/blogs', isActive: true, canDelete: false, order: 8 },
+  { id: 'contact', label: 'Contact', url: '/contact', isActive: true, canDelete: false, order: 8 },
 ];
 
 export function Navbar() {
@@ -68,7 +68,13 @@ export function Navbar() {
     : DEFAULT_NAV_LINKS;
 
   const displayNavLinks = rawNavLinks
-    .filter((link: any) => link.isActive !== false)
+    .filter((link: any) => link.isActive !== false && link.url !== '/blogs' && link.id !== 'blogs')
+    .map((link: any) => {
+      if (link.id === 'kailash') {
+        return { ...link, url: '/landing/kailash-mansarovar' };
+      }
+      return link;
+    })
     .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
 
   /* ── Dynamically compute active domestic and international destinations ── */

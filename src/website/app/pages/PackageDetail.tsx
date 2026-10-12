@@ -36,13 +36,6 @@ import { PlanTourModal } from "../components/PlanTourModal";
 import { useState, useEffect } from "react";
 import { useAgent } from "../context/AgentContext";
 
-const DEFAULT_IMAGES = [
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1476514525535-ce74f45814da?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1530789253388-582c481c54b0?auto=format&fit=crop&w=1200&q=80",
-];
-
 const getBadgeStyles = (badge: string): string => {
   return "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-orange-500/20";
 };
@@ -104,10 +97,10 @@ export default function PackageDetail() {
             pkg.imageUrl3,
             pkg.imageUrl4,
           ].filter(Boolean);
-          const finalImages = rawImages.length > 0 ? rawImages : DEFAULT_IMAGES;
+          const finalImages = rawImages;
 
           setPackageData({
-            title: pkg.title || "Exclusive Tour Package",
+            title: pkg.title || "Tour Package",
             location: pkg.location || "India",
             price:
               pkg.discountedPrice && pkg.discountedPrice > 0
@@ -121,23 +114,18 @@ export default function PackageDetail() {
               pkg.originalPrice > pkg.discountedPrice
                 ? pkg.originalPrice
                 : null,
-            duration: pkg.duration || "5 Days / 4 Nights",
+            duration: pkg.duration || "Custom Duration",
             badges: pkg.badges && Array.isArray(pkg.badges) ? pkg.badges : [],
             images: finalImages,
-            rating: 4.9,
-            reviews: 142,
+            rating: typeof pkg.rating === "number" && pkg.rating > 0 ? pkg.rating : null,
+            reviews: typeof pkg.reviewCount === "number" && pkg.reviewCount > 0 ? pkg.reviewCount : null,
             description:
               pkg.description ||
-              "Embark on an unforgettable journey curated with luxury accommodations, guided sightseeing, seamless transfers, and expert 24/7 concierge support.",
+              "Handcrafted travel package curated with personalized accommodations, transfers, and guided sightseeing.",
             highlights:
               pkg.highlights && pkg.highlights.length > 0
                 ? pkg.highlights
-                : [
-                    "Handpicked Luxury Accommodations & Transfers",
-                    "Customizable Day-by-Day Sightseeing Itinerary",
-                    "All Breakfasts & Key Meals Included",
-                    "24/7 Dedicated Local Travel Support & Guide",
-                  ],
+                : [],
             itinerary:
               pkg.itinerary && pkg.itinerary.length > 0
                 ? pkg.itinerary.map((i: any) => ({
@@ -145,53 +133,17 @@ export default function PackageDetail() {
                     title: i.title || `Day ${i.dayNumber || i.day} Sightseeing`,
                     description:
                       i.description ||
-                      "Enjoy a curated day of sightseeing, local cuisine, and comfortable stays.",
+                      "Curated day of sightseeing, local experiences, and comfortable stay.",
                   }))
-                : [
-                    {
-                      day: 1,
-                      title: "Arrival & Welcome Reception",
-                      description:
-                        "Arrive at destination, private transfer to hotel, check-in & welcome dinner.",
-                    },
-                    {
-                      day: 2,
-                      title: "Guided City Highlights & Cultural Excursions",
-                      description:
-                        "Explore top landmarks with our expert guide. Local delicacies for lunch.",
-                    },
-                    {
-                      day: 3,
-                      title: "Nature Exploration & Leisure Time",
-                      description:
-                        "Visit scenic spots, waterfalls or historical sites. Evening at leisure.",
-                    },
-                    {
-                      day: 4,
-                      title: "Departure with Sweet Memories",
-                      description:
-                        "Breakfast, check-out and smooth transfer back to airport/station.",
-                    },
-                  ],
+                : [],
             inclusions:
               pkg.inclusions && pkg.inclusions.length > 0
                 ? pkg.inclusions
-                : [
-                    "Comfortable Hotel Stay on Twin Sharing",
-                    "Daily Breakfast & Dinner",
-                    "Private Air-Conditioned Vehicle Transfers",
-                    "Sightseeing Tours with Local Guide",
-                    "All Toll Taxes, Driver Allowances & Parking",
-                  ],
+                : [],
             exclusions:
               pkg.exclusions && pkg.exclusions.length > 0
                 ? pkg.exclusions
-                : [
-                    "Flight/Train Tickets (Unless selected)",
-                    "Personal expenses, Laundry & Shopping",
-                    "Any Entry Fees to Monuments/Parks",
-                    "GST / Tipping expenses",
-                  ],
+                : [],
             termsAndConditions: Array.isArray(pkg.termsAndConditions)
               ? pkg.termsAndConditions
               : typeof pkg.termsAndConditions === "string" &&
@@ -199,7 +151,7 @@ export default function PackageDetail() {
                 ? [pkg.termsAndConditions]
                 : [],
           });
-          setActiveImage(finalImages[0]);
+          setActiveImage(finalImages[0] || "");
         } else {
           setPackageData(null);
         }
@@ -249,13 +201,19 @@ export default function PackageDetail() {
 
   const handleWhatsAppShare = () => {
     if (!packageData) return;
-    const phone = agent?.whatsapp || siteConfig?.contactPhone || "911234567890";
+    const phone = agent?.whatsapp || siteConfig?.contactPhone || "";
+    const cleanPhone = phone.replace(/[^0-9]/g, "");
     const priceTxt =
       packageData.price && packageData.price > 0
         ? `₹${packageData.price.toLocaleString()} per person`
         : "Price on Request";
-    const message = `Helllo! 🌟 I'm interested in the "${packageData.title}" package (${packageData.location}).\nDuration: ${packageData.duration}\nPrice: ${priceTxt}.\nPlease share the full itinerary details.\n\nLink: ${window.location.href}`;
-    const whatsappUrl = `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`;
+    const message = `Hello! 🌟 I'm interested in the "${packageData.title}" package (${packageData.location}).\nDuration: ${packageData.duration}\nPrice: ${priceTxt}.\nPlease share the full itinerary details.\n\nLink: ${typeof window !== "undefined" ? window.location.href : ""}`;
+    if (!cleanPhone) {
+      if (typeof window !== "undefined") window.location.href = "/contact";
+      return;
+    }
+    const targetPhone = cleanPhone.startsWith("91") ? cleanPhone : (cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone);
+    const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -312,8 +270,7 @@ export default function PackageDetail() {
     );
   }
 
-  const phoneNum =
-    siteConfig?.contactPhone || agent?.whatsapp || "+91 98765 43210";
+  const phoneNum = siteConfig?.contactPhone || agent?.whatsapp || "";
   const discountPercent = packageData.originalPrice
     ? Math.round(
         ((packageData.originalPrice - packageData.price) /
@@ -332,7 +289,7 @@ export default function PackageDetail() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
             <Link
-              href="/"
+              href="/packages"
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-gray-600 dark:text-gray-300 bg-slate-100 dark:bg-gray-800 hover:bg-[var(--theme-primary)] hover:text-white dark:hover:bg-[var(--theme-primary)] transition-all group"
             >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -379,13 +336,17 @@ export default function PackageDetail() {
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
-                <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <span className="font-bold">{packageData.rating}</span>
-                  <span className="opacity-75">
-                    ({packageData.reviews} verified reviews)
-                  </span>
-                </div>
+                {packageData.rating && (
+                  <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span className="font-bold">{packageData.rating}</span>
+                    {packageData.reviews && (
+                      <span className="opacity-75">
+                        ({packageData.reviews} reviews)
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
                   <Calendar className="w-4 h-4" />
@@ -411,7 +372,7 @@ export default function PackageDetail() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Primary Main Image (Native 4:5 Aspect Ratio Container) */}
-            <div className="lg:col-span-7 xl:col-span-6 relative w-full max-w-[460px] aspect-[4/5] mx-auto rounded-3xl overflow-hidden shadow-2xl group border border-slate-200 dark:border-gray-800 bg-slate-950">
+            <div className={`${packageData.images?.length > 1 ? "lg:col-span-7 xl:col-span-6" : "lg:col-span-12 max-w-2xl"} relative w-full max-w-[460px] aspect-[4/5] mx-auto rounded-3xl overflow-hidden shadow-2xl group border border-slate-200 dark:border-gray-800 bg-slate-950`}>
               {activeImage || packageData.images?.[0] ? (
                 <img
                   src={activeImage || packageData.images[0]}
@@ -419,9 +380,13 @@ export default function PackageDetail() {
                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center p-8 text-center">
-                  <span className="text-gray-400 dark:text-gray-500 font-black text-4xl leading-tight">
+                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center p-8 text-center text-white">
+                  <MapPin className="w-12 h-12 text-[var(--theme-primary)] mb-3 opacity-80" />
+                  <span className="font-bold text-2xl leading-tight">
                     {packageData.title}
+                  </span>
+                  <span className="text-xs text-slate-400 mt-2">
+                    {packageData.location}
                   </span>
                 </div>
               )}
@@ -436,10 +401,12 @@ export default function PackageDetail() {
                     {packageData.title}
                   </h3>
                 </div>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold border border-white/30">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />{" "}
-                  High-Resolution Photo Tour
-                </span>
+                {packageData.images?.length > 1 && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold border border-white/30">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />{" "}
+                    Photo Tour
+                  </span>
+                )}
               </div>
 
               {/* Slider Controls */}
@@ -478,39 +445,41 @@ export default function PackageDetail() {
               )}
             </div>
 
-            {/* Thumbnail Gallery Grid (5 Columns) */}
-            <div className="lg:col-span-5 xl:col-span-6 flex flex-col justify-start">
-              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-2">
-                <span>📸 Photo Gallery</span>
-                <span className="text-gray-400 font-normal">
-                  ({packageData.images?.length || ""} Photos)
-                </span>
-              </p>
-              <div className="grid grid-cols-2 gap-3.5 max-w-[460px]">
-                {packageData.images?.map((img: string, idx: number) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImage(img)}
-                    className={`relative aspect-[4/5] rounded-2xl overflow-hidden border-2 transition-all duration-300 shadow-sm ${
-                      activeImage === img
-                        ? "border-[var(--theme-primary)] scale-[1.02] ring-4 ring-[var(--theme-primary)]/20"
-                        : "border-transparent opacity-80 hover:opacity-100 hover:scale-[1.01]"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`Gallery ${idx + 1}`}
-                      className="w-full h-full object-cover object-center"
-                    />
-                    {activeImage === img && (
-                      <div className="absolute inset-0 bg-[var(--theme-primary)]/25 flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6 text-white drop-shadow-md" />
-                      </div>
-                    )}
-                  </button>
-                ))}
+            {/* Thumbnail Gallery Grid - only rendered when multiple photos exist */}
+            {packageData.images?.length > 1 && (
+              <div className="lg:col-span-5 xl:col-span-6 flex flex-col justify-start">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-2">
+                  <span>📸 Photo Gallery</span>
+                  <span className="text-gray-400 font-normal">
+                    ({packageData.images.length} Photos)
+                  </span>
+                </p>
+                <div className="grid grid-cols-2 gap-3.5 max-w-[460px]">
+                  {packageData.images.map((img: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImage(img)}
+                      className={`relative aspect-[4/5] rounded-2xl overflow-hidden border-2 transition-all duration-300 shadow-sm ${
+                        activeImage === img
+                          ? "border-[var(--theme-primary)] scale-[1.02] ring-4 ring-[var(--theme-primary)]/20"
+                          : "border-transparent opacity-80 hover:opacity-100 hover:scale-[1.01]"
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt={`${packageData.title} photo ${idx + 1}`}
+                        className="w-full h-full object-cover object-center"
+                      />
+                      {activeImage === img && (
+                        <div className="absolute inset-0 bg-[var(--theme-primary)]/25 flex items-center justify-center">
+                          <CheckCircle2 className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -554,10 +523,10 @@ export default function PackageDetail() {
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wider font-bold text-gray-600 dark:text-gray-400">
-                    Rating
+                    Tour Style
                   </p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    ⭐ {packageData.rating} / 5
+                    {packageData.rating ? `⭐ ${packageData.rating} / 5` : "Curated & Verified"}
                   </p>
                 </div>
               </div>
@@ -600,70 +569,78 @@ export default function PackageDetail() {
                     Click on any day to explore activities & stay schedule
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={expandAllDays}
-                    className="text-xs font-semibold text-[var(--theme-primary)] hover:underline"
-                  >
-                    Expand All
-                  </button>
-                  <span className="text-gray-300 dark:text-gray-700">|</span>
-                  <button
-                    onClick={collapseAllDays}
-                    className="text-xs font-semibold text-gray-600 dark:text-gray-400 hover:underline"
-                  >
-                    Collapse All
-                  </button>
-                </div>
+                {packageData.itinerary && packageData.itinerary.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={expandAllDays}
+                      className="text-xs font-semibold text-[var(--theme-primary)] hover:underline"
+                    >
+                      Expand All
+                    </button>
+                    <span className="text-gray-300 dark:text-gray-700">|</span>
+                    <button
+                      onClick={collapseAllDays}
+                      className="text-xs font-semibold text-gray-600 dark:text-gray-400 hover:underline"
+                    >
+                      Collapse All
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
-                {packageData.itinerary.map((item: any) => {
-                  const isOpen = !!expandedDays[item.day];
-                  return (
-                    <div
-                      key={item.day}
-                      className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-                        isOpen
-                          ? "border-[var(--theme-primary)]/40 bg-slate-50/50 dark:bg-gray-800/50 shadow-sm"
-                          : "border-slate-200 dark:border-gray-800 hover:border-slate-300 dark:hover:border-gray-700"
-                      }`}
-                    >
-                      <button
-                        onClick={() => toggleDay(item.day)}
-                        className="w-full p-4 sm:p-5 flex items-center justify-between text-left gap-4"
+                {packageData.itinerary && packageData.itinerary.length > 0 ? (
+                  packageData.itinerary.map((item: any) => {
+                    const isOpen = !!expandedDays[item.day];
+                    return (
+                      <div
+                        key={item.day}
+                        className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
+                          isOpen
+                            ? "border-[var(--theme-primary)]/40 bg-slate-50/50 dark:bg-gray-800/50 shadow-sm"
+                            : "border-slate-200 dark:border-gray-800 hover:border-slate-300 dark:hover:border-gray-700"
+                        }`}
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div
-                            className={`px-4 h-11 rounded-xl flex items-center justify-center font-extrabold text-sm whitespace-nowrap flex-shrink-0 transition-colors ${
-                              isOpen
-                                ? "bg-[var(--theme-primary)] text-white shadow-md"
-                                : "bg-slate-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                            }`}
-                          >
-                            Day {item.day}
+                        <button
+                          onClick={() => toggleDay(item.day)}
+                          className="w-full p-4 sm:p-5 flex items-center justify-between text-left gap-4"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div
+                              className={`px-4 h-11 rounded-xl flex items-center justify-center font-extrabold text-sm whitespace-nowrap flex-shrink-0 transition-colors ${
+                                isOpen
+                                  ? "bg-[var(--theme-primary)] text-white shadow-md"
+                                  : "bg-slate-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              Day {item.day}
+                            </div>
+                            <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg truncate">
+                              {item.title}
+                            </h3>
                           </div>
-                          <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg truncate">
-                            {item.title}
-                          </h3>
-                        </div>
-                        <div className="flex-shrink-0 text-gray-600 dark:text-gray-400">
-                          {isOpen ? (
-                            <ChevronUp className="w-5 h-5" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5" />
-                          )}
-                        </div>
-                      </button>
+                          <div className="flex-shrink-0 text-gray-600 dark:text-gray-400">
+                            {isOpen ? (
+                              <ChevronUp className="w-5 h-5" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5" />
+                            )}
+                          </div>
+                        </button>
 
-                      {isOpen && (
-                        <div className="px-5 pb-5 pt-1 text-sm text-gray-700 dark:text-gray-300 leading-relaxed border-t border-slate-200/60 dark:border-gray-700/60 font-normal">
-                          <p className="mt-2">{item.description}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        {isOpen && (
+                          <div className="px-5 pb-5 pt-1 text-sm text-gray-700 dark:text-gray-300 leading-relaxed border-t border-slate-200/60 dark:border-gray-700/60 font-normal">
+                            <p className="mt-2">{item.description}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-6 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
+                    A customized day-by-day itinerary tailored to your travel dates and preferences is crafted upon request. Contact our team to plan your personalized schedule.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -678,19 +655,25 @@ export default function PackageDetail() {
                   <span>Package Inclusions</span>
                 </h3>
                 <ul className="space-y-3">
-                  {packageData.inclusions.map((inc: string, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xs p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-2xs"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-black shadow-sm">
-                        ✓
-                      </div>
-                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        {inc}
-                      </span>
+                  {packageData.inclusions && packageData.inclusions.length > 0 ? (
+                    packageData.inclusions.map((inc: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xs p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-2xs"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-black shadow-sm">
+                          ✓
+                        </div>
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                          {inc}
+                        </span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="p-4 text-xs font-medium text-emerald-800 dark:text-emerald-300 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+                      Inclusions are tailored to your selected package tier. Contact us for complete inclusions details.
                     </li>
-                  ))}
+                  )}
                 </ul>
               </div>
 
@@ -703,19 +686,25 @@ export default function PackageDetail() {
                   <span>Package Exclusions</span>
                 </h3>
                 <ul className="space-y-3">
-                  {packageData.exclusions.map((exc: string, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xs p-3 rounded-2xl border border-rose-100 dark:border-rose-900/50 shadow-2xs"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-black shadow-sm">
-                        ✕
-                      </div>
-                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        {exc}
-                      </span>
+                  {packageData.exclusions && packageData.exclusions.length > 0 ? (
+                    packageData.exclusions.map((exc: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xs p-3 rounded-2xl border border-rose-100 dark:border-rose-900/50 shadow-2xs"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-black shadow-sm">
+                          ✕
+                        </div>
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                          {exc}
+                        </span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="p-4 text-xs font-medium text-rose-800 dark:text-rose-300 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+                      Standard exclusions apply (personal expenses, optional activities). Detailed terms provided on inquiry.
                     </li>
-                  ))}
+                  )}
                 </ul>
               </div>
             </div>
@@ -745,7 +734,7 @@ export default function PackageDetail() {
                 </div>
               )}
 
-            {/* 24/7 Helpline Banner */}
+            {/* Concierge Assistance Banner */}
             <div
               className="rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6"
               style={{
@@ -761,14 +750,14 @@ export default function PackageDetail() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     <span className="text-xs uppercase font-extrabold text-white/70 tracking-wider">
-                      24/7 Live Support
+                      Dedicated Concierge Support
                     </span>
                   </div>
                   <h4 className="text-xl font-bold">
                     Need Customization or Help?
                   </h4>
                   <p className="text-xs text-white/80 mt-0.5">
-                    Speak with our certified travel specialists instantly.
+                    Speak with our experienced travel specialists directly.
                   </p>
                 </div>
               </div>
@@ -875,22 +864,42 @@ export default function PackageDetail() {
               </div>
 
               {/* Direct Call Helper */}
-              <div className="p-4 bg-slate-100 dark:bg-gray-800/80 rounded-2xl flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
-                    Have Questions?
-                  </p>
-                  <p className="text-xs font-extrabold text-gray-900 dark:text-white">
-                    {phoneNum}
-                  </p>
+              {phoneNum ? (
+                <div className="p-4 bg-slate-100 dark:bg-gray-800/80 rounded-2xl flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                      Have Questions?
+                    </p>
+                    <a
+                      href={`tel:${phoneNum.replace(/[^0-9+]/g, '')}`}
+                      className="text-xs font-extrabold text-gray-900 dark:text-white hover:text-[var(--theme-primary)]"
+                    >
+                      {phoneNum}
+                    </a>
+                  </div>
+                  <button
+                    onClick={handleWhatsAppShare}
+                    className="p-2.5 bg-[#25D366]/10 dark:bg-gray-700 text-[#25D366] rounded-xl shadow-sm hover:scale-105 transition-transform"
+                    aria-label="Ask on WhatsApp"
+                  >
+                    <FontAwesomeIcon icon={faWhatsapp} className="w-4 h-4" />
+                  </button>
                 </div>
-                <button
-                  onClick={handleWhatsAppShare}
-                  className="p-2.5 bg-[#25D366]/10 dark:bg-gray-700 text-[#25D366] rounded-xl shadow-sm hover:scale-105 transition-transform"
-                >
-                  <FontAwesomeIcon icon={faWhatsapp} className="w-4 h-4" />
-                </button>
-              </div>
+              ) : (
+                <div className="p-4 bg-slate-100 dark:bg-gray-800/80 rounded-2xl flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                      Have Questions?
+                    </p>
+                    <Link
+                      href="/contact"
+                      className="text-xs font-extrabold text-[var(--theme-primary)] hover:underline"
+                    >
+                      Contact our Team
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

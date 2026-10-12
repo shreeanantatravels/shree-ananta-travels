@@ -5,6 +5,7 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
 import { Compass, MapPin, Home as HomeIcon, Search, ArrowLeft, HelpCircle, PhoneCall, Sparkles } from 'lucide-react';
+import { useAgent } from '../context/AgentContext';
 
 const QUICK_DESTINATIONS = [
   { name: 'Kailash Yatra', href: '/packages?category=kailash' },
@@ -16,6 +17,11 @@ const QUICK_DESTINATIONS = [
 ];
 
 export default function NotFoundPage() {
+  const { siteConfig, agent } = useAgent();
+  const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const digits = phone.replace(/\D/g, '');
+  const whatsappTarget = digits.startsWith('91') ? digits : (digits.length === 10 ? `91${digits}` : digits);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col selection:bg-amber-500 selection:text-white">
       <Topbar />
@@ -106,14 +112,23 @@ export default function NotFoundPage() {
           <div className="mt-8 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             <HelpCircle className="w-4 h-4 text-gray-400" />
             <span>Need help finding something?</span>
-            <a 
-              href="https://wa.me/?text=Hi%20Shree%20Ananta%20Travels,%20I%20need%20help%20finding%20a%20tour%20package"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold underline text-amber-600 dark:text-amber-400 hover:opacity-80"
-            >
-              Contact Support
-            </a>
+            {whatsappTarget ? (
+              <a 
+                href={`https://wa.me/${whatsappTarget}?text=${encodeURIComponent("Hi Shree Ananta Travels, I need help finding a tour package")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold underline text-amber-600 dark:text-amber-400 hover:opacity-80"
+              >
+                Contact Support
+              </a>
+            ) : (
+              <Link
+                href="/contact"
+                className="font-bold underline text-amber-600 dark:text-amber-400 hover:opacity-80"
+              >
+                Contact Support
+              </Link>
+            )}
           </div>
 
         </div>

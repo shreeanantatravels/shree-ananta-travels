@@ -76,7 +76,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">Phone *</label>
-              <Input required type="tel" value={form.phone} onChange={set('phone')} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm h-auto" placeholder="+91 9876543210" />
+              <Input required type="tel" value={form.phone} onChange={set('phone')} className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm h-auto" placeholder="e.g. +91 7289037447" />
             </div>
           </div>
 

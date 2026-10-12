@@ -760,7 +760,7 @@ export function ThemeDetail() {
                   required
                   value={inquiryPhone}
                   onChange={e => setInquiryPhone(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  placeholder="e.g. +91 7289037447"
                   className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-2.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[var(--theme-primary)] focus:ring-1 focus:ring-[var(--theme-primary)] transition-colors"
                 />
               </div>

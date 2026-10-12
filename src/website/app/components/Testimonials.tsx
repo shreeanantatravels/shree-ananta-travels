@@ -12,36 +12,8 @@ const gradientPairs = [
   { from: 'from-indigo-500', to: 'to-blue-400' },
 ];
 
-const defaultTestimonials = [
-  {
-    name: 'Priya Sharma', destination: 'Maldives', rating: 5,
-    review: 'The trip was perfectly organized! From the water villa in Maldives to seamless airport transfers, everything was 10/10. Highly recommended!',
-    date: 'Feb 2026', initials: 'PS', gradientFrom: 'from-amber-500', gradientTo: 'to-orange-400',
-  },
-  {
-    name: 'Rahul & Ananya', destination: 'Switzerland & Paris', rating: 5,
-    review: 'Our honeymoon was pure magic. Custom itinerary, top-notch hotels, and 24/7 support whenever we had questions. Will book all our future trips here.',
-    date: 'Jan 2026', initials: 'RA', gradientFrom: 'from-blue-500', gradientTo: 'to-cyan-400',
-  },
-  {
-    name: 'Vikram Malhotra', destination: 'Dubai', rating: 5,
-    review: 'Best travel agency experience ever. Got us amazing deals on desert safari and Burj Khalifa tickets. Super professional and responsive team.',
-    date: 'Dec 2025', initials: 'VM', gradientFrom: 'from-emerald-500', gradientTo: 'to-teal-400',
-  },
-  {
-    name: 'Sneha Patel', destination: 'Bali', rating: 5,
-    review: 'Bali exceeded all expectations! The private villa, temple visits, and rice terrace trek were incredible. Best vacation of my life.',
-    date: 'Nov 2025', initials: 'SP', gradientFrom: 'from-rose-500', gradientTo: 'to-red-400',
-  },
-  {
-    name: 'Arjun Kapoor', destination: 'Ladakh', rating: 5,
-    review: 'Ladakh was an adventure of a lifetime. From Pangong Lake to Nubra Valley, every moment was breathtaking. The team handled all permits and logistics flawlessly.',
-    date: 'Oct 2025', initials: 'AK', gradientFrom: 'from-indigo-500', gradientTo: 'to-blue-400',
-  },
-];
-
 export function Testimonials() {
-  const { layoutVariant, themeConfig } = useTheme();
+  const { layoutVariant } = useTheme();
   const [apiTestimonials, setApiTestimonials] = useState<any[] | null>(null);
 
   useEffect(() => {
@@ -50,9 +22,13 @@ export function Testimonials() {
       .then(data => {
         if (data.success && data.data?.length > 0) {
           setApiTestimonials(data.data);
+        } else {
+          setApiTestimonials([]);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setApiTestimonials([]);
+      });
   }, []);
 
   const testimonials = useMemo(() => {
@@ -72,7 +48,7 @@ export function Testimonials() {
         };
       });
     }
-    return defaultTestimonials;
+    return [];
   }, [apiTestimonials]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -90,13 +66,17 @@ export function Testimonials() {
   }, [maxIndex]);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || testimonials.length <= 1) return;
     const interval = setInterval(goNext, 5000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying, goNext]);
+  }, [isAutoPlaying, goNext, testimonials.length]);
+
+  if (!apiTestimonials || testimonials.length === 0) {
+    return null;
+  }
 
   return (
-    <section id="reviews" className={`py-20 ${themeConfig.testimonialsBgClass} overflow-hidden`}>
+    <section id="reviews" className="py-20 bg-gray-50/50 dark:bg-gray-900/50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
