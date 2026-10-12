@@ -124,7 +124,7 @@ export function Navbar() {
         ? 'pt-2 sm:pt-4 px-3 sm:px-6' 
         : 'pt-0 px-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800'
     }`}>
-      <nav className={`mx-auto transition-all duration-300 ${
+      <nav aria-label="Main Navigation" className={`mx-auto transition-all duration-300 ${
         isScrolled 
           ? `max-w-[1600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl shadow-xl border border-gray-200/50 dark:border-gray-800/50 px-4 sm:px-6 py-2.5 sm:py-3 ${
               isOpen ? 'rounded-2xl sm:rounded-3xl' : 'rounded-full'

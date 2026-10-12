@@ -2,25 +2,30 @@ import type { Metadata } from 'next';
 import Home from '@website/app/pages/Home';
 
 export const metadata: Metadata = {
-  title: 'Tour Packages for India and Abroad | Shree Ananta Travels',
+  title: {
+    absolute: 'Shree Ananta Travels - #1 Kailash and Adi Kailash Yatra Agency in India',
+  },
   description:
-    'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.',
+    'Shree Ananta Travels is the #1 Kailash and Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham Yatra, domestic holidays & international tour packages with pure veg food and full permit assistance.',
   keywords: [
-    'tour packages',
-    'Tour Packages for India and Abroad',
-    'Kailash Mansarovar yatra',
+    '#1 Kailash and Adi Kailash Yatra Agency in India',
+    'Kailash Mansarovar Yatra',
+    'Adi Kailash Yatra',
+    'Om Parvat Yatra',
+    'Char Dham Yatra',
+    'Shree Ananta Travels',
+    'spiritual tour packages',
     'domestic tour packages',
     'international tour packages',
-    'holiday packages',
-    'Shree Ananta Travels',
+    'holiday packages India',
   ],
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Tour Packages for India and Abroad | Shree Ananta Travels',
+    title: 'Shree Ananta Travels - #1 Kailash and Adi Kailash Yatra Agency in India',
     description:
-      'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.',
+      'Shree Ananta Travels is the #1 Kailash and Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham Yatra, domestic holidays & international tour packages with pure veg food and full permit assistance.',
     url: '/',
     siteName: 'Shree Ananta Travels',
     type: 'website',
@@ -39,9 +44,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tour Packages for India and Abroad | Shree Ananta Travels',
+    title: 'Shree Ananta Travels - #1 Kailash and Adi Kailash Yatra Agency in India',
     description:
-      'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.',
+      'Shree Ananta Travels is the #1 Kailash and Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham Yatra, domestic holidays & international tour packages with pure veg food and full permit assistance.',
   },
 };
 

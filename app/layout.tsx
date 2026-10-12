@@ -18,8 +18,11 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://shreeanantatravels.com'),
-  title: "Shree Ananta Travels",
-  description: "Your trusted travel partner for unforgettable domestic and international experiences.",
+  title: {
+    default: "Shree Ananta Travels - #1 Kailash and Adi Kailash Yatra Agency in India",
+    template: "%s | Shree Ananta Travels",
+  },
+  description: "Shree Ananta Travels is the #1 Kailash and Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, domestic and international holiday tour packages.",
   robots: {
     index: true,
     follow: true,
