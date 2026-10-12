@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
-  Star,
   ShieldCheck,
   MapPin,
   MessageCircle,
@@ -199,7 +198,7 @@ Please share available batch dates and pricing details.`;
 
                 <p className="text-sm sm:text-base text-gray-200 max-w-xl leading-relaxed">
                   Undertake the sacred Parikrama of Mount Kailash and the holy bath at Lake Mansarovar with Shree Ananta Travels. 
-                  End-to-end permits, certified Sherpas, pure vegetarian meals, and 24/7 medical care.
+                  End-to-end Tibet permits, certified Sherpas, pure vegetarian meals, and high-altitude medical safety.
                 </p>
 
                 {/* 4 Clean Trust Pills */}
@@ -361,25 +360,48 @@ Please share available batch dates and pricing details.`;
           </div>
         </section>
 
-        {/* ── 2. TRUST HIGHLIGHT STRIP ── */}
-        <section className="bg-amber-500 text-slate-950 py-4 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-xl sm:text-2xl font-black">10+ Years</p>
-                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Yatra Experience</p>
+        {/* ── 2. TRUST HIGHLIGHT STRIP (Authentic Operational Authority - No Fake Stats) ── */}
+        <section className="bg-amber-500 text-slate-950 py-4.5 sm:py-5 border-y border-amber-600/20 shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-950/10 border border-slate-950/15 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">Official Permits</p>
+                  <p className="text-[11px] sm:text-xs text-slate-900 font-medium">China Visa & Tibet Liaison</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-black">1,500+</p>
-                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Devotees Guided</p>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-950/10 border border-slate-950/15 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">Certified Sherpas</p>
+                  <p className="text-[11px] sm:text-xs text-slate-900 font-medium">Trained High-Altitude Support</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-black">100%</p>
-                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Pure Veg Indian Food</p>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-950/10 border border-slate-950/15 flex items-center justify-center shrink-0">
+                  <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">Indian Kitchen</p>
+                  <p className="text-[11px] sm:text-xs text-slate-900 font-medium">Fresh Pure Veg & Jain Meals</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-black">24x7</p>
-                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900">Oxygen & Sherpa Care</p>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-950/10 border border-slate-950/15 flex items-center justify-center shrink-0">
+                  <HeartPulse className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-slate-950">Medical Safety</p>
+                  <p className="text-[11px] sm:text-xs text-slate-900 font-medium">Oxygen & Oximeter Ready</p>
+                </div>
               </div>
             </div>
           </div>
@@ -463,9 +485,9 @@ Please share available batch dates and pricing details.`;
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-md text-xs font-bold text-amber-700 dark:text-amber-300">
-                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                          <span>4.9</span>
+                        <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md text-[11px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                          <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                          <span>Permit Liaison</span>
                         </div>
                       </div>
 
