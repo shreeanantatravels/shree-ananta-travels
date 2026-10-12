@@ -58,18 +58,22 @@ const getThemeHref = (theme: ThemeItem) => {
     return '/spiritual';
   }
   if (t.includes('beach') || t.includes('island')) {
-    return '/packages?search=Beach';
+    return '/theme/beach';
   }
   if (t.includes('heritage') || t.includes('culture')) {
-    return '/packages?search=Heritage';
+    return '/theme/heritage';
   }
   if (t.includes('adventure') || t.includes('trek')) {
-    return '/packages?search=Adventure';
+    return '/theme/adventure';
   }
   if (t.includes('honeymoon') || t.includes('romance')) {
-    return '/packages?search=Honeymoon';
+    return '/theme/honeymoon';
   }
-  return `/packages?search=${encodeURIComponent(theme.title)}`;
+  const slug = (theme.id || theme.title)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  return `/theme/${slug}`;
 };
 
 export function TravelThemes() {

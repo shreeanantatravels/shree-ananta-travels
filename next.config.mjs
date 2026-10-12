@@ -72,6 +72,54 @@ const nextConfig = {
         destination: '/spiritual',
         permanent: true,
       },
+      {
+        source: '/packages',
+        has: [
+          {
+            type: 'query',
+            key: 'search',
+            value: 'Beach',
+          },
+        ],
+        destination: '/theme/beach',
+        permanent: true,
+      },
+      {
+        source: '/packages',
+        has: [
+          {
+            type: 'query',
+            key: 'search',
+            value: 'Heritage',
+          },
+        ],
+        destination: '/theme/heritage',
+        permanent: true,
+      },
+      {
+        source: '/packages',
+        has: [
+          {
+            type: 'query',
+            key: 'search',
+            value: 'Adventure',
+          },
+        ],
+        destination: '/theme/adventure',
+        permanent: true,
+      },
+      {
+        source: '/packages',
+        has: [
+          {
+            type: 'query',
+            key: 'search',
+            value: 'Honeymoon',
+          },
+        ],
+        destination: '/theme/honeymoon',
+        permanent: true,
+      },
     ];
   },
 };
