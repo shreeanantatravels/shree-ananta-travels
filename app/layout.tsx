@@ -31,14 +31,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
-    icon: [
-      { url: "/favicon.png", type: "image/png" },
-      { url: "/icon.png", type: "image/png" },
-    ],
-    shortcut: "/favicon.png",
-    apple: "/apple-icon.png",
-  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
