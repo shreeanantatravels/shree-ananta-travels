@@ -11,6 +11,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/landing/kailash-mansarovar',
+        destination: '/kailash-mansarovar',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

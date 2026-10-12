@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     }
 
     const defaultNavLinks = [
-      { id: 'kailash', label: 'Kailash Mansarovar', url: '/landing/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
+      { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
       { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
       { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
       { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
@@ -34,7 +34,13 @@ export async function GET(req: Request) {
       await config.save();
     } else {
       let updated = false;
-      const currentNav = [...config.navLinks];
+      const currentNav = config.navLinks.map((l: any) => {
+        if (l.url === '/landing/kailash-mansarovar') {
+          updated = true;
+          return { ...l, url: '/kailash-mansarovar' };
+        }
+        return l;
+      });
       defaultNavLinks.forEach(def => {
         if (!currentNav.some((l: any) => l.id === def.id || l.label?.toLowerCase() === def.label.toLowerCase())) {
           currentNav.push(def);
