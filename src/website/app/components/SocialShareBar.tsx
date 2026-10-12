@@ -10,26 +10,34 @@ interface SocialShareProps {
 }
 
 export function SocialShareBar({
-  title = "Shree Ananta Travels — Kailash & Holy Yatras, Domestic & International Tour Packages",
-  url = "https://www.shreeanantatravels.com/",
+  title,
+  url,
 }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState(url);
+  const [currentUrl, setCurrentUrl] = useState(url || "https://www.shreeanantatravels.com/");
+  const [currentTitle, setCurrentTitle] = useState(
+    title || "Shree Ananta Travels — Journeys That Connect"
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setCurrentUrl(window.location.href);
+      setCurrentUrl(url || window.location.href);
+      if (title) {
+        setCurrentTitle(title);
+      } else if (document.title && document.title.trim()) {
+        setCurrentTitle(document.title.trim());
+      }
     }
-  }, []);
+  }, [title, url]);
 
   const encodedUrl = encodeURIComponent(currentUrl);
-  const encodedTitle = encodeURIComponent(title);
+  const encodedTitle = encodeURIComponent(currentTitle);
 
   const shareLinks = [
     {
       name: "WhatsApp",
       icon: faWhatsapp,
-      href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
+      href: `https://api.whatsapp.com/send?text=${encodedTitle}%0A%0A${encodedUrl}`,
       color: "hover:bg-[#25D366] text-white bg-[#25D366]/90",
       ariaLabel: "Share page on WhatsApp",
     },

@@ -8,6 +8,7 @@ import {
 import { Topbar } from '../components/Topbar';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
+import { SocialShareBar } from '../components/SocialShareBar';
 import { ChatbotButton } from '../components/ChatbotButton';
 import { useAgent } from '../context/AgentContext';
 
@@ -43,7 +44,7 @@ export default function AboutUs() {
           </h1>
 
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-10">
-            A holiday is not just a change of place; it's a collection of moments, carefully crafted and seamlessly executed. We believe the people who plan your journey make all the difference.
+            A journey is not just a change of place; it&apos;s a collection of moments, carefully crafted and seamlessly executed. We believe the people who plan your journey make all the difference.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
@@ -329,6 +330,7 @@ export default function AboutUs() {
         </div>
       </section>
 
+      <SocialShareBar title="About Us — Journeys That Connect | Shree Ananta Travels" />
       <Footer />
       <ChatbotButton />
     </div>

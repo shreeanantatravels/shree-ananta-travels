@@ -4,10 +4,10 @@ import Home from "@website/app/pages/Home";
 export const metadata: Metadata = {
   title: {
     absolute:
-      "Shree Ananta Travels - Kailash and Adi Kailash Yatra Agency in India",
+      "Shree Ananta Travels — Journeys That Connect",
   },
   description:
-    "Shree Ananta Travels: Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, holiday packages, pure veg food & permits.",
+    "Shree Ananta Travels: Leading Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, curated tour packages, pure veg food & permits.",
   keywords: [
     "Kailash and Adi Kailash Yatra Agency in India",
     "Kailash Mansarovar Yatra",
@@ -18,19 +18,27 @@ export const metadata: Metadata = {
     "spiritual tour packages",
     "domestic tour packages",
     "international tour packages",
-    "holiday packages India",
+    "tour packages India",
   ],
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title:
-      "Shree Ananta Travels - Kailash and Adi Kailash Yatra Agency in India",
+      "Shree Ananta Travels — Journeys That Connect",
     description:
-      "Shree Ananta Travels: Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, holiday packages, pure veg food & permits.",
+      "Leading Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, curated tour packages, pure veg food & permits.",
     url: "/",
     siteName: "Shree Ananta Travels",
     type: "website",
+    images: [
+      {
+        url: "/icon.png",
+        width: 512,
+        height: 512,
+        alt: "Shree Ananta Travels — Journeys That Connect",
+      },
+    ],
   },
   robots: {
     index: true,
@@ -47,9 +55,10 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "Shree Ananta Travels - Kailash and Adi Kailash Yatra Agency in India",
+      "Shree Ananta Travels — Journeys That Connect",
     description:
-      "Shree Ananta Travels: Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, holiday packages, pure veg food & permits.",
+      "Leading Kailash & Adi Kailash Yatra agency in India. Customized spiritual yatras, Char Dham, curated tour packages, pure veg food & permits.",
+    images: ["/icon.png"],
   },
 };
 

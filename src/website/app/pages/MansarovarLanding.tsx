@@ -25,6 +25,7 @@ import { useAgent } from "../context/AgentContext";
 import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { SocialShareBar } from "../components/SocialShareBar";
 import { WhyTrustUs } from "../components/WhyTrustUs";
 import { Testimonials } from "../components/Testimonials";
 
@@ -866,7 +867,10 @@ export default function MansarovarLanding() {
         </div>
       </section>
 
-      {/* 11. ORIGINAL SITE FOOTER */}
+      {/* 11. SOCIAL SHARE BAR */}
+      <SocialShareBar title="Kailash Mansarovar Yatra 2027 Packages & Booking | Shree Ananta Travels" />
+
+      {/* 12. ORIGINAL SITE FOOTER */}
       <Footer />
 
       {/* 12. STICKY MOBILE ACTION BAR */}

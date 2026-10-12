@@ -31,6 +31,7 @@ import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { SocialShareBar } from "../components/SocialShareBar";
 import { ChatbotButton } from "../components/ChatbotButton";
 import { PlanTourModal } from "../components/PlanTourModal";
 import { useState, useEffect } from "react";
@@ -951,6 +952,7 @@ export default function PackageDetail() {
         </div>
       </div>
 
+      <SocialShareBar title={`${packageData.title} | Shree Ananta Travels`} />
       <Footer />
       <ChatbotButton hidden />
 

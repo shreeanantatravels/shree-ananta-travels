@@ -21,17 +21,17 @@ export function SeoOverviewSection() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] text-xs font-bold uppercase tracking-wider mb-3">
             <Compass className="w-3.5 h-3.5" />
             <span>
-              India&apos;s Trusted Pilgrimage &amp; Holiday Specialist
+              India&apos;s Trusted Pilgrimage &amp; Tour Specialist
             </span>
           </div>
           <h2
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            Your Trusted Partner for Sacred Pilgrimages &amp; Curated Holidays
+            Shree Ananta Travels — Journeys That Connect
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
-            Shree Ananta Travels is India&apos;s premier pilgrimage and holiday
+            Shree Ananta Travels is India&apos;s premier pilgrimage and travel
             agency, delivering customized tour packages across domestic
             destinations, international getaways, and sacred Himalayan yatras.
             With over 15 years of operational excellence, we ensure seamless
@@ -148,10 +148,10 @@ export function SeoOverviewSection() {
           <div className="space-y-3">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[var(--theme-primary)]" />
-              Domestic &amp; International Holidays
+              Domestic &amp; International Tours
             </h3>
             <p>
-              Beyond pilgrimages, Shree Ananta Travels curates bespoke holiday
+              Beyond pilgrimages, Shree Ananta Travels curates bespoke travel
               packages across India (Kashmir, Kerala, Rajasthan, Himachal,
               Ladakh, Andaman) and leading world destinations (Dubai, Bali,
               Thailand, Vietnam, Singapore, Europe). All packages include
