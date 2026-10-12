@@ -19,9 +19,6 @@ import {
   Calendar,
   Loader2,
   Send,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAgent } from "../context/AgentContext";
@@ -70,21 +67,6 @@ const DEFAULT_ROUTES_FALLBACK = [
   },
 ];
 
-const MONTH_NAMES = [
-  { name: "January", short: "Jan", season: false },
-  { name: "February", short: "Feb", season: false },
-  { name: "March", short: "Mar", season: false },
-  { name: "April", short: "Apr", season: false },
-  { name: "May", short: "May", season: true, special: "Season Start" },
-  { name: "June", short: "Jun", season: true, special: "Purnima" },
-  { name: "July", short: "Jul", season: true, special: "Guru Purnima" },
-  { name: "August", short: "Aug", season: true, special: "Shravan" },
-  { name: "September", short: "Sep", season: true, special: "Bhadrapada" },
-  { name: "October", short: "Oct", season: true, special: "Autumn" },
-  { name: "November", short: "Nov", season: false },
-  { name: "December", short: "Dec", season: false },
-];
-
 export default function MansarovarLanding() {
   const { agent, siteConfig, packages: agentPackages } = useAgent();
 
@@ -113,23 +95,6 @@ export default function MansarovarLanding() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(2027);
-  const calendarRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
-        setShowCalendar(false);
-      }
-    }
-    if (showCalendar) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showCalendar]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,7 +186,7 @@ export default function MansarovarLanding() {
               >
                 Kailash Mansarovar{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200 block mt-2">
-                  Yatra 2026 - 2027
+                  Yatra 2027 Season
                 </span>
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mb-8 leading-relaxed font-medium">
@@ -254,15 +219,17 @@ export default function MansarovarLanding() {
 
             {/* Right: Glassmorphism High-Converting Form */}
             <div className="lg:col-span-5">
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 sm:p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] relative overflow-hidden">
-                {/* Subtle Amber Glow */}
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/30 blur-[60px] rounded-full pointer-events-none"></div>
+              <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 sm:p-7 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] relative">
+                {/* Subtle Amber Glow isolated in an inner container */}
+                <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/30 blur-[60px] rounded-full"></div>
+                </div>
 
                 <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 relative z-10 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Get Yatra Details
                 </h2>
-                <p className="text-gray-300 text-xs sm:text-sm mb-5 relative z-10 font-medium leading-relaxed">
-                  Share your details to receive customized route comparison, 2026-2027 season departure advisory, and pricing details from our experts.
+                <p className="text-gray-300 text-xs sm:text-sm mb-4 relative z-10 font-medium leading-relaxed">
+                  Share your details to receive customized route comparison, 2027 departure batches & early permit advisory, and pricing details from our experts.
                 </p>
 
                 {isSubmitted ? (
@@ -284,10 +251,10 @@ export default function MansarovarLanding() {
                           name: "",
                           phone: "",
                           package: "Helicopter Route (10 Days via Lucknow)",
-                          month: "May - June 2026",
+                          month: "Not Sure / Flexible Dates",
                         });
                       }}
-                      className="mt-4 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold uppercase tracking-wider transition-colors border border-white/20"
+                      className="mt-4 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-bold uppercase tracking-wider transition-colors border border-white/20 cursor-pointer"
                     >
                       Submit Another Enquiry
                     </button>
@@ -295,7 +262,7 @@ export default function MansarovarLanding() {
                 ) : (
                   <form
                     onSubmit={handleFormSubmit}
-                    className="space-y-3.5 relative z-10"
+                    className="space-y-3 relative z-10"
                   >
                     <div>
                       <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
@@ -340,7 +307,7 @@ export default function MansarovarLanding() {
                           onChange={(e) =>
                             setFormData({ ...formData, package: e.target.value })
                           }
-                          className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900"
+                          className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900 [&>option]:bg-white"
                         >
                           <option value="Helicopter Route (10 Days via Lucknow)">
                             Helicopter Route (10 Days via Lucknow)
@@ -361,107 +328,91 @@ export default function MansarovarLanding() {
                         <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
                       </div>
                     </div>
-                    {/* Interactive Month & Calendar Picker */}
-                    <div className="relative" ref={calendarRef}>
-                      <button
-                        type="button"
-                        onClick={() => setShowCalendar(!showCalendar)}
-                        className={`w-full relative flex items-center bg-black/30 border ${
-                          showCalendar ? "border-amber-400 bg-black/50" : "border-white/15"
-                        } rounded-xl px-4 py-3.5 text-left transition-all shadow-inner hover:border-white/30`}
-                      >
+
+                    {/* Month Selection: Sleek native styled select */}
+                    <div>
+                      <div className="relative flex items-center bg-black/30 border border-white/15 rounded-xl px-4 py-3.5 focus-within:border-amber-400 focus-within:bg-black/50 transition-all shadow-inner">
                         <Calendar className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                        <span className="text-white text-sm font-medium flex-1 truncate">
-                          {formData.month || "Not Sure / Flexible Dates"}
-                        </span>
-                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showCalendar ? "rotate-180 text-amber-400" : ""}`} />
-                      </button>
+                        <select
+                          value={formData.month}
+                          onChange={(e) =>
+                            setFormData({ ...formData, month: e.target.value })
+                          }
+                          className="bg-transparent w-full text-white text-sm outline-none appearance-none cursor-pointer font-medium [&>option]:text-gray-900 [&>option]:bg-white"
+                        >
+                          <option value="Not Sure / Flexible Dates">
+                            ✨ Not Sure / Flexible Dates (Need Guidance)
+                          </option>
+                          <option value="May 2027">
+                            May 2027 (Buddha Purnima - Opening Batch)
+                          </option>
+                          <option value="June 2027">
+                            June 2027 (Jyeshtha Purnima - Best Weather)
+                          </option>
+                          <option value="July 2027">
+                            July 2027 (Guru Purnima - Most Auspicious)
+                          </option>
+                          <option value="August 2027">
+                            August 2027 (Shravan / Raksha Bandhan)
+                          </option>
+                          <option value="September 2027">
+                            September 2027 (Bhadrapada Purnima)
+                          </option>
+                          <option value="October 2027">
+                            October 2027 (Autumn Clear Darshan)
+                          </option>
+                          <option value="2028 Advance Season">
+                            2028 Season Advance Registration
+                          </option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 pointer-events-none" />
+                      </div>
 
-                      {showCalendar && (
-                        <div className="absolute top-full left-0 right-0 mt-2 p-3 sm:p-4 bg-slate-900/98 border border-amber-500/40 rounded-2xl shadow-[0_16px_45px_rgba(0,0,0,0.85)] z-50 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150">
-                          {/* Quick "Not Sure / Flexible" button */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setFormData({ ...formData, month: "Not Sure / Flexible Dates" });
-                              setShowCalendar(false);
-                            }}
-                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
-                              formData.month === "Not Sure / Flexible Dates"
-                                ? "bg-amber-500 text-white border-amber-400 shadow-md"
-                                : "bg-white/5 hover:bg-white/10 text-amber-300 border-white/10"
-                            }`}
-                          >
-                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                            <span>Not Sure / Flexible Dates (Need Guidance)</span>
-                          </button>
-
-                          {/* Year Navigation */}
-                          <div className="flex items-center justify-between pt-3 pb-2 px-1 text-white text-xs font-bold border-t border-white/10 mt-3">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedYear((y) => Math.max(2027, y - 1))}
-                              disabled={selectedYear <= 2027}
-                              className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <span className="text-amber-400 font-extrabold text-sm tracking-wide">
-                              {selectedYear} Yatra Season
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedYear((y) => Math.min(2029, y + 1))}
-                              disabled={selectedYear >= 2029}
-                              className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          {/* 12-Month Clickable Grid */}
-                          <div className="grid grid-cols-3 gap-1.5 pt-1">
-                            {MONTH_NAMES.map((m, idx) => {
-                              const monthLabel = `${m.name} ${selectedYear}`;
-                              const isSelected = formData.month === monthLabel;
-                              return (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  onClick={() => {
-                                    setFormData({ ...formData, month: monthLabel });
-                                    setShowCalendar(false);
-                                  }}
-                                  className={`py-2 px-1 rounded-xl text-xs font-semibold flex flex-col items-center justify-center transition-all ${
-                                    isSelected
-                                      ? "bg-amber-500 text-white font-bold shadow-md scale-95"
-                                      : m.season
-                                      ? "bg-amber-500/10 hover:bg-amber-500/25 text-amber-200 border border-amber-500/20"
-                                      : "bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white"
-                                  }`}
-                                >
-                                  <span>{m.short}</span>
-                                  {m.special && (
-                                    <span className="text-[9px] text-amber-300/80 scale-90 truncate max-w-full">
-                                      {m.special}
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          
-                          <p className="text-[10px] text-gray-400 text-center mt-2.5">
-                            * May to Oct is the sacred Himalayan Yatra season
-                          </p>
+                      {/* 1-Tap Quick Month Chips */}
+                      <div className="mt-2 px-0.5">
+                        <div className="flex items-center justify-between text-[11px] text-gray-300 font-semibold mb-1.5">
+                          <span>Quick Select:</span>
+                          <span className="text-amber-300 text-[10px] font-bold">2027 Yatra Season</span>
                         </div>
-                      )}
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            { label: "✨ Flexible", val: "Not Sure / Flexible Dates" },
+                            { label: "May '27", val: "May 2027" },
+                            { label: "Jun '27", val: "June 2027" },
+                            { label: "Jul '27 ★", val: "July 2027" },
+                            { label: "Aug '27", val: "August 2027" },
+                            { label: "Sep '27", val: "September 2027" },
+                            { label: "Oct '27", val: "October 2027" },
+                          ].map((item) => {
+                            const active =
+                              formData.month === item.val ||
+                              (item.val !== "Not Sure / Flexible Dates" &&
+                                formData.month.startsWith(item.val));
+                            return (
+                              <button
+                                key={item.val}
+                                type="button"
+                                onClick={() =>
+                                  setFormData({ ...formData, month: item.val })
+                                }
+                                className={`text-xs py-1 px-2.5 rounded-lg transition-all border cursor-pointer ${
+                                  active
+                                    ? "bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-md scale-[1.03]"
+                                    : "bg-white/5 hover:bg-white/15 text-gray-200 border-white/10 hover:border-white/25 font-medium"
+                                }`}
+                              >
+                                {item.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-4 mt-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 disabled:opacity-75 disabled:pointer-events-none"
+                      className="w-full py-3.5 sm:py-4 mt-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 disabled:opacity-75 disabled:pointer-events-none cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>
@@ -894,10 +845,10 @@ export default function MansarovarLanding() {
               onClick={() =>
                 handleWhatsAppClick(
                   "mansarovar_whatsapp_click_footer",
-                  "ॐ नमः शिवाय! I am ready to plan my Kailash Mansarovar Yatra 2026 - 2027. Please assist me with packages and booking guidance.",
+                  "ॐ नमः शिवाय! I am ready to plan my Kailash Mansarovar Yatra 2027 Season. Please assist me with packages and booking guidance.",
                 )
               }
-              className="w-full sm:w-auto px-10 py-5 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-2xl font-black text-base sm:text-lg uppercase tracking-wider transition-all shadow-[0_8px_25px_rgba(37,211,102,0.4)] hover:shadow-[0_12px_30px_rgba(37,211,102,0.5)] hover:-translate-y-1 flex items-center justify-center gap-3 active:scale-95"
+              className="w-full sm:w-auto px-10 py-5 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-2xl font-black text-base sm:text-lg uppercase tracking-wider transition-all shadow-[0_8px_25px_rgba(37,211,102,0.4)] hover:shadow-[0_12px_30px_rgba(37,211,102,0.5)] hover:-translate-y-1 flex items-center justify-center gap-3 active:scale-95 cursor-pointer"
             >
               <MessageCircle className="w-6 h-6" />
               Get Details on WhatsApp
@@ -915,10 +866,10 @@ export default function MansarovarLanding() {
           onClick={() =>
             handleWhatsAppClick(
               "mansarovar_whatsapp_click_sticky",
-              "ॐ नमः शिवाय! I need help planning Kailash Mansarovar Yatra 2026 - 2027.",
+              "ॐ नमः शिवाय! I need help planning Kailash Mansarovar Yatra 2027 Season.",
             )
           }
-          className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transition-colors shadow-md"
+          className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transition-colors shadow-md cursor-pointer"
         >
           <MessageCircle className="w-5 h-5" />
           WhatsApp
