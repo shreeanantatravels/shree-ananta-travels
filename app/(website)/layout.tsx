@@ -36,15 +36,20 @@ const siteGraphSchema = {
       "@type": "TravelAgency",
       "@id": "https://www.shreeanantatravels.com/#organization",
       name: "Shree Ananta Travels",
-      alternateName: "kailash and Adi Kailash Yatra Agency in India",
+      alternateName: "Kailash and Adi Kailash Yatra Agency in India",
       url: "https://www.shreeanantatravels.com",
-      logo: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.jpg",
-      image: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.jpg",
+      logo: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.webp",
+      image: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.webp",
       telephone: "+91 7289037447",
       email: "shreeanantatravels@gmail.com",
       priceRange: "₹₹",
+      sameAs: [
+        "https://www.facebook.com/shreeanantatravels",
+        "https://www.instagram.com/shreeanantatravels",
+        "https://wa.me/917289037447"
+      ],
       description:
-        "kailash and Adi Kailash Yatra Agency in India. Providing complete Tibet permits, certified Sherpas, pure veg meals, and customized domestic & international tour packages.",
+        "Kailash and Adi Kailash Yatra Agency in India. Providing complete Tibet permits, certified Sherpas, pure veg meals, and customized domestic & international tour packages.",
       address: {
         "@type": "PostalAddress",
         streetAddress: "E91, East of Kailash",

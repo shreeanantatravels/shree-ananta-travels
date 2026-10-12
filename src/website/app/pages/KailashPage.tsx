@@ -164,8 +164,13 @@ Please share package itinerary and customized pricing details.`;
           {/* Background image & gradient */}
           <div className="absolute inset-0 z-0">
             <img
-              src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2500&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=75&w=1600&auto=format&fit=crop"
               alt="Mount Kailash and Lake Mansarovar"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              width={1600}
+              height={800}
               className="w-full h-full object-cover object-center filter brightness-60"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/40" />
@@ -421,7 +426,7 @@ Please share package itinerary and customized pricing details.`;
                 const pkgTitle = pkg.title || "Kailash Mansarovar Tour Package";
                 const pkgDuration = pkg.duration || "12 Days";
                 const pkgLocation = pkg.location || "Tibet, Mount Kailash";
-                const pkgImg = pkg.imageUrl1 || pkg.imageUrl || "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1200&auto=format&fit=crop";
+                const pkgImg = pkg.imageUrl1 || pkg.imageUrl || "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=75&w=600&auto=format&fit=crop";
                 const pkgPrice = pkg.discountedPrice || pkg.originalPrice;
 
                 return (
@@ -434,6 +439,10 @@ Please share package itinerary and customized pricing details.`;
                       <img
                         src={pkgImg}
                         alt={pkgTitle}
+                        loading="lazy"
+                        decoding="async"
+                        width={400}
+                        height={192}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

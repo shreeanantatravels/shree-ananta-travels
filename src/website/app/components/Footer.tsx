@@ -5,6 +5,7 @@ import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import Link from 'next/link';
 import { useAgent } from '../context/AgentContext';
 import { PlanTourModal } from './PlanTourModal';
+import { ProtectedEmail } from './ProtectedEmail';
 import logo from "../../assets/tgt-logo.png";
 
 export function Footer() {
@@ -37,7 +38,7 @@ export function Footer() {
     return '';
   }
 
-  const rawLogo = siteConfig?.logoUrl || agent?.logo || '/uploads/shree-ananta-logo.jpg';
+  const rawLogo = siteConfig?.logoUrl || agent?.logo || '/uploads/shree-ananta-logo.webp';
   const logoUrl = formatLogoUrl(rawLogo) || formatLogoUrl(logo);
 
   const socialIconBaseClass = "w-10 h-10 rounded-full flex items-center justify-center transition-all transform hover:scale-110";
@@ -45,7 +46,15 @@ export function Footer() {
   const LogoBlock = ({ size = 'sm' }: { size?: 'sm' | 'lg' }) => (
     <Link href="/" className="flex items-center gap-3 mb-4 group">
       <div className={`${size === 'lg' ? 'w-14 h-14' : 'w-12 h-12'} bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-secondary)] rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-0.5 transition-transform duration-300 group-hover:scale-105`}>
-        <img src={logoUrl} alt={displayName} className="w-full h-full object-cover rounded-xl" />
+        <img 
+          src={logoUrl} 
+          alt={displayName} 
+          loading="lazy"
+          decoding="async"
+          width={size === 'lg' ? 56 : 48}
+          height={size === 'lg' ? 56 : 48}
+          className="w-full h-full object-cover rounded-xl" 
+        />
       </div>
       <div className="flex flex-col">
         <span className={`${size === 'lg' ? 'text-2xl font-black' : 'text-xl font-bold'} text-white group-hover:text-[var(--theme-accent)] transition-colors`}>{displayName}</span>
@@ -71,9 +80,7 @@ export function Footer() {
           <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[var(--theme-accent)] group-hover:bg-[var(--theme-primary)] group-hover:text-white transition-all shrink-0">
             <Mail className="w-4 h-4" />
           </div>
-          <a href={`mailto:${email}`} className="text-gray-300 hover:text-white transition-colors font-medium truncate">
-            {email}
-          </a>
+          <ProtectedEmail email={email} className="text-gray-300 hover:text-white transition-colors font-medium truncate" />
         </li>
       )}
       {address && (

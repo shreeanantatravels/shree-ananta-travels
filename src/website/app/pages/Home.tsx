@@ -13,9 +13,12 @@ import { WhyTrustUs } from '../components/WhyTrustUs';
 import { Testimonials } from '../components/Testimonials';
 import { FAQ } from '../components/FAQ';
 import { SeoOverviewSection } from '../components/SeoOverviewSection';
+import { SocialShareBar } from '../components/SocialShareBar';
 import { Footer } from '../components/Footer';
-import { LeadCaptureModal } from '../components/LeadCaptureModal';
-import { ChatbotButton } from '../components/ChatbotButton';
+import dynamic from 'next/dynamic';
+
+const LeadCaptureModal = dynamic(() => import('../components/LeadCaptureModal').then(mod => mod.LeadCaptureModal), { ssr: false });
+const ChatbotButton = dynamic(() => import('../components/ChatbotButton').then(mod => mod.ChatbotButton), { ssr: false });
 
 export default function Home() {
   return (
@@ -35,6 +38,7 @@ export default function Home() {
         <Testimonials />
         <FAQ />
         <SeoOverviewSection />
+        <SocialShareBar />
       </main>
       <Footer />
       <LeadCaptureModal />

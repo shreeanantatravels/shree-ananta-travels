@@ -21,7 +21,14 @@ const safeParseJson = (str: any, fallback: any = []) => {
   }
 };
 
+function isWebpFile(file: File): boolean {
+  return file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp');
+}
+
 async function saveUploadedFile(file: File): Promise<string> {
+  if (!isWebpFile(file)) {
+    throw new Error(`Only WebP (.webp) images are allowed for packages.`);
+  }
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   return await uploadImageToCloudinary(buffer, 'ananda-travel/packages');
@@ -67,6 +74,12 @@ export async function POST(req: Request) {
       for (const [key, value] of formData.entries()) {
         if (value instanceof File) {
           if (value.name && value.size > 0) {
+            if (!isWebpFile(value)) {
+              return NextResponse.json(
+                { success: false, message: `Only WebP (.webp) images are allowed for packages. File "${value.name}" is not WebP.` },
+                { status: 400 }
+              );
+            }
             const uploadedUrl = await saveUploadedFile(value);
             if (key === 'image1') body.imageUrl1 = uploadedUrl;
             else if (key === 'image2') body.imageUrl2 = uploadedUrl;

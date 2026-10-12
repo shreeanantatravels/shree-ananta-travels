@@ -2,6 +2,7 @@
 import { useAgent } from '../context/AgentContext';
 import { Phone, Mail, Info } from 'lucide-react';
 import Link from 'next/link';
+import { ProtectedEmail } from './ProtectedEmail';
 
 export function Topbar() {
   const { agent, siteConfig } = useAgent();
@@ -66,13 +67,10 @@ export function Topbar() {
         {/* Right: Support Email & About Us */}
         <div className="flex items-center gap-3.5 whitespace-nowrap">
           {email && (
-            <a
-              href={`mailto:${email}`}
-              className="flex items-center gap-1.5 hover:opacity-90 transition-opacity"
-            >
+            <div className="flex items-center gap-1.5 hover:opacity-90 transition-opacity">
               <Mail className="w-3.5 h-3.5 text-white" />
-              <span className="hidden md:inline">{email}</span>
-            </a>
+              <ProtectedEmail email={email} className="hidden md:inline text-white hover:underline" />
+            </div>
           )}
 
           {email && <span className="opacity-40">|</span>}

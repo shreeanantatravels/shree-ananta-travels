@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAgent } from '../context/AgentContext';
+import { toDestinationSlug } from '@/lib/utils/slugify';
 
 export function HeroSection() {
   const router = useRouter();
@@ -16,16 +17,21 @@ export function HeroSection() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   // Dynamic Title & Subtitle with fallbacks
-  const heroHeading = siteConfig?.heroTitle?.trim() || 'Tour Packages for Domestic and International';
+  const heroHeading = siteConfig?.heroTitle?.trim() || 'Shree Ananta Travels — Kailash Yatra & Curated Holiday Tour Packages';
   const heroSubtitle = siteConfig?.heroSubtitle?.trim() || 'Customized tour packages across domestic and international destinations, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.';
 
   const images = useMemo(() => {
+    let list: string[] = [];
     if (siteConfig?.heroImages && siteConfig.heroImages.length > 0) {
-      return siteConfig.heroImages;
+      list = siteConfig.heroImages;
+    } else if (isLoading) {
+      list = ['/uploads/banners/isloarding.webp'];
+    } else if (themeConfig?.heroImages?.length) {
+      list = themeConfig.heroImages;
+    } else {
+      list = ['/uploads/banners/isloarding.webp'];
     }
-    if (isLoading) return ['/uploads/banners/isloarding.png'];
-    if (themeConfig?.heroImages?.length) return themeConfig.heroImages;
-    return ['/uploads/banners/isloarding.png'];
+    return list.map(img => img === '/uploads/banners/isloarding.png' ? '/uploads/banners/isloarding.webp' : img);
   }, [siteConfig?.heroImages, isLoading, themeConfig?.heroImages]);
 
   useEffect(() => {
@@ -106,7 +112,7 @@ export function HeroSection() {
         seenLocations.add(locLower);
         const isKailash = locLower.includes('kailash');
         const cat = pkg.category === 'international' ? 'international' : 'domestic';
-        const destSlug = encodeURIComponent(loc.toLowerCase().replace(/\s+/g, '-'));
+        const destSlug = toDestinationSlug(loc);
         const targetUrl = isKailash ? '/kailash-mansarovar' : `/${cat}/${destSlug}`;
         results.push({
           type: 'destination',
@@ -127,7 +133,7 @@ export function HeroSection() {
         seenLocations.add(locLower);
         const isKailash = locLower.includes('kailash');
         const cat = d.category === 'international' ? 'international' : 'domestic';
-        const destSlug = encodeURIComponent(loc.toLowerCase().replace(/\s+/g, '-'));
+        const destSlug = toDestinationSlug(loc);
         const targetUrl = isKailash ? '/kailash-mansarovar' : `/${cat}/${destSlug}`;
         results.push({
           type: 'destination',
@@ -188,7 +194,15 @@ export function HeroSection() {
             >
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 flex items-center justify-center border border-gray-100 dark:border-gray-700">
                 {item.image ? (
-                  <img src={item.image} alt={item.title || "Travel Destination"} className="w-full h-full object-cover" />
+                  <img 
+                    src={item.image} 
+                    alt={item.title || "Travel Destination"} 
+                    loading="lazy"
+                    decoding="async"
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
                   <span className="text-sm">{item.type === 'destination' ? '📍' : '✈️'}</span>
                 )}
@@ -249,25 +263,41 @@ export function HeroSection() {
   );
 
 
+  const renderBannerImages = () => (
+    <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
+      {images.map((image, index) => {
+        const isLcp = index === 0;
+        return (
+          <img
+            key={index}
+            src={image}
+            alt={`Hero Banner ${index + 1}`}
+            loading={isLcp ? "eager" : "lazy"}
+            fetchPriority={isLcp ? "high" : "low"}
+            decoding="async"
+            width={1920}
+            height={400}
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
+              index === currentImageIndex
+                ? 'opacity-100 z-10'
+                : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          />
+        );
+      })}
+      {/* Semantic H1 for Google Search & Screen Readers */}
+      <h1 className="sr-only">
+        {heroHeading || 'Shree Ananta Travels - Kailash and Adi Kailash Yatra Agency in India'}
+      </h1>
+    </div>
+  );
+
   if (layoutVariant === 'centered') {
     return (
       <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
         {/* Banner Image Container */}
         <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-          <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Hero Banner ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                  index === currentImageIndex
-                    ? 'opacity-100 z-10'
-                    : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              />
-            ))}
-          </div>
+          {renderBannerImages()}
         </section>
 
         {/* Search Bar - Compact Theme Glassmorphism */}
@@ -308,20 +338,7 @@ export function HeroSection() {
       <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
         {/* Banner Image Container */}
         <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-          <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Hero Banner ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                  index === currentImageIndex
-                    ? 'opacity-100 z-10'
-                    : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              />
-            ))}
-          </div>
+          {renderBannerImages()}
         </section>
 
         {/* Search Bar - Compact Theme Glassmorphism */}
@@ -362,20 +379,7 @@ export function HeroSection() {
       <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
         {/* Banner Image Container */}
         <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden bg-[#0a1c3d]">
-          <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-            {images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Hero Banner ${index + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                  index === currentImageIndex
-                    ? 'opacity-100 z-10'
-                    : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              />
-            ))}
-          </div>
+          {renderBannerImages()}
         </section>
 
         {/* Search Bar - Compact Royal Gold Theme */}
@@ -415,20 +419,7 @@ export function HeroSection() {
     <div className="relative z-30 w-full bg-gray-50 dark:bg-gray-900 pb-2">
       {/* Banner Image Container */}
       <section className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-        <div className="relative w-full h-[180px] sm:h-[240px] md:h-[380px] lg:h-[400px] overflow-hidden">
-          {images.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Hero Banner ${index + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
-                index === currentImageIndex
-                  ? 'opacity-100 z-10'
-                  : 'opacity-0 z-0 pointer-events-none'
-              }`}
-            />
-          ))}
-        </div>
+        {renderBannerImages()}
       </section>
 
       {/* Search Bar - Compact Theme Glassmorphism */}

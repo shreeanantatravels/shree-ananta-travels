@@ -8,12 +8,14 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
+  display: "swap",
 });
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-montserrat",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -22,11 +24,11 @@ export const metadata: Metadata = {
   ),
   title: {
     default:
-      "Shree Ananta Travels - kailash and Adi Kailash Yatra Agency in India",
+      "Shree Ananta Travels - Kailash and Adi Kailash Yatra Agency in India",
     template: "%s | Shree Ananta Travels",
   },
   description:
-    "Shree Ananta Travels is the kailash and Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, domestic and international holiday tour packages.",
+    "Shree Ananta Travels: Leading Kailash & Adi Kailash Yatra agency in India. Spiritual yatras, Char Dham, and customized holiday tour packages.",
   robots: {
     index: true,
     follow: true,
@@ -58,14 +60,18 @@ export default function RootLayout({
       className={`${poppins.variable} ${montserrat.variable} h-full antialiased`}
     >
       <head>
-        {/* Google Analytics Tag */}
+        {/* Preconnect for external assets */}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        
+        {/* Google Analytics Tag - Loaded lazily to keep main thread fast */}
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src="https://www.googletagmanager.com/gtag/js?id=G-733S4J5EV4"
         />
         <Script
           id="google-analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];

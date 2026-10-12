@@ -290,14 +290,22 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                 </div>
               </div>
               <div className="w-[420px] flex-shrink-0">
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Package Images (4 Slots)</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-semibold text-gray-700">Images (4 Slots)</span>
+                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    WebP Only
+                  </span>
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   <ImageUploadSlot label="Main Image *" preview={imagePreviews[0]} onFile={f => handleImageFile(0, f)} onClear={() => setPreview(0, null)} compact />
-                  <ImageUploadSlot label="Image 2 (Opt)" preview={imagePreviews[1]} onFile={f => handleImageFile(1, f)} onClear={() => setPreview(1, null)} compact />
-                  <ImageUploadSlot label="Image 3 (Opt)" preview={imagePreviews[2]} onFile={f => handleImageFile(2, f)} onClear={() => setPreview(2, null)} compact />
-                  <ImageUploadSlot label="Image 4 (Opt)" preview={imagePreviews[3]} onFile={f => handleImageFile(3, f)} onClear={() => setPreview(3, null)} compact />
+                  <ImageUploadSlot label="Image 2" preview={imagePreviews[1]} onFile={f => handleImageFile(1, f)} onClear={() => setPreview(1, null)} compact />
+                  <ImageUploadSlot label="Image 3" preview={imagePreviews[2]} onFile={f => handleImageFile(2, f)} onClear={() => setPreview(2, null)} compact />
+                  <ImageUploadSlot label="Image 4" preview={imagePreviews[3]} onFile={f => handleImageFile(3, f)} onClear={() => setPreview(3, null)} compact />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1.5">Best Fit: 4:5 Portrait (1024×1280 px)</p>
+                <div className="mt-1 flex items-center justify-between text-[9px] text-gray-400">
+                  <span>Best fit: 4:5 (1024×1280 px)</span>
+                  <span>Max 5MB / slot</span>
+                </div>
               </div>
             </div>
 

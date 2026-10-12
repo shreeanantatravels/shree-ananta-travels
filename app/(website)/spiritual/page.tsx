@@ -4,7 +4,7 @@ import AgentMarketplacePage from '@website/app/pages/AgentMarketplacePage';
 export const metadata: Metadata = {
   title: 'Spiritual & Pilgrimage Yatra Packages',
   description:
-    'Book sacred Himalayan yatras including Kailash Mansarovar, Adi Kailash, Om Parvat, Char Dham, and Kashi with Shree Ananta Travels. Certified guides and pure veg meals.',
+    'Book sacred Himalayan yatras: Kailash Mansarovar, Adi Kailash, Om Parvat & Char Dham with Shree Ananta Travels. Certified guides & pure veg meals.',
   alternates: {
     canonical: '/spiritual',
   },

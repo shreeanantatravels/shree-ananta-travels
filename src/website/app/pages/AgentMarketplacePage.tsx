@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAgent, type AgentPackage } from '../context/AgentContext';
 import Link from 'next/link';
 import { Topbar } from '../components/Topbar';
@@ -109,6 +109,7 @@ export default function AgentMarketplacePage({
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedPackages = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const marqueeItems = useMemo(() => (filtered.length > 0 ? filtered : packages || []).slice(0, 3), [filtered, packages]);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
@@ -144,37 +145,69 @@ export default function AgentMarketplacePage({
       {/* Full-Screen Marquee Hero Section */}
       <section className="relative w-full min-h-[300px] md:min-h-[380px] bg-gray-900 overflow-hidden flex items-center justify-center">
          
-         {/* Moving Packages Background Grid */}
-         <div className="absolute inset-0 z-0 flex gap-4 p-4 transform scale-[1.05] opacity-75" style={{ transformOrigin: 'center' }}>
+         {/* Moving Packages Background Grid (Optimized Lightweight Backdrop) */}
+         <div className="absolute inset-0 z-0 flex gap-4 p-4 transform scale-[1.05] opacity-60" style={{ transformOrigin: 'center' }}>
             {/* Column 1 */}
             <div className="flex-1 flex flex-col gap-4" style={{ animation: 'marquee-up 45s linear infinite' }}>
-               {[...filtered, ...filtered, ...filtered, ...filtered].map((pkg, i) => (
+               {[...marqueeItems, ...marqueeItems].map((pkg, i) => (
                   <div key={`col1-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da'} className="w-full h-40 object-cover" alt="" />
+                     <img 
+                       src={pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=70&auto=format'} 
+                       className="w-full h-40 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={160}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
             {/* Column 2 */}
             <div className="flex-1 flex flex-col gap-4" style={{ animation: 'marquee-down 55s linear infinite' }}>
-               {[...filtered, ...filtered, ...filtered, ...filtered].reverse().map((pkg, i) => (
+               {[...marqueeItems, ...marqueeItems].reverse().map((pkg, i) => (
                   <div key={`col2-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={pkg.imageUrl2 || pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da'} className="w-full h-56 object-cover" alt="" />
+                     <img 
+                       src={pkg.imageUrl2 || pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=70&auto=format'} 
+                       className="w-full h-56 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={224}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
             {/* Column 3 (Hidden on mobile) */}
             <div className="hidden md:flex flex-1 flex-col gap-4" style={{ animation: 'marquee-up 50s linear infinite' }}>
-               {[...filtered, ...filtered, ...filtered, ...filtered].map((pkg, i) => (
+               {[...marqueeItems, ...marqueeItems].map((pkg, i) => (
                   <div key={`col3-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={pkg.imageUrl2 || pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da'} className="w-full h-48 object-cover" alt="" />
+                     <img 
+                       src={pkg.imageUrl2 || pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=70&auto=format'} 
+                       className="w-full h-48 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={192}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
             {/* Column 4 (Hidden on tablet/mobile) */}
             <div className="hidden lg:flex flex-1 flex-col gap-4" style={{ animation: 'marquee-down 65s linear infinite' }}>
-               {[...filtered, ...filtered, ...filtered, ...filtered].reverse().map((pkg, i) => (
+               {[...marqueeItems, ...marqueeItems].reverse().map((pkg, i) => (
                   <div key={`col4-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da'} className="w-full h-64 object-cover" alt="" />
+                     <img 
+                       src={pkg.imageUrl1 || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=70&auto=format'} 
+                       className="w-full h-64 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={256}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>

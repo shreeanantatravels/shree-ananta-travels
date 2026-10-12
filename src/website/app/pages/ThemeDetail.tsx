@@ -470,6 +470,11 @@ export function ThemeDetail() {
           <img
             src={profile.heroImage}
             alt={profile.name}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            width={1600}
+            height={600}
             className="w-full h-full object-cover transform scale-105 filter brightness-75"
           />
           {/* Dynamic Gradients */}
@@ -622,6 +627,10 @@ export function ThemeDetail() {
                     <img
                       src={pkg.image}
                       alt={pkg.title}
+                      loading="lazy"
+                      decoding="async"
+                      width={400}
+                      height={192}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />

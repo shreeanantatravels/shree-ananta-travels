@@ -5,6 +5,7 @@ import { Topbar } from '../components/Topbar';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
+import { ProtectedEmail } from '../components/ProtectedEmail';
 import { useAgent } from '../context/AgentContext';
 import { 
   MapPin, 
@@ -168,12 +169,10 @@ export default function ContactUs() {
                       <p className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                         Email Concierge
                       </p>
-                      <a 
-                        href={`mailto:${email}`} 
+                      <ProtectedEmail 
+                        email={email} 
                         className="text-sm sm:text-base font-bold text-[var(--theme-primary)] hover:underline mt-0.5 block break-all"
-                      >
-                        {email}
-                      </a>
+                      />
                     </div>
                   </div>
                 )}

@@ -115,6 +115,8 @@ export default function DestinationsPage() {
     });
   }, [searchMatchedDestinations, filter]);
 
+  const marqueeDestinations = useMemo(() => filteredDestinations.slice(0, 3), [filteredDestinations]);
+
   const getCategoryCount = (tab: 'all' | 'domestic' | 'international') => {
     if (tab === 'all') return searchMatchedDestinations.length;
     return searchMatchedDestinations.filter(d => d.category === tab).length;
@@ -143,37 +145,69 @@ export default function DestinationsPage() {
       {/* Full-Screen Marquee Hero Section */}
       <section className="relative w-full min-h-[300px] md:min-h-[380px] bg-gray-900 overflow-hidden flex items-center justify-center">
          
-         {/* Moving Destinations Background Grid */}
-         <div className="absolute inset-0 z-0 flex gap-4 p-4 transform scale-[1.05] opacity-75" style={{ transformOrigin: 'center' }}>
+         {/* Moving Destinations Background Grid (Optimized Lightweight Backdrop) */}
+         <div className="absolute inset-0 z-0 flex gap-4 p-4 transform scale-[1.05] opacity-60" style={{ transformOrigin: 'center' }}>
             {/* Column 1 */}
             <div className="flex-1 flex flex-col gap-4" style={{ animation: 'marquee-up 45s linear infinite' }}>
-               {[...filteredDestinations, ...filteredDestinations, ...filteredDestinations, ...filteredDestinations].map((dest, i) => (
+               {[...marqueeDestinations, ...marqueeDestinations].map((dest, i) => (
                   <div key={`col1-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={dest.image} className="w-full h-40 object-cover" alt="" />
+                     <img 
+                       src={dest.image} 
+                       className="w-full h-40 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={160}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
             {/* Column 2 */}
             <div className="flex-1 flex flex-col gap-4" style={{ animation: 'marquee-down 55s linear infinite' }}>
-               {[...filteredDestinations, ...filteredDestinations, ...filteredDestinations, ...filteredDestinations].reverse().map((dest, i) => (
+               {[...marqueeDestinations, ...marqueeDestinations].reverse().map((dest, i) => (
                   <div key={`col2-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={dest.image} className="w-full h-56 object-cover" alt="" />
+                     <img 
+                       src={dest.image} 
+                       className="w-full h-56 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={224}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
             {/* Column 3 (Hidden on mobile) */}
             <div className="hidden md:flex flex-1 flex-col gap-4" style={{ animation: 'marquee-up 50s linear infinite' }}>
-               {[...filteredDestinations, ...filteredDestinations, ...filteredDestinations, ...filteredDestinations].map((dest, i) => (
+               {[...marqueeDestinations, ...marqueeDestinations].map((dest, i) => (
                   <div key={`col3-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={dest.image} className="w-full h-48 object-cover" alt="" />
+                     <img 
+                       src={dest.image} 
+                       className="w-full h-48 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={192}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
             {/* Column 4 (Hidden on tablet/mobile) */}
             <div className="hidden lg:flex flex-1 flex-col gap-4" style={{ animation: 'marquee-down 65s linear infinite' }}>
-               {[...filteredDestinations, ...filteredDestinations, ...filteredDestinations, ...filteredDestinations].reverse().map((dest, i) => (
+               {[...marqueeDestinations, ...marqueeDestinations].reverse().map((dest, i) => (
                   <div key={`col4-${i}`} className="w-full rounded-2xl shadow-sm overflow-hidden shrink-0">
-                     <img src={dest.image} className="w-full h-64 object-cover" alt="" />
+                     <img 
+                       src={dest.image} 
+                       className="w-full h-64 object-cover" 
+                       loading="lazy"
+                       decoding="async"
+                       width={320}
+                       height={256}
+                       alt="" 
+                     />
                   </div>
                ))}
             </div>
@@ -266,6 +300,10 @@ export default function DestinationsPage() {
                   <img
                     src={dest.image}
                     alt={dest.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={224}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-gray-950/20 to-transparent" />

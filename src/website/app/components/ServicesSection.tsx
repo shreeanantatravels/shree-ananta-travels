@@ -11,7 +11,7 @@ export const SERVICES_DATA = [
     shortDesc: "Tailored travel plans for individuals, families, and groups. Luxury, budget, or spiritual — we craft every journey to your needs.",
     fullDesc: "Tailored travel plans for individuals, families, and groups. Luxury, budget, or spiritual — we craft every journey to your needs.",
     icon: Compass,
-    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1000"
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=75&w=600&auto=format&fit=crop"
   },
   {
     id: "spiritual-yatra",
@@ -20,7 +20,7 @@ export const SERVICES_DATA = [
     shortDesc: "Char Dham, Kailash Mansarovar, Amarnath, Vaishno Devi — organized group & self-guided spiritual yatras with complete support.",
     fullDesc: "Char Dham, Kailash Mansarovar, Amarnath, Vaishno Devi — organized group & self-guided spiritual yatras with complete support.",
     icon: Sunrise,
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1000"
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=75&w=600&auto=format&fit=crop"
   },
   {
     id: "group-management",
@@ -29,7 +29,7 @@ export const SERVICES_DATA = [
     shortDesc: "Corporate trips, family groups, religious gatherings — seamless logistics, accommodation, and transport for groups of any size.",
     fullDesc: "Corporate trips, family groups, religious gatherings — seamless logistics, accommodation, and transport for groups of any size. We also curate our own groups for solo travellers and small group travellers.",
     icon: Users,
-    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000"
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=75&w=600&auto=format&fit=crop"
   },
   {
     id: "business-consultancy",
@@ -38,7 +38,7 @@ export const SERVICES_DATA = [
     shortDesc: "Visa assistance, exhibition participation, trade show management, and end-to-end business travel support for corporates.",
     fullDesc: "Visa assistance, exhibition participation, trade show management, and end-to-end business travel support for corporates.",
     icon: Building,
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000"
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=75&w=600&auto=format&fit=crop"
   },
   {
     id: "events-conference",
@@ -47,7 +47,7 @@ export const SERVICES_DATA = [
     shortDesc: "Full event management for exhibitions, promotional exhibitions and launches, cultural events.",
     fullDesc: "Full event management for exhibitions, promotional exhibitions and launches, cultural events.",
     icon: Award,
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1000"
+    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=75&w=600&auto=format&fit=crop"
   },
   {
     id: "spiritual-event-services",
@@ -56,7 +56,7 @@ export const SERVICES_DATA = [
     shortDesc: "Helps in organizing spiritual events as per your need in different countries, end-to-end management.",
     fullDesc: "Helps in organizing spiritual events as per your need in different countries, end-to-end management.",
     icon: Gem,
-    image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=1000"
+    image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=75&w=600&auto=format&fit=crop"
   },
   {
     id: "logistics-booking",
@@ -169,8 +169,12 @@ export function ServicesSection() {
                 <img 
                   src={service.image} 
                   alt={service.title} 
+                  loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={250}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800';
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=75&w=600&auto=format&fit=crop';
                   }}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 group-hover:opacity-100 opacity-90 transition-all duration-700" 
                 />

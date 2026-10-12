@@ -4,7 +4,7 @@ import MansarovarLanding from '@website/app/pages/MansarovarLanding';
 export const metadata: Metadata = {
   title: 'Kailash Mansarovar Yatra 2027 Packages & Booking',
   description:
-    'Plan your sacred Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Lhasa air route, China visa, Tibet permits, and pure vegetarian meals.',
+    'Book Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Tibet permits, China visa, and pure veg meals.',
   keywords: [
     'Kailash Mansarovar Yatra',
     'Kailash Mansarovar Yatra 2027',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Kailash Mansarovar Yatra 2027 Packages & Booking | Shree Ananta Travels',
     description:
-      'Plan your sacred Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Lhasa air route, China visa, Tibet permits, and pure vegetarian meals.',
+      'Book Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Tibet permits, China visa, and pure veg meals.',
     url: '/kailash-mansarovar',
     type: 'website',
   },
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Kailash Mansarovar Yatra 2027 Packages & Booking | Shree Ananta Travels',
     description:
-      'Plan your sacred Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Lhasa air route, China visa, Tibet permits, and pure vegetarian meals.',
+      'Book Kailash Mansarovar Yatra 2027 with Shree Ananta Travels. Helicopter & overland routes via Nepal, Tibet permits, China visa, and pure veg meals.',
   },
 };
 

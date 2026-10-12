@@ -20,8 +20,15 @@ export async function POST(req: Request) {
 
     // Determine Cloudinary folder
     let folder = 'ananda-travel/general';
-    if (type === 'logo') folder = 'ananda-travel/logos';
-    else if (type === 'package') folder = 'ananda-travel/packages';
+    if (type === 'logo') {
+      folder = 'ananda-travel/logos';
+    } else if (type === 'package') {
+      const isWebp = file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp');
+      if (!isWebp) {
+        return NextResponse.json({ success: false, message: 'Only WebP (.webp) images are allowed for packages.' }, { status: 400 });
+      }
+      folder = 'ananda-travel/packages';
+    }
 
     // Upload to Cloudinary
     const fileUrl = await uploadImageToCloudinary(buffer, folder);

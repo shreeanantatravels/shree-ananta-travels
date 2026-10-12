@@ -36,7 +36,7 @@ export default function AboutUs() {
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-gray-900 dark:text-white tracking-tight mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Because Every Journey Is <br className="hidden md:block" />
+            Where Every Journey Is <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'var(--theme-gradient)' }}>
               More Than an Itinerary
             </span>
@@ -140,21 +140,21 @@ export default function AboutUs() {
               
               <div className="space-y-4 translate-y-8">
                 <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border-4 border-white dark:border-gray-800 relative group">
-                  <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?q=80&w=800&auto=format&fit=crop" alt="Travel" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?q=75&w=600&auto=format&fit=crop" alt="Travel" loading="lazy" decoding="async" width={400} height={500} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                 </div>
                 <div className="aspect-square rounded-3xl overflow-hidden shadow-xl border-4 border-white dark:border-gray-800 relative group">
-                  <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop" alt="Adventure" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=75&w=600&auto=format&fit=crop" alt="Adventure" loading="lazy" decoding="async" width={400} height={400} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="aspect-square rounded-3xl overflow-hidden shadow-xl border-4 border-white dark:border-gray-800 relative group">
-                  <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop" alt="Views" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=75&w=600&auto=format&fit=crop" alt="Views" loading="lazy" decoding="async" width={400} height={400} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                 </div>
                 <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border-4 border-white dark:border-gray-800 relative group">
-                  <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop" alt="Beach" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=75&w=600&auto=format&fit=crop" alt="Beach" loading="lazy" decoding="async" width={400} height={500} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                 </div>
               </div>

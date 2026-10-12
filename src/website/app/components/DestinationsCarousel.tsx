@@ -1,7 +1,9 @@
 "use client";
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { useAgent } from '../context/AgentContext';
+import { toDestinationSlug } from '@/lib/utils/slugify';
 
 
 
@@ -77,10 +79,10 @@ function CarouselSection({ subtitle, title, destinations }: CarouselSectionProps
           const isKailash = (dest.name || '').toLowerCase().includes('kailash');
           const isIntlDest = INTL_KEYWORDS.some(k => (dest.name || '').toLowerCase().includes(k));
           const catPrefix = isIntlDest ? '/international' : '/domestic';
-          const destSlug = encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+          const destSlug = toDestinationSlug(dest.name);
           const cardHref = isKailash ? '/kailash-mansarovar' : `${catPrefix}/${destSlug}`;
           return (
-            <a
+            <Link
               key={index}
               href={cardHref}
               className="flex-shrink-0 group flex flex-col items-center cursor-pointer"
@@ -93,6 +95,10 @@ function CarouselSection({ subtitle, title, destinations }: CarouselSectionProps
                   <img
                     src={dest.image}
                     alt={dest.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={192}
+                    height={192}
                     className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-black/15 group-hover:bg-black/0 transition-colors" />
@@ -101,7 +107,7 @@ function CarouselSection({ subtitle, title, destinations }: CarouselSectionProps
               <span className="mt-3 text-base md:text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-[var(--theme-primary)] transition-colors text-center">
                 {dest.name}
               </span>
-            </a>
+            </Link>
           );
         })}
       </div>

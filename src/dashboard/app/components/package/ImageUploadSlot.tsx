@@ -21,7 +21,17 @@ export function ImageUploadSlot({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (file: File) => {
-    if (file.size > MAX_FILE_SIZE_BYTES) { setError(`Max ${MAX_FILE_SIZE_MB}MB.`); return; }
+    if (file.size > MAX_FILE_SIZE_BYTES) { 
+      setError(`Max ${MAX_FILE_SIZE_MB}MB.`); 
+      return; 
+    }
+    
+    const isWebp = file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp');
+    if (!isWebp) {
+      setError('Only WebP (.webp) images are allowed.');
+      return;
+    }
+
     setError(null);
     onFile(file);
   };
@@ -40,20 +50,24 @@ export function ImageUploadSlot({
       ) : (
         <div className="flex flex-col">
           <label
-            className={`flex flex-col items-center justify-center gap-1 ${heightClass} border-2 border-dashed rounded-lg cursor-pointer transition-colors p-2 text-center ${
-              dragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+            className={`group flex flex-col items-center justify-center gap-1 ${heightClass} border border-dashed rounded-lg cursor-pointer transition-all p-2 text-center ${
+              dragging 
+                ? 'border-emerald-500 bg-emerald-50/70' 
+                : 'border-gray-300 hover:border-emerald-500 hover:bg-emerald-50/30 bg-gray-50/50'
             }`}
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
           >
-            <input ref={fileRef} type="file" accept="image/*" className="hidden"
+            <input ref={fileRef} type="file" accept="image/webp,.webp" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-            <Upload className={compact ? "w-4 h-4 text-gray-400" : "w-6 h-6 text-gray-300"} />
-            <span className="text-[11px] text-gray-600 font-medium leading-tight">Click or drag</span>
-            <span className="text-[9px] text-gray-400">JPG, PNG · Max {MAX_FILE_SIZE_MB}MB</span>
+            <div className="w-6 h-6 rounded-full bg-emerald-50 group-hover:bg-emerald-100 flex items-center justify-center transition-colors">
+              <Upload className="w-3 h-3 text-emerald-600" />
+            </div>
+            <span className="text-[10px] text-gray-700 font-medium leading-tight">Select .webp</span>
+            <span className="text-[8px] text-gray-400 font-normal">Max {MAX_FILE_SIZE_MB}MB</span>
           </label>
-          {error && <p className="mt-0.5 text-[9px] text-red-500 text-center">{error}</p>}
+          {error && <p className="mt-0.5 text-[9px] text-red-500 text-center font-semibold">{error}</p>}
         </div>
       )}
     </div>

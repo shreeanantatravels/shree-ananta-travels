@@ -61,13 +61,14 @@ export function Navbar() {
   }, []);
 
   const displayName = siteConfig?.companyName || (siteConfig as any)?.businessName || (agent ? (agent.businessName || agent.name) : 'Shree Ananta Travels');
-  const rawLogo = siteConfig?.logoUrl || agent?.logo || '/uploads/shree-ananta-logo.jpg';
+  const rawLogo = siteConfig?.logoUrl || agent?.logo || '/uploads/shree-ananta-logo.webp';
   const logoUrl = formatLogoUrl(rawLogo) || formatLogoUrl(logoAsset);
 
   const rawNavLinks = (siteConfig?.navLinks && siteConfig.navLinks.length > 0)
     ? siteConfig.navLinks
     : DEFAULT_NAV_LINKS;
 
+  const seenNavKeys = new Set<string>();
   const displayNavLinks = rawNavLinks
     .filter((link: any) => link.isActive !== false && link.url !== '/blogs' && link.id !== 'blogs')
     .map((link: any) => {
@@ -81,6 +82,12 @@ export function Navbar() {
         return { ...link, url: '/spiritual' };
       }
       return link;
+    })
+    .filter((link: any) => {
+      const key = `${(link.label || '').toLowerCase().trim()}|${(link.url || '').toLowerCase().trim()}`;
+      if (seenNavKeys.has(key)) return false;
+      seenNavKeys.add(key);
+      return true;
     })
     .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
 
@@ -143,7 +150,15 @@ export function Navbar() {
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden bg-white flex-shrink-0" style={{ border: '2.5px solid var(--theme-primary)', boxShadow: '0 0 0 4px color-mix(in srgb, var(--theme-primary) 15%, transparent)' }}>
-              <img src={logoUrl} alt={displayName} className="w-full h-full object-contain" />
+              <img 
+                src={logoUrl} 
+                alt={displayName} 
+                width={48} 
+                height={48} 
+                decoding="async"
+                fetchPriority="high"
+                className="w-full h-full object-contain" 
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-gray-900 dark:text-white text-lg sm:text-xl tracking-tight leading-tight group-hover:text-[var(--theme-primary)] transition-colors">

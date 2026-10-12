@@ -26,36 +26,48 @@ function DealCard({ deal, className = '', height = 'h-48' }: DealCardProps) {
   useEffect(() => { setImgSrc(deal.image); }, [deal.image]);
 
   return (
-    <Link href={`/package/${deal.id}`}
+    <div
       className={`group relative overflow-hidden rounded-2xl block ${height} ${className}`}
     >
-      <img
-        src={imgSrc}
-        alt={deal.headline}
-        onError={() => setImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1400&q=80')}
-        className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10 group-hover:from-black/85 transition-all duration-300" />
+      <Link
+        href={`/package/${deal.id}`}
+        aria-label={`View ${deal.headline} tour package`}
+        className="absolute inset-0 z-0 block"
+      >
+        <img
+          src={imgSrc}
+          alt={deal.headline}
+          onError={() => setImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1400&q=80')}
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10 group-hover:from-black/85 transition-all duration-300" />
+      </Link>
 
       {/* Tag */}
       <div
-        className="absolute top-3 left-3 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+        className="absolute top-3 left-3 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full z-10 pointer-events-none"
         style={{ background: 'var(--theme-gradient)' }}
       >
         {deal.tag}
       </div>
 
       {/* Arrow */}
-      <div
-        className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300"
+      <Link
+        href={`/package/${deal.id}`}
+        aria-label={`View ${deal.headline}`}
+        className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300 z-10"
         style={{ background: 'var(--theme-primary)' }}
       >
         <ArrowUpRight size={15} />
-      </div>
+      </Link>
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 p-4">
-        <h3 className="text-white font-bold text-lg leading-tight">{deal.headline}</h3>
+      <div className="absolute bottom-0 left-0 p-4 z-10 pointer-events-none">
+        <div className="text-white font-bold text-lg leading-tight pointer-events-auto">
+          <Link href={`/package/${deal.id}`} className="hover:underline">
+            {deal.headline}
+          </Link>
+        </div>
         <p className="text-white/75 text-xs mt-0.5">{deal.subtitle}</p>
         <div className="flex items-center gap-3 mt-2.5">
           {deal.price && deal.price > 0 ? (
@@ -67,12 +79,17 @@ function DealCard({ deal, className = '', height = 'h-48' }: DealCardProps) {
               Price on Request
             </span>
           )}
-          <div className="inline-flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/40 bg-white/15">
-            View More <ArrowUpRight size={11} />
-          </div>
+          <Link
+            href={`/package/${deal.id}`}
+            aria-label={`View itinerary for ${deal.headline}`}
+            className="inline-flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/40 bg-white/15 hover:bg-white/30 transition-colors pointer-events-auto"
+          >
+            <span>View Itinerary</span>
+            <ArrowUpRight size={11} />
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -137,7 +154,7 @@ function BentoCarousel({ slides }: { slides: any[] }) {
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 p-4 z-10">
-        <h3 className="text-white font-bold text-xl leading-tight">{slide.headline}</h3>
+        <div className="text-white font-bold text-xl leading-tight">{slide.headline}</div>
         <p className="text-white/75 text-xs mt-0.5">{slide.subtitle}</p>
         <div className="flex items-center gap-3 mt-2.5">
           {slide.price && slide.price > 0 ? (
@@ -150,9 +167,11 @@ function BentoCarousel({ slides }: { slides: any[] }) {
             </span>
           )}
           <Link href={`/package/${slide.id}`}
+            aria-label={`View itinerary for ${slide.headline}`}
             className="inline-flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/40 bg-white/15 hover:bg-white/30 transition-colors"
           >
-            View More <ArrowUpRight size={11} />
+            <span>View Itinerary</span>
+            <ArrowUpRight size={11} />
           </Link>
         </div>
       </div>
@@ -210,7 +229,7 @@ export function TrendingPackages() {
             >
               Curated Itineraries &amp; Holy Yatras
             </p>
-            <h1
+            <h2
               className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
@@ -221,7 +240,7 @@ export function TrendingPackages() {
               >
                 Domestic and International
               </span>
-            </h1>
+            </h2>
             <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
               Customized tour packages across domestic and international destinations, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.
             </p>

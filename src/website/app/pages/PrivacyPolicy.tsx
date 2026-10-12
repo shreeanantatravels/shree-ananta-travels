@@ -4,6 +4,7 @@ import { Topbar } from '../components/Topbar';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
+import { ProtectedEmail } from '../components/ProtectedEmail';
 import { useAgent } from '../context/AgentContext';
 
 export default function PrivacyPolicy() {
@@ -93,7 +94,7 @@ export default function PrivacyPolicy() {
 
           <section>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Your Rights</h3>
-            <p>You have the right to access, correct, or delete your personal information. If you would like to exercise these rights or have any concerns about your data, please contact us at <a href={`mailto:${email}`} className="text-[var(--theme-primary)] hover:underline">{email}</a>.</p>
+            <p>You have the right to access, correct, or delete your personal information. If you would like to exercise these rights or have any concerns about your data, please contact us at <ProtectedEmail email={email} className="text-[var(--theme-primary)] hover:underline" />.</p>
           </section>
 
           <section>
@@ -107,7 +108,7 @@ export default function PrivacyPolicy() {
             <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl space-y-3">
               <p><strong>Add:</strong> {address}</p>
               <p><strong>Ph No.:</strong> {phone}</p>
-              <p><strong>Email:</strong> <a href={`mailto:${email}`} className="text-[var(--theme-primary)] hover:underline">{email}</a></p>
+              <p><strong>Email:</strong> <ProtectedEmail email={email} className="text-[var(--theme-primary)] hover:underline" /></p>
             </div>
           </section>
         </div>

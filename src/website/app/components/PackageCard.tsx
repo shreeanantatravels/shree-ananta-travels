@@ -25,6 +25,22 @@ interface PackageCardProps {
   exclusions?: string[];
 }
 
+function optimizeCardImageUrl(url: string): string {
+  if (!url) return '';
+  if (url.includes('images.unsplash.com')) {
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set('w', '600');
+      parsed.searchParams.set('q', '75');
+      parsed.searchParams.set('auto', 'format');
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+  return url;
+}
+
 export function PackageCard({
   id,
   title,
@@ -44,11 +60,11 @@ export function PackageCard({
   exclusions = [],
 }: PackageCardProps) {
   const { siteConfig } = useAgent();
-  const [imgSrc, setImgSrc] = useState<string>(imageUrl || '');
+  const [imgSrc, setImgSrc] = useState<string>(() => optimizeCardImageUrl(imageUrl || ''));
   const [hasImgError, setHasImgError] = useState(false);
 
   useEffect(() => {
-    setImgSrc(imageUrl || '');
+    setImgSrc(optimizeCardImageUrl(imageUrl || ''));
     setHasImgError(false);
   }, [imageUrl]);
 
@@ -69,42 +85,52 @@ export function PackageCard({
   if (featured) {
     return (
       <div className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300 h-full">
-        <Link href={`/package/${id}`} className="block relative overflow-hidden w-full aspect-[4/5] lg:max-h-[500px]">
-          {imgSrc && !hasImgError ? (
-            <img
-              src={imgSrc}
-              alt={title}
-              onError={handleImageError}
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-700">
-              <ImageIcon className="w-12 h-12 text-slate-600 mb-3 opacity-60" />
-              <span className="text-white font-bold text-2xl leading-snug line-clamp-2">{title}</span>
-              <span className="text-slate-400 text-sm mt-1 font-medium">{location}</span>
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+        <div className="relative overflow-hidden w-full aspect-[4/5] lg:max-h-[500px]">
+          <Link
+            href={`/package/${id}`}
+            aria-label={`View ${title} tour package`}
+            className="absolute inset-0 block z-0"
+          >
+            {imgSrc && !hasImgError ? (
+              <img
+                src={imgSrc}
+                alt={title}
+                loading="lazy"
+                decoding="async"
+                width={480}
+                height={600}
+                onError={handleImageError}
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-700">
+                <ImageIcon className="w-12 h-12 text-slate-600 mb-3 opacity-60" />
+                <span className="text-white font-bold text-2xl leading-snug line-clamp-2">{title}</span>
+                <span className="text-slate-400 text-sm mt-1 font-medium">{location}</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+          </Link>
           
           {/* Offer Ribbon */}
           {effectiveOffer && (
-            <div className="absolute top-0 right-0 bg-gradient-to-br from-red-600 to-orange-600 text-white px-6 py-2 rounded-bl-2xl shadow-xl">
+            <div className="absolute top-0 right-0 bg-gradient-to-br from-red-600 to-orange-600 text-white px-6 py-2 rounded-bl-2xl shadow-xl z-10 pointer-events-none">
               <p className="text-sm font-bold uppercase tracking-wider">{effectiveOffer}</p>
             </div>
           )}
           
           {/* Category Badge */}
           {category && (
-            <div className="absolute bottom-24 left-6 bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/20">
+            <div className="absolute bottom-24 left-6 bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/20 z-10 pointer-events-none">
               {category}
             </div>
           )}
           
-          <div className="absolute top-6 right-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold text-gray-900 dark:text-white shadow-lg">
+          <div className="absolute top-6 right-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-bold text-gray-900 dark:text-white shadow-lg z-10 pointer-events-none">
             {duration}
           </div>
           
-          <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+          <div className="absolute bottom-0 left-0 right-0 p-8 text-white z-10 pointer-events-none">
             {/* Single Bestseller Badge */}
             {isBestseller && (
               <div className="flex gap-2 mb-4 flex-wrap">
@@ -120,7 +146,11 @@ export function PackageCard({
               <span className="text-gray-200 text-sm ml-2">({reviews} reviews)</span>
             </div>
             
-            <h3 className="text-4xl font-black mb-2">{title}</h3>
+            <div className="text-4xl font-black mb-2 pointer-events-auto">
+              <Link href={`/package/${id}`} className="hover:underline">
+                {title}
+              </Link>
+            </div>
             <p className="text-lg text-gray-200 mb-4">{location}</p>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -146,8 +176,9 @@ export function PackageCard({
             </div>
             
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 pointer-events-auto">
               <Link href={`/package/${id}`}
+                aria-label={`View itinerary for ${title}`}
                 className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-lg transition-all duration-300 font-bold text-base shadow-2xl hover:shadow-3xl hover:-translate-y-1 active:scale-95"
               >
                 <span>View Details</span>
@@ -167,57 +198,69 @@ export function PackageCard({
               </button>
             </div>
           </div>
-        </Link>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-      <Link href={`/package/${id}`} className="block relative overflow-hidden w-full aspect-[4/5] bg-slate-900">
-        {imgSrc && !hasImgError ? (
-          <img
-            src={imgSrc}
-            alt={title}
-            onError={handleImageError}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
-            <ImageIcon className="w-10 h-10 text-slate-600 mb-2 opacity-60" />
-            <span className="text-white font-bold text-lg leading-snug line-clamp-2">{title}</span>
-            <span className="text-slate-400 text-xs mt-1 font-medium">{location}</span>
-          </div>
-        )}
+      <div className="relative overflow-hidden w-full aspect-[4/5] bg-slate-900">
+        <Link
+          href={`/package/${id}`}
+          aria-label={`View ${title} tour package`}
+          className="block w-full h-full"
+        >
+          {imgSrc && !hasImgError ? (
+            <img
+              src={imgSrc}
+              alt={title}
+              loading="lazy"
+              decoding="async"
+              width={400}
+              height={500}
+              onError={handleImageError}
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
+              <ImageIcon className="w-10 h-10 text-slate-600 mb-2 opacity-60" />
+              <span className="text-white font-bold text-lg leading-snug line-clamp-2">{title}</span>
+              <span className="text-slate-400 text-xs mt-1 font-medium">{location}</span>
+            </div>
+          )}
+        </Link>
         
         {/* Category Badge on Image (bottom left) */}
         {category && (
-          <div className="absolute bottom-4 left-4 bg-[#1e293b] text-white px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider">
+          <div className="absolute bottom-4 left-4 bg-[#1e293b] text-white px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider pointer-events-none">
             {category}
           </div>
         )}
 
         {/* Bestseller Badge (curved style with gold color) */}
         {isBestseller && (
-          <div className="absolute top-0 right-0 z-10 animate-fade-in-up">
+          <div className="absolute top-0 right-0 z-10 animate-fade-in-up pointer-events-none">
             <div className="flex items-center gap-1.5 bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-500 text-slate-900 px-3.5 py-1.5 rounded-bl-2xl shadow-[0_4px_15px_rgba(245,158,11,0.4)] border-b border-l border-amber-300 backdrop-blur-md">
               <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest drop-shadow-sm">Bestseller</span>
             </div>
           </div>
         )}
-      </Link>
+      </div>
       
       <div className="p-5 flex-1 flex flex-col">
-        <Link href={`/package/${id}`}>
+        <div>
           {/* Location / Theme Text */}
           <p className="text-sm font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--theme-primary)' }}>
             {location}
           </p>
           
           {/* Title */}
-          <h3 className="text-xl font-bold text-[#1e293b] dark:text-white leading-tight mb-2 hover:text-[var(--theme-primary)] transition-colors line-clamp-2">
-            {title}
-          </h3>
+          <div className="text-xl font-bold text-[#1e293b] dark:text-white leading-tight mb-2 line-clamp-2">
+            <Link href={`/package/${id}`} className="hover:text-[var(--theme-primary)] transition-colors">
+              {title}
+            </Link>
+          </div>
           
           {/* Rating */}
           <div className="flex items-center gap-1 mb-3">
@@ -235,7 +278,7 @@ export function PackageCard({
               {duration}
             </div>
           </div>
-        </Link>
+        </div>
         
         <div className="mt-auto"></div>
         

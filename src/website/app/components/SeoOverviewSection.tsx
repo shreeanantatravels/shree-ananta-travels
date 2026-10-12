@@ -10,6 +10,7 @@ import {
   Mail,
   CheckCircle2,
 } from "lucide-react";
+import { ProtectedEmail } from "./ProtectedEmail";
 
 export function SeoOverviewSection() {
   return (
@@ -27,7 +28,7 @@ export function SeoOverviewSection() {
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            About Shree Ananta Travels — kailash &amp; Holiday Tour Agency
+            Your Trusted Partner for Sacred Pilgrimages &amp; Curated Holidays
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
             Shree Ananta Travels is India&apos;s premier pilgrimage and holiday
@@ -187,7 +188,8 @@ export function SeoOverviewSection() {
             </span>
             <span className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[var(--theme-primary)]" />
-              <strong>Email:</strong> shreeanantatravels@gmail.com
+              <strong>Email:</strong>{" "}
+              <ProtectedEmail email="shreeanantatravels@gmail.com" className="text-gray-900 dark:text-gray-100 hover:underline" />
             </span>
           </div>
 

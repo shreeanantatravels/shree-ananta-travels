@@ -4,6 +4,7 @@ import { Topbar } from '../components/Topbar';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
+import { ProtectedEmail } from '../components/ProtectedEmail';
 import { useAgent } from '../context/AgentContext';
 
 export default function TermsConditions() {
@@ -85,7 +86,7 @@ export default function TermsConditions() {
             <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl space-y-3">
               <p><strong>Contact Address:</strong> {address}</p>
               <p><strong>Contact Phone Number:</strong> {phone}</p>
-              <p><strong>Contact Email:</strong> <a href={`mailto:${email}`} className="text-[var(--theme-primary)] hover:underline">{email}</a></p>
+              <p><strong>Contact Email:</strong> <ProtectedEmail email={email} className="text-[var(--theme-primary)] hover:underline" /></p>
             </div>
           </section>
         </div>

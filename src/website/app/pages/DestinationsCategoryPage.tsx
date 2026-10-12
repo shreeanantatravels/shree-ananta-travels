@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAgent, type AgentPackage } from "../context/AgentContext";
+import { toDestinationSlug } from "@/lib/utils/slugify";
 import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -337,7 +338,7 @@ export default function DestinationsCategoryPage({ category }: Props) {
           <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${filteredDestinations.length === 1 ? 'justify-items-center' : ''}`}>
             {filteredDestinations.map((dest) => {
               const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-              const destSlug = (dest as any).slug || encodeURIComponent((dest.name || '').toLowerCase().trim().replace(/\s+/g, '-'));
+              const destSlug = (dest as any).slug || toDestinationSlug(dest.name);
               const cardHref = isKailash ? '/kailash-mansarovar' : `/${category}/${destSlug}`;
               return (
               <Link
@@ -350,6 +351,10 @@ export default function DestinationsCategoryPage({ category }: Props) {
                   <img
                     src={dest.image}
                     alt={dest.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={224}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent" />
