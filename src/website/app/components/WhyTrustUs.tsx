@@ -10,7 +10,7 @@ export function WhyTrustUs() {
 
   const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
   
-  const heroSubtitle = `${companyDisplayName} is a dedicated travel company delivering personalized, hassle-free holiday experiences across India and abroad.`;
+  const heroSubtitle = `${companyDisplayName} is a dedicated travel company delivering personalized, hassle-free holiday experiences across domestic and international destinations.`;
 
   const features = [
     {

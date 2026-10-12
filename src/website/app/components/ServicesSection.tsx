@@ -90,7 +90,7 @@ export const SERVICES_DATA = [
     title: "Hotels & Resorts",
     tag: "Hotels",
     shortDesc: "Handpicked luxury stays, premium resorts, and comfortable accommodations tailored to your preference.",
-    fullDesc: "Reliable and instant confirmation of hotels in India and in International countries. All categories of hotels and resorts are available.",
+    fullDesc: "Reliable and instant confirmation of hotels across domestic and international destinations. All categories of hotels and resorts are available.",
     icon: Building,
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000"
   },

@@ -223,7 +223,7 @@ export function TrendingPackages() {
               </span>
             </h1>
             <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
-              Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.
+              Customized tour packages across domestic and international destinations, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.
             </p>
           </div>
           <Link href="/packages"

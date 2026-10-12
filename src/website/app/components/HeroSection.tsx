@@ -17,7 +17,7 @@ export function HeroSection() {
 
   // Dynamic Title & Subtitle with fallbacks
   const heroHeading = siteConfig?.heroTitle?.trim() || 'Tour Packages for Domestic and International';
-  const heroSubtitle = siteConfig?.heroSubtitle?.trim() || 'Customized tour packages across India and abroad, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.';
+  const heroSubtitle = siteConfig?.heroSubtitle?.trim() || 'Customized tour packages across domestic and international destinations, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.';
 
   const images = useMemo(() => {
     if (siteConfig?.heroImages && siteConfig.heroImages.length > 0) {
