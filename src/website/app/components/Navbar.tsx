@@ -28,7 +28,7 @@ const DEFAULT_INTL_FALLBACKS = [
 ];
 
 const DEFAULT_NAV_LINKS = [
-  { id: 'kailash', label: 'Kailash Mansarovar', url: '/landing/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
+  { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
   { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
   { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
   { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
@@ -71,7 +71,7 @@ export function Navbar() {
     .filter((link: any) => link.isActive !== false && link.url !== '/blogs' && link.id !== 'blogs')
     .map((link: any) => {
       if (link.id === 'kailash') {
-        return { ...link, url: '/landing/kailash-mansarovar' };
+        return { ...link, url: '/kailash-mansarovar' };
       }
       return link;
     })

@@ -43,7 +43,7 @@ const siteGraphSchema = {
     {
       '@type': 'SiteNavigationElement',
       name: 'Kailash Mansarovar Yatra',
-      url: 'https://shreeanantatravels.com/landing/kailash-mansarovar',
+      url: 'https://shreeanantatravels.com/kailash-mansarovar',
     },
     {
       '@type': 'SiteNavigationElement',
