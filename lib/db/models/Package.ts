@@ -6,8 +6,16 @@ export interface IItineraryDay {
   description: string;
 }
 
+export interface IPackageSEO {
+  title?: string;
+  description?: string;
+  focusKeyword?: string;
+  relatedKeywords?: string[];
+}
+
 export interface IPackage extends Document {
   title: string;
+  slug: string;
   description: string;
   location: string;
   duration: string;
@@ -23,6 +31,9 @@ export interface IPackage extends Document {
   isTrending: boolean;
   hasOffer: boolean;
   badges: string[];
+  tags: string[];
+  seo: IPackageSEO;
+  redirectFromSlugs: string[];
   inclusions: string[];
   exclusions: string[];
   termsAndConditions: string[];
@@ -43,6 +54,11 @@ const PackageSchema = new Schema<IPackage>(
       type: String,
       required: [true, 'Please provide a package title'],
       trim: true,
+    },
+    slug: {
+      type: String,
+      trim: true,
+      lowercase: true,
     },
     description: {
       type: String,
@@ -107,6 +123,20 @@ const PackageSchema = new Schema<IPackage>(
       enum: ['bestseller'],
       default: [],
     },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    seo: {
+      title: { type: String, trim: true, default: '' },
+      description: { type: String, trim: true, default: '' },
+      focusKeyword: { type: String, trim: true, default: '' },
+      relatedKeywords: { type: [String], default: [] },
+    },
+    redirectFromSlugs: {
+      type: [String],
+      default: [],
+    },
     inclusions: {
       type: [String],
       default: [],
@@ -127,6 +157,9 @@ const PackageSchema = new Schema<IPackage>(
   { timestamps: true }
 );
 
+PackageSchema.index({ slug: 1 }, { unique: true, sparse: true });
+PackageSchema.index({ redirectFromSlugs: 1 });
+PackageSchema.index({ tags: 1 });
 PackageSchema.index({ category: 1 });
 PackageSchema.index({ isTrending: 1 });
 PackageSchema.index({ isActive: 1 });

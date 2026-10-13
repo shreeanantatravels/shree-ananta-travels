@@ -1,5 +1,5 @@
 "use client";
-import { X, Tag, Award, TrendingUp, Plus, Trash2, Calendar, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { X, Tag, Award, TrendingUp, Plus, Trash2, Calendar, CheckCircle2, XCircle, Loader2, Sparkles, Link as LinkIcon, AlertCircle, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useCreatePackageMutation, useUpdatePackageMutation, PackageData } from '../api/packageApi';
 import { toast } from 'sonner';
@@ -9,6 +9,9 @@ import { Textarea } from "./ui/textarea";
 import { TagEntryField } from './package/TagEntryField';
 import { CustomCategoryModal } from './package/CustomCategoryModal';
 import { ImageUploadSlot } from './package/ImageUploadSlot';
+import { PackageTagsSection } from './package/PackageTagsSection';
+import { PackageSeoSection } from './package/PackageSeoSection';
+import { slugifyPackage } from '@/lib/utils/packageSeoHelper';
 
 interface PackageModalProps {
   isOpen: boolean;
@@ -27,6 +30,12 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
   const isEditMode = !!initialData;
 
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [slugSuggested, setSlugSuggested] = useState<string | null>(null);
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false);
+
   const [location, setLocation] = useState('');
   const [duration, setDuration] = useState('');
   const [category, setCategory] = useState('domestic');
@@ -53,14 +62,55 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
   const [exclusions, setExclusions] = useState<string[]>([]);
   const [termsAndConditions, setTermsAndConditions] = useState<string[]>([]);
 
+  // Tags & SEO
+  const [tags, setTags] = useState<string[]>([]);
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [focusKeyword, setFocusKeyword] = useState('');
+  const [relatedKeywords, setRelatedKeywords] = useState<string[]>([]);
+
   const [customTypes, setCustomTypes] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState('');
   const [showTypeModal, setShowTypeModal] = useState(false);
+
+  // Check slug availability via API
+  const checkSlugAvailability = async (slugToCheck: string) => {
+    const clean = slugifyPackage(slugToCheck);
+    if (!clean) {
+      setSlugError('URL Slug cannot be empty.');
+      setSlugSuggested(null);
+      return;
+    }
+    try {
+      setIsCheckingSlug(true);
+      const url = `/api/packages/check-slug?slug=${encodeURIComponent(clean)}${
+        initialData?._id ? `&excludeId=${initialData._id}` : ''
+      }`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.available) {
+        setSlugError(data.message || 'This slug is already in use.');
+        setSlugSuggested(data.suggestedSlug || null);
+      } else {
+        setSlugError(null);
+        setSlugSuggested(null);
+      }
+    } catch {
+      // graceful fallback
+    } finally {
+      setIsCheckingSlug(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
     if (initialData) {
       setTitle(initialData.title || '');
+      setSlug(initialData.slug || '');
+      setIsSlugManuallyEdited(!!initialData.slug);
+      setSlugError(null);
+      setSlugSuggested(null);
+
       setLocation(initialData.location || '');
       setDuration(initialData.duration || '');
       setCategory(initialData.category || 'domestic');
@@ -96,6 +146,13 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       setExclusions(parseArrayField(initialData.exclusions));
       setTermsAndConditions(parseArrayField(initialData.termsAndConditions));
       setSelectedType(initialData.packageType || '');
+
+      setTags(parseArrayField(initialData.tags));
+      setSeoTitle(initialData.seo?.title || '');
+      setSeoDescription(initialData.seo?.description || '');
+      setFocusKeyword(initialData.seo?.focusKeyword || '');
+      setRelatedKeywords(parseArrayField(initialData.seo?.relatedKeywords));
+
       setItineraryDays(
         (initialData.itinerary || []).map((d, i) => ({
           id: d._id || String(i),
@@ -112,16 +169,60 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       ]);
       setImageFiles([null, null, null, null]);
     } else {
-      setTitle(''); setLocation(''); setDuration('');
+      setTitle('');
+      setSlug('');
+      setIsSlugManuallyEdited(false);
+      setSlugError(null);
+      setSlugSuggested(null);
+
+      setLocation(''); setDuration('');
       setCategory('domestic'); setDescription('');
       setPriceType('fixed');
       setOriginalPrice(''); setDiscountedPrice('');
       setIsBestseller(false); setHasOffer(false); setIsTrending(false);
       setInclusions([]); setExclusions([]); setTermsAndConditions([]); setSelectedType('');
+      setTags([]);
+      setSeoTitle(''); setSeoDescription(''); setFocusKeyword(''); setRelatedKeywords([]);
       setItineraryDays([]);
       setImagePreviews([null, null, null, null]); setImageFiles([null, null, null, null]);
     }
   }, [isOpen, initialData]);
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (!isSlugManuallyEdited) {
+      const generated = slugifyPackage(newTitle);
+      setSlug(generated);
+      if (generated) {
+        checkSlugAvailability(generated);
+      } else {
+        setSlugError(null);
+        setSlugSuggested(null);
+      }
+    }
+  };
+
+  const handleGenerateSlugClick = () => {
+    const generated = slugifyPackage(title || 'package');
+    setSlug(generated);
+    setIsSlugManuallyEdited(false);
+    checkSlugAvailability(generated);
+  };
+
+  const handleSlugBlur = () => {
+    const cleaned = slugifyPackage(slug);
+    setSlug(cleaned);
+    if (cleaned) {
+      checkSlugAvailability(cleaned);
+    }
+  };
+
+  const handleApplySuggestedSlug = (suggested: string) => {
+    setSlug(suggested);
+    setSlugError(null);
+    setSlugSuggested(null);
+    setIsSlugManuallyEdited(true);
+  };
 
   const setPreview = (index: 0 | 1 | 2 | 3, src: string | null) =>
     setImagePreviews(prev => { 
@@ -159,6 +260,17 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       toast.error('Please fill all critical required fields (Name, Destination, Duration, Description)');
       return;
     }
+
+    const cleanSlug = slugifyPackage(slug || title);
+    if (!cleanSlug) {
+      toast.error('Please specify or generate a valid URL slug');
+      return;
+    }
+
+    if (slugError) {
+      toast.error('Please resolve the URL slug error before saving');
+      return;
+    }
     
     try {
       const origAmt = priceType === 'fixed' && originalPrice ? (parseFloat(String(originalPrice).replace(/[^0-9.]/g, '')) || 0) : 0;
@@ -166,6 +278,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
 
       const formData = new FormData();
       formData.append('title', title);
+      formData.append('slug', cleanSlug);
       formData.append('location', location);
       formData.append('duration', duration);
       formData.append('category', category);
@@ -182,6 +295,16 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       formData.append('inclusions', JSON.stringify(inclusions));
       formData.append('exclusions', JSON.stringify(exclusions));
       formData.append('termsAndConditions', JSON.stringify(termsAndConditions));
+      formData.append('tags', JSON.stringify(tags));
+      formData.append(
+        'seo',
+        JSON.stringify({
+          title: seoTitle,
+          description: seoDescription,
+          focusKeyword,
+          relatedKeywords,
+        })
+      );
       formData.append('itinerary', JSON.stringify(itineraryDays.map(d => ({
         dayNumber: d.dayNumber,
         title: d.title || `Day ${d.dayNumber}`,
@@ -244,10 +367,86 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
             {/* Basic Details */}
             <div className="flex gap-4">
               <div className="flex-1 space-y-3 min-w-0">
+                {/* 1. Package Name */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Package Name</label>
-                  <Input value={title} onChange={e => setTitle(e.target.value)} type="text" placeholder="e.g., Kailash Mansarovar Yatra – 14D/13N" className={inp + " h-auto"} />
+                  <Input
+                    value={title}
+                    onChange={e => handleTitleChange(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Do Dham Yatra by Helicopter"
+                    className={inp + " h-auto"}
+                  />
                 </div>
+
+                {/* 2. URL Slug with Generate Slug Button & Live Preview */}
+                <div className="bg-slate-50/80 p-3 rounded-lg border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-gray-700">
+                      URL Slug
+                      <span className="text-[10px] font-normal text-gray-400 ml-1.5">(SEO Friendly)</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleGenerateSlugClick}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-colors cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3 text-blue-600" />
+                      Generate Slug
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <Input
+                      value={slug}
+                      onChange={e => {
+                        setIsSlugManuallyEdited(true);
+                        setSlug(e.target.value);
+                      }}
+                      onBlur={handleSlugBlur}
+                      type="text"
+                      placeholder="e.g., do-dham-yatra-by-helicopter"
+                      className={`w-full px-3 py-2 text-sm bg-white border rounded focus:ring-2 focus:ring-blue-500 transition-all font-mono text-xs ${
+                        slugError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
+                      }`}
+                    />
+                    {isCheckingSlug && (
+                      <span className="absolute right-3 top-2.5 text-[10px] text-gray-400 flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> checking...
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Slug Error & Suggested Alternative */}
+                  {slugError && (
+                    <div className="p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700 flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 mt-0.5 text-red-500 flex-shrink-0" />
+                        <span>{slugError}</span>
+                      </div>
+                      {slugSuggested && (
+                        <button
+                          type="button"
+                          onClick={() => handleApplySuggestedSlug(slugSuggested)}
+                          className="text-[11px] font-bold text-red-800 underline hover:text-red-900 whitespace-nowrap cursor-pointer"
+                        >
+                          Use "{slugSuggested}"
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Live URL Preview */}
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 truncate pt-0.5 font-mono">
+                    <LinkIcon className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                    <span className="text-slate-400">Live URL:</span>
+                    <span className="text-blue-700 truncate underline">
+                      https://www.shreeanantatravels.com/packages/{slug || 'your-package-slug'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Destination, Duration, Category, Type */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
                   <Input value={location} onChange={e => setLocation(e.target.value)} type="text" placeholder="e.g., Tibet, China / Nepal" className={inp + " h-auto"} />
@@ -289,6 +488,8 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                   </div>
                 </div>
               </div>
+
+              {/* Image Slots */}
               <div className="w-[420px] flex-shrink-0">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[11px] font-semibold text-gray-700">Images (4 Slots)</span>
@@ -480,14 +681,36 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                 />
               </div>
             </div>
+
+            {/* 4. Package Tags */}
+            <PackageTagsSection tags={tags} setTags={setTags} />
+
+            {/* 5. SEO Settings Section */}
+            <PackageSeoSection
+              title={title}
+              slug={slug}
+              location={location}
+              duration={duration}
+              category={category}
+              description={description}
+              seoTitle={seoTitle}
+              setSeoTitle={setSeoTitle}
+              seoDescription={seoDescription}
+              setSeoDescription={setSeoDescription}
+              focusKeyword={focusKeyword}
+              setFocusKeyword={setFocusKeyword}
+              relatedKeywords={relatedKeywords}
+              setRelatedKeywords={setRelatedKeywords}
+            />
           </div>
 
+          {/* 6. Footer Controls */}
           <div className="flex-shrink-0 flex items-center justify-end gap-3 px-5 py-4 border-t border-gray-200 bg-gray-50">
             <button onClick={onClose} disabled={isSaving} className="px-4 py-2 text-sm text-gray-600 font-medium">Cancel</button>
             <button
               disabled={isSaving}
               onClick={handleCreate}
-              className={`px-6 py-2 flex items-center gap-2 text-sm text-white rounded font-bold shadow-lg disabled:opacity-50 ${
+              className={`px-6 py-2 flex items-center gap-2 text-sm text-white rounded font-bold shadow-lg disabled:opacity-50 cursor-pointer ${
                 isEditMode
                   ? 'bg-emerald-600 shadow-emerald-500/20 hover:bg-emerald-700'
                   : 'bg-blue-600 shadow-blue-500/20 hover:bg-blue-700'

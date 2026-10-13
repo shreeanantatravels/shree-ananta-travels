@@ -46,7 +46,8 @@ const BADGE_ICONS: Record<string, string> = {
 };
 
 export default function PackageDetail() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id?: string; slug?: string }>();
+  const identifier = params?.slug || params?.id;
   const { siteConfig, agent } = useAgent();
 
   const [packageData, setPackageData] = useState<any>(null);
@@ -84,10 +85,10 @@ export default function PackageDetail() {
   }, [packageData?.images, isHoveredGallery]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!identifier) return;
 
     setIsLoading(true);
-    fetch(`/api/packages/${id}`)
+    fetch(`/api/packages/${identifier}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.data) {
@@ -163,7 +164,7 @@ export default function PackageDetail() {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [id]);
+  }, [identifier]);
 
   useEffect(() => {
     const handleScroll = () => {

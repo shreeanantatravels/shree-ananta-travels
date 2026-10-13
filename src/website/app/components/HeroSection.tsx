@@ -153,7 +153,7 @@ export function HeroSection() {
           type: 'package',
           title: pkg.title,
           subtitle: `${pkg.location} • ${pkg.duration}`,
-          url: `/package/${pkg._id}`,
+          url: `/packages/${pkg.slug || pkg._id}`,
           image: pkg.imageUrl1,
         });
       }

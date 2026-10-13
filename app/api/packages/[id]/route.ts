@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/db/connect';
 import Package from '@/lib/db/models/Package';
 import { getAuthUserId } from '@/lib/auth';
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '@/lib/cloudinary';
+import {
+  slugifyPackage,
+  ensureUniquePackageSlug,
+  generatePackageSeoTitle,
+  generatePackageMetaDescription,
+  generatePackageFocusKeyword,
+  generatePackageRelatedKeywords,
+} from '@/lib/utils/packageUtils';
 
 const safeParseJson = (str: any, fallback: any = []) => {
   if (!str || typeof str !== 'string') return str || fallback;
@@ -39,7 +48,15 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
     const { id } = await context.params;
     await connectDB();
     
-    const pkg = await Package.findById(id);
+    let pkg: any = null;
+    if (mongoose.isValidObjectId(id)) {
+      pkg = await Package.findById(id);
+    }
+    if (!pkg) {
+      pkg = await Package.findOne({
+        $or: [{ slug: id }, { redirectFromSlugs: id }],
+      });
+    }
     
     if (!pkg) {
       return NextResponse.json({ success: false, message: 'Package not found' }, { status: 404 });
@@ -140,9 +157,92 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
     if (body.hasOffer !== undefined) body.hasOffer = String(body.hasOffer) === 'true';
     if (body.isActive !== undefined) body.isActive = String(body.isActive) === 'true';
 
+    // Handle slug update and redirect preservation
+    if (body.slug !== undefined) {
+      const newSlug = slugifyPackage(body.slug);
+      if (newSlug && newSlug !== oldPackage.slug) {
+        // Validate uniqueness excluding this document
+        const existingWithSlug = await Package.findOne({
+          $or: [{ slug: newSlug }, { redirectFromSlugs: newSlug }],
+          _id: { $ne: id },
+        }).lean();
+
+        if (existingWithSlug) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `The slug "${newSlug}" is already in use by another package. Please choose a unique slug.`,
+            },
+            { status: 400 }
+          );
+        }
+
+        // Preserve old slug in redirectFromSlugs
+        const oldRedirects = Array.isArray(oldPackage.redirectFromSlugs) ? oldPackage.redirectFromSlugs : [];
+        const updatedRedirects = new Set(oldRedirects);
+        if (oldPackage.slug) {
+          updatedRedirects.add(oldPackage.slug);
+        }
+        updatedRedirects.delete(newSlug);
+        body.redirectFromSlugs = Array.from(updatedRedirects);
+        body.slug = newSlug;
+      } else if (!newSlug && !oldPackage.slug) {
+        body.slug = await ensureUniquePackageSlug(slugifyPackage(body.title || oldPackage.title), id);
+      }
+    }
+
+    // Handle tags
+    if (body.tags !== undefined) {
+      const parsedTags = safeParseJson(body.tags, []);
+      body.tags = Array.isArray(parsedTags)
+        ? parsedTags.map((t: any) => String(t).trim()).filter(Boolean)
+        : [];
+    }
+
+    // Handle SEO
+    if (body.seo !== undefined) {
+      const seoData = safeParseJson(body.seo, {});
+      const existingSeo = oldPackage.seo || {};
+      body.seo = {
+        title:
+          seoData.title !== undefined
+            ? seoData.title.trim()
+            : existingSeo.title ||
+              generatePackageSeoTitle(body.title || oldPackage.title, body.location || oldPackage.location),
+        description:
+          seoData.description !== undefined
+            ? seoData.description.trim()
+            : existingSeo.description ||
+              generatePackageMetaDescription(
+                body.title || oldPackage.title,
+                body.location || oldPackage.location,
+                body.duration || oldPackage.duration,
+                body.description || oldPackage.description
+              ),
+        focusKeyword:
+          seoData.focusKeyword !== undefined
+            ? seoData.focusKeyword.trim()
+            : existingSeo.focusKeyword ||
+              generatePackageFocusKeyword(body.title || oldPackage.title, body.location || oldPackage.location),
+        relatedKeywords:
+          seoData.relatedKeywords !== undefined
+            ? Array.isArray(seoData.relatedKeywords)
+              ? seoData.relatedKeywords.map((k: any) => String(k).trim()).filter(Boolean)
+              : typeof seoData.relatedKeywords === 'string'
+              ? safeParseJson(seoData.relatedKeywords, [])
+              : []
+            : existingSeo.relatedKeywords ||
+              generatePackageRelatedKeywords(
+                body.title || oldPackage.title,
+                body.location || oldPackage.location,
+                body.category || oldPackage.category
+              ),
+      };
+    }
+
     const updatedPackage = await Package.findByIdAndUpdate(id, body, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
 
     return NextResponse.json({ success: true, data: updatedPackage });

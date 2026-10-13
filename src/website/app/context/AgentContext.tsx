@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 export interface AgentPackage {
   _id: string;
   title: string;
+  slug?: string;
   description: string;
   location: string;
   duration: string;
@@ -17,6 +18,13 @@ export interface AgentPackage {
   isTrending: boolean;
   hasOffer: boolean;
   badges: string[];
+  tags?: string[];
+  seo?: {
+    title?: string;
+    description?: string;
+    focusKeyword?: string;
+    relatedKeywords?: string[];
+  };
   inclusions: string[];
   exclusions: string[];
   itinerary?: { day: number; title: string; description: string; }[];

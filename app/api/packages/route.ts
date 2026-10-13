@@ -3,6 +3,14 @@ import connectDB from '@/lib/db/connect';
 import Package from '@/lib/db/models/Package';
 import { getAuthUserId } from '@/lib/auth';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
+import {
+  slugifyPackage,
+  ensureUniquePackageSlug,
+  generatePackageSeoTitle,
+  generatePackageMetaDescription,
+  generatePackageFocusKeyword,
+  generatePackageRelatedKeywords,
+} from '@/lib/utils/packageUtils';
 
 const safeParseJson = (str: any, fallback: any = []) => {
   if (!str || typeof str !== 'string') return str || fallback;
@@ -105,6 +113,55 @@ export async function POST(req: Request) {
     if (body.isTrending !== undefined) body.isTrending = String(body.isTrending) === 'true';
     if (body.hasOffer !== undefined) body.hasOffer = String(body.hasOffer) === 'true';
     if (body.isActive !== undefined) body.isActive = String(body.isActive) === 'true';
+
+    // Handle slug
+    let finalSlug = slugifyPackage(body.slug || '');
+    if (!finalSlug) {
+      finalSlug = await ensureUniquePackageSlug(slugifyPackage(body.title || 'package'));
+    } else {
+      const existingSlug = await Package.findOne({
+        $or: [{ slug: finalSlug }, { redirectFromSlugs: finalSlug }],
+      }).lean();
+      if (existingSlug) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `The slug "${finalSlug}" is already in use. Please choose another unique slug.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+    body.slug = finalSlug;
+
+    // Handle tags
+    if (body.tags !== undefined) {
+      const parsedTags = safeParseJson(body.tags, []);
+      body.tags = Array.isArray(parsedTags)
+        ? parsedTags.map((t: any) => String(t).trim()).filter(Boolean)
+        : [];
+    } else {
+      body.tags = [];
+    }
+
+    // Handle SEO
+    let seoData: any = {};
+    if (body.seo) {
+      seoData = safeParseJson(body.seo, {});
+    }
+    body.seo = {
+      title: seoData.title?.trim() || generatePackageSeoTitle(body.title, body.location),
+      description:
+        seoData.description?.trim() ||
+        generatePackageMetaDescription(body.title, body.location, body.duration, body.description),
+      focusKeyword:
+        seoData.focusKeyword?.trim() || generatePackageFocusKeyword(body.title, body.location),
+      relatedKeywords: Array.isArray(seoData.relatedKeywords)
+        ? seoData.relatedKeywords.map((k: any) => String(k).trim()).filter(Boolean)
+        : typeof seoData.relatedKeywords === 'string'
+        ? safeParseJson(seoData.relatedKeywords, [])
+        : generatePackageRelatedKeywords(body.title, body.location, body.category),
+    };
 
     const newPackage = await Package.create(body);
 

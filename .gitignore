@@ -42,3 +42,8 @@ next-env.d.ts
 
 # deployment scripts
 deploy.ps1
+
+# scratch & temporary dev scripts / data dumps
+/scratch/
+*.log
+

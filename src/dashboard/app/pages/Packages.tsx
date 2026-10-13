@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Search, Edit, Trash2, TrendingUp, MapPin, Clock, Tag, ImageOff, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, TrendingUp, MapPin, Clock, Tag, ImageOff, Loader2, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { PackageModal } from '../components/PackageModal';
 import { Input } from "../components/ui/input";
@@ -136,9 +136,15 @@ function PackageCard({
         )}
 
         {/* Name */}
-        <h3 className="font-semibold text-gray-900 text-[15px] leading-snug mb-2 line-clamp-2">
+        <h3 className="font-semibold text-gray-900 text-[15px] leading-snug mb-1 line-clamp-2">
           {pkg.title}
         </h3>
+        {pkg.slug && (
+          <div className="flex items-center gap-1 text-[11px] text-blue-600 font-mono mb-2">
+            <span className="text-gray-400">/packages/</span>
+            <span className="truncate">{pkg.slug}</span>
+          </div>
+        )}
 
         {/* Meta row */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
@@ -243,6 +249,15 @@ function PackageCard({
               {isActive ? 'Active' : 'Inactive'}
             </span>
           </div>
+          <a
+            href={`/packages/${pkg.slug || pkg._id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-300 rounded-lg hover:bg-blue-50 transition-all flex items-center justify-center"
+            title="View Public Page"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
           <button
             onClick={() => onEdit(pkg)}
             className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-md hover:shadow-blue-500/30 transition-all"

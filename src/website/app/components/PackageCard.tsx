@@ -8,6 +8,7 @@ import { useAgent } from '../context/AgentContext';
 
 interface PackageCardProps {
   id: string;
+  slug?: string;
   title: string;
   location: string;
   price: number;
@@ -43,6 +44,7 @@ function optimizeCardImageUrl(url: string): string {
 
 export function PackageCard({
   id,
+  slug,
   title,
   location,
   price,
@@ -63,6 +65,8 @@ export function PackageCard({
   const [imgSrc, setImgSrc] = useState<string>(() => optimizeCardImageUrl(imageUrl || ''));
   const [hasImgError, setHasImgError] = useState(false);
 
+  const packageHref = `/packages/${slug || id}`;
+
   useEffect(() => {
     setImgSrc(optimizeCardImageUrl(imageUrl || ''));
     setHasImgError(false);
@@ -73,7 +77,7 @@ export function PackageCard({
   };
 
   const handleWhatsAppShare = () => {
-    const text = encodeURIComponent(`Check out this package: ${title} - ${location}`);
+    const text = encodeURIComponent(`Check out this package: ${title} - https://www.shreeanantatravels.com${packageHref}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
@@ -87,7 +91,7 @@ export function PackageCard({
       <div className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300 h-full">
         <div className="relative overflow-hidden w-full aspect-[4/5] lg:max-h-[500px]">
           <Link
-            href={`/package/${id}`}
+            href={packageHref}
             aria-label={`View ${title} tour package`}
             className="absolute inset-0 block z-0"
           >
@@ -148,7 +152,7 @@ export function PackageCard({
             </div>
             
             <div className="text-4xl font-black mb-2 pointer-events-auto">
-              <Link href={`/package/${id}`} className="hover:underline">
+              <Link href={packageHref} className="hover:underline">
                 {title}
               </Link>
             </div>
@@ -178,7 +182,7 @@ export function PackageCard({
             
             {/* Action Buttons */}
             <div className="flex gap-3 pointer-events-auto">
-              <Link href={`/package/${id}`}
+              <Link href={packageHref}
                 aria-label={`View itinerary for ${title}`}
                 className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-lg transition-all duration-300 font-bold text-base shadow-2xl hover:shadow-3xl hover:-translate-y-1 active:scale-95"
               >
@@ -208,7 +212,7 @@ export function PackageCard({
     <div className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
       <div className="relative overflow-hidden w-full aspect-[4/5] bg-slate-900">
         <Link
-          href={`/package/${id}`}
+          href={packageHref}
           aria-label={`View ${title} tour package`}
           className="block w-full h-full"
         >
@@ -259,7 +263,7 @@ export function PackageCard({
           
           {/* Title */}
           <div className="text-xl font-bold text-[#1e293b] dark:text-white leading-tight mb-2 line-clamp-2">
-            <Link href={`/package/${id}`} className="hover:text-[var(--theme-primary)] transition-colors">
+            <Link href={packageHref} className="hover:text-[var(--theme-primary)] transition-colors">
               {title}
             </Link>
           </div>

@@ -9,6 +9,7 @@ import { testimonialApi } from './api/testimonialApi';
 import { contentSectionApi } from './api/contentSectionApi';
 import { siteConfigApi } from './api/siteConfigApi';
 import { faqsApi } from './api/faqsApi';
+import { blogsApi } from './api/blogsApi';
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ export const store = configureStore({
     [contentSectionApi.reducerPath]: contentSectionApi.reducer,
     [siteConfigApi.reducerPath]: siteConfigApi.reducer,
     [faqsApi.reducerPath]: faqsApi.reducer,
+    [blogsApi.reducerPath]: blogsApi.reducer,
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -29,7 +31,8 @@ export const store = configureStore({
       .concat(testimonialApi.middleware)
       .concat(contentSectionApi.middleware)
       .concat(siteConfigApi.middleware)
-      .concat(faqsApi.middleware),
+      .concat(faqsApi.middleware)
+      .concat(blogsApi.middleware),
 });
 
 setupListeners(store.dispatch);

@@ -197,6 +197,7 @@ export function Footer() {
               <li><Link href="/destinations" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> All Destinations</Link></li>
               <li><Link href="/packages" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Tour Packages</Link></li>
               <li><Link href="/services" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Travel Services</Link></li>
+              <li><Link href="/blogs" className="hover:text-[#d4af37] transition-colors flex items-center gap-1.5"><ArrowRight className="w-3 h-3 text-[#d4af37]" /> Travel Blog</Link></li>
             </ul>
           </div>
 

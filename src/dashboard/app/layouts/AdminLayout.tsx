@@ -9,7 +9,7 @@ import { Sidebar } from './admin/components/Sidebar';
 import { Topbar } from './admin/components/Topbar';
 import { useGetMeQuery } from '../api/authApi';
 
-const websiteItems = ['/branding', '/content', '/testimonials'];
+const websiteItems = ['/branding', '/content', '/testimonials', '/faqs', '/blogs'];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';

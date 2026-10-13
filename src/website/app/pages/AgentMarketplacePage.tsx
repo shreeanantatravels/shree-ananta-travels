@@ -339,6 +339,7 @@ export default function AgentMarketplacePage({
                 <div key={pkg._id} className={filtered.length === 1 ? 'w-full max-w-[340px] sm:max-w-md mx-auto' : 'w-full'}>
                   <PackageCard
                     id={pkg._id}
+                    slug={pkg.slug}
                     title={pkg.title}
                     location={pkg.location}
                     price={pkg.discountedPrice && pkg.discountedPrice > 0 ? pkg.discountedPrice : (pkg.originalPrice || 0)}

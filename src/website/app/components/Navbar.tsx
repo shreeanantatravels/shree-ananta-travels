@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown, ArrowRight, MapPin } from 'lucide-react';
+import { Menu, X, ChevronDown, ArrowRight, MapPin, BookOpen } from 'lucide-react';
 import { useAgent, type AgentPackage } from '../context/AgentContext';
 import { PlanTourModal } from './PlanTourModal';
 import logoAsset from "../../assets/tgt-logo.png";
@@ -36,7 +36,8 @@ const DEFAULT_NAV_LINKS = [
   { id: 'spiritual', label: 'Spiritual', url: '/spiritual', isActive: true, canDelete: false, order: 5 },
   { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
   { id: 'trending', label: 'Trending', url: '/trending', isActive: true, canDelete: false, order: 7 },
-  { id: 'contact', label: 'Contact', url: '/contact', isActive: true, canDelete: false, order: 8 },
+  { id: 'blogs', label: 'Blogs', url: '/blogs', isActive: true, canDelete: false, order: 8 },
+  { id: 'contact', label: 'Contact', url: '/contact', isActive: true, canDelete: false, order: 9 },
 ];
 
 export function Navbar() {
@@ -44,8 +45,20 @@ export function Navbar() {
   const [showPlanTourModal, setShowPlanTourModal] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [blogCategories, setBlogCategories] = useState<{ name: string; slug: string }[]>([]);
 
   const { agent, packages, siteConfig } = useAgent();
+
+  useEffect(() => {
+    fetch('/api/blogs/categories?navbar=true')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.success && Array.isArray(data.data) && data.data.length > 0) {
+          setBlogCategories(data.data.map((c: any) => ({ name: c.name, slug: c.slug })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,7 +83,7 @@ export function Navbar() {
 
   const seenNavKeys = new Set<string>();
   const displayNavLinks = rawNavLinks
-    .filter((link: any) => link.isActive !== false && link.url !== '/blogs' && link.id !== 'blogs')
+    .filter((link: any) => link.isActive !== false)
     .map((link: any) => {
       if (link.id === 'kailash') {
         return { ...link, url: '/kailash-mansarovar' };
@@ -175,7 +188,8 @@ export function Navbar() {
             {displayNavLinks.map((link: any) => {
               const isDom = link.id === 'domestic' || link.category === 'domestic' || link.label?.toLowerCase() === 'domestic';
               const isIntl = link.id === 'international' || link.category === 'international' || link.label?.toLowerCase() === 'international';
-              const isDropdown = link.isDropdown || isDom || isIntl;
+              const isBlogs = link.id === 'blogs' || link.url === '/blogs' || (link.label || '').toLowerCase().trim() === 'blogs';
+              const isDropdown = link.isDropdown || isDom || isIntl || isBlogs;
 
               if (isDropdown) {
                 const dropCategory = (isIntl || link.category === 'international') ? 'international' : 'domestic';
@@ -198,56 +212,104 @@ export function Navbar() {
                       <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
                     </Link>
                     
-                    {/* TravelGrow-Style Mega Dropdown Menu */}
+                    {/* Mega Dropdown Menu */}
                     {activeDropdown === link.id && (
                       <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 w-[460px] z-50">
                         <div className="bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                          {/* Dropdown Header */}
-                          <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
-                            <div className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              {dropCategory === 'domestic' ? 'Domestic Destinations' : 'International Destinations'}
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-0.5">
-                              Tour Packages
-                            </span>
-                          </div>
+                          {isBlogs ? (
+                            <>
+                              {/* Blogs Dropdown Header */}
+                              <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
+                                <div className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
+                                  <BookOpen className="w-4 h-4 text-amber-500" />
+                                  Blog Categories &amp; Yatra Guides
+                                </div>
+                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-0.5">
+                                  Travel Literature &amp; Stories
+                                </span>
+                              </div>
 
-                          {/* Dropdown Destinations Grid (2 Columns) */}
-                          <div className="p-5 max-h-[360px] overflow-y-auto custom-scrollbar">
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                              {dropDestinations.map((dest: any) => {
-                                const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-                                const destSlug = toDestinationSlug(dest.name);
-                                const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
-                                return (
-                                  <Link 
-                                    key={dest.name} 
-                                    href={destUrl}
-                                    onClick={() => setActiveDropdown(null)}
-                                    className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
-                                  >
-                                    <span className="truncate">{dest.name}</span>
-                                    <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
-                                  </Link>
-                                );
-                              })}
-                            </div>
-                          </div>
+                              {/* Blog Categories Grid (2 Columns) */}
+                              <div className="p-5 max-h-[360px] overflow-y-auto custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                                  {blogCategories.map((cat) => (
+                                    <Link 
+                                      key={cat.slug} 
+                                      href={`/blogs/${cat.slug}`}
+                                      onClick={() => setActiveDropdown(null)}
+                                      className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
+                                    >
+                                      <span className="truncate">{cat.name}</span>
+                                      <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
 
-                          {/* Dropdown Footer */}
-                          <div className="bg-gray-50/80 dark:bg-gray-800/60 px-6 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold">
-                            <span className="text-gray-500 dark:text-gray-400">
-                              Explore all {dropCategory === 'domestic' ? 'Domestic' : 'International'} Destinations
-                            </span>
-                            <Link
-                              href={pageUrl}
-                              onClick={() => setActiveDropdown(null)}
-                              className="text-[var(--theme-primary)] dark:text-amber-400 hover:underline flex items-center gap-1 font-bold"
-                            >
-                              View All <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
-                          </div>
+                              {/* Blogs Dropdown Footer */}
+                              <div className="bg-gray-50/80 dark:bg-gray-800/60 px-6 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold">
+                                <span className="text-gray-500 dark:text-gray-400">
+                                  Explore all travel blogs &amp; articles
+                                </span>
+                                <Link
+                                  href="/blogs"
+                                  onClick={() => setActiveDropdown(null)}
+                                  className="text-[var(--theme-primary)] dark:text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                                >
+                                  View All Blogs <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {/* Dropdown Header */}
+                              <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
+                                <div className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
+                                  <MapPin className="w-4 h-4" />
+                                  {dropCategory === 'domestic' ? 'Domestic Destinations' : 'International Destinations'}
+                                </div>
+                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-0.5">
+                                  Tour Packages
+                                </span>
+                              </div>
+
+                              {/* Dropdown Destinations Grid (2 Columns) */}
+                              <div className="p-5 max-h-[360px] overflow-y-auto custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                                  {dropDestinations.map((dest: any) => {
+                                    const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                                    const destSlug = toDestinationSlug(dest.name);
+                                    const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                                    return (
+                                      <Link 
+                                        key={dest.name} 
+                                        href={destUrl}
+                                        onClick={() => setActiveDropdown(null)}
+                                        className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
+                                      >
+                                        <span className="truncate">{dest.name}</span>
+                                        <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {/* Dropdown Footer */}
+                              <div className="bg-gray-50/80 dark:bg-gray-800/60 px-6 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold">
+                                <span className="text-gray-500 dark:text-gray-400">
+                                  Explore all {dropCategory === 'domestic' ? 'Domestic' : 'International'} Destinations
+                                </span>
+                                <Link
+                                  href={pageUrl}
+                                  onClick={() => setActiveDropdown(null)}
+                                  className="text-[var(--theme-primary)] dark:text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                                >
+                                  View All <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
@@ -298,7 +360,8 @@ export function Navbar() {
             {displayNavLinks.map((link: any) => {
               const isDom = link.id === 'domestic' || link.category === 'domestic' || link.label?.toLowerCase() === 'domestic';
               const isIntl = link.id === 'international' || link.category === 'international' || link.label?.toLowerCase() === 'international';
-              const isDropdown = link.isDropdown || isDom || isIntl;
+              const isBlogs = link.id === 'blogs' || link.url === '/blogs' || (link.label || '').toLowerCase().trim() === 'blogs';
+              const isDropdown = link.isDropdown || isDom || isIntl || isBlogs;
 
               if (isDropdown) {
                 const dropCategory = (isIntl || link.category === 'international') ? 'international' : 'domestic';
@@ -325,32 +388,60 @@ export function Navbar() {
 
                     {activeDropdown === link.id && (
                       <div className="pl-4 pr-2 py-2 space-y-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                        <div className="grid grid-cols-2 gap-2">
-                          {dropDestinations.map((dest: any) => {
-                            const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-                            const destSlug = toDestinationSlug(dest.name);
-                            const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
-                            return (
+                        {isBlogs ? (
+                          <>
+                            <div className="grid grid-cols-2 gap-2">
+                              {blogCategories.map((cat) => (
+                                <Link 
+                                  key={cat.slug} 
+                                  href={`/blogs/${cat.slug}`}
+                                  onClick={() => setIsOpen(false)}
+                                  className="block px-2 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] rounded-lg transition-colors truncate"
+                                >
+                                  {cat.name}
+                                </Link>
+                              ))}
+                            </div>
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 text-right">
                               <Link 
-                                key={dest.name} 
-                                href={destUrl}
+                                href="/blogs"
                                 onClick={() => setIsOpen(false)}
-                                className="block px-2 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] rounded-lg transition-colors truncate"
+                                className="text-xs font-bold text-[var(--theme-primary)] dark:text-amber-400 inline-flex items-center gap-1"
                               >
-                                {dest.name}
+                                View All Blogs →
                               </Link>
-                            );
-                          })}
-                        </div>
-                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700 text-right">
-                          <Link 
-                            href={pageUrl}
-                            onClick={() => setIsOpen(false)}
-                            className="text-xs font-bold text-[var(--theme-primary)] dark:text-amber-400 inline-flex items-center gap-1"
-                          >
-                            View All {dropCategory === 'domestic' ? 'Domestic' : 'International'} →
-                          </Link>
-                        </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-2 gap-2">
+                              {dropDestinations.map((dest: any) => {
+                                const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                                const destSlug = toDestinationSlug(dest.name);
+                                const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                                return (
+                                  <Link 
+                                    key={dest.name} 
+                                    href={destUrl}
+                                    onClick={() => setIsOpen(false)}
+                                    className="block px-2 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] rounded-lg transition-colors truncate"
+                                  >
+                                    {dest.name}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 text-right">
+                              <Link 
+                                href={pageUrl}
+                                onClick={() => setIsOpen(false)}
+                                className="text-xs font-bold text-[var(--theme-primary)] dark:text-amber-400 inline-flex items-center gap-1"
+                              >
+                                View All {dropCategory === 'domestic' ? 'Domestic' : 'International'} →
+                              </Link>
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>

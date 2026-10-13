@@ -20,6 +20,7 @@ import {
   Globe,
   ChevronRight,
   HelpCircle,
+  BookOpen,
 } from 'lucide-react';
 
 const globalNavItems = [
@@ -31,10 +32,11 @@ const globalNavItems = [
 const contextData: Record<string, { title: string, description: string, items: { name: string, href: string, icon: any }[] }> = {
   'website': {
     title: 'Website Management',
-    description: 'Branding, content, FAQs & testimonials',
+    description: 'Branding, content, blogs, FAQs & testimonials',
     items: [
       { name: 'Branding & Theme', href: '/admin/branding', icon: Palette },
       { name: 'Content Setup', href: '/admin/content', icon: FileText },
+      { name: 'Blog Articles', href: '/admin/blogs', icon: BookOpen },
       { name: 'FAQs Management', href: '/admin/faqs', icon: HelpCircle },
       { name: 'Testimonials', href: '/admin/testimonials', icon: Star },
     ]

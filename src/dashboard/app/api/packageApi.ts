@@ -8,10 +8,18 @@ export interface ItineraryItem {
   _id?: string;
 }
 
+export interface PackageSEO {
+  title?: string;
+  description?: string;
+  focusKeyword?: string;
+  relatedKeywords?: string[];
+}
+
 export interface PackageData {
   _id: string;
   agentId: string;
   title: string;
+  slug?: string;
   description: string;
   location: string;
   duration: string;
@@ -27,6 +35,9 @@ export interface PackageData {
   isTrending: boolean;
   hasOffer: boolean;
   badges: string[];
+  tags?: string[];
+  seo?: PackageSEO;
+  redirectFromSlugs?: string[];
   inclusions: string[];
   exclusions: string[];
   termsAndConditions?: string;

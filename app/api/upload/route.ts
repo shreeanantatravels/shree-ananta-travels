@@ -28,6 +28,23 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: 'Only WebP (.webp) images are allowed for packages.' }, { status: 400 });
       }
       folder = 'ananda-travel/packages';
+    } else if (type === 'blog') {
+      const allowedTypes = ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'];
+      const isAllowed = allowedTypes.includes(file.type.toLowerCase()) || 
+        /\.(webp|jpg|jpeg|png)$/i.test(file.name);
+      if (!isAllowed) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid format. Only WebP, JPEG, or PNG images are accepted for blog articles.' },
+          { status: 400 }
+        );
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json(
+          { success: false, message: 'Image size exceeds maximum limit of 5 MB.' },
+          { status: 400 }
+        );
+      }
+      folder = 'ananda-travel/blogs';
     }
 
     // Upload to Cloudinary

@@ -24,6 +24,7 @@ import { Footer } from "../components/Footer";
 interface KailashPackageItem {
   _id: string;
   title: string;
+  slug?: string | null;
   location?: string | null;
   duration?: string | null;
   discountedPrice?: number | null;
@@ -497,7 +498,7 @@ Please share package itinerary and customized pricing details.`;
                       {/* Action Buttons: 2 Clean Buttons */}
                       <div className="flex items-center gap-2 pt-1">
                         <Link
-                          href={`/package/${pkg._id}`}
+                          href={`/packages/${pkg.slug || pkg._id}`}
                           className="flex-1 py-2 px-3 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider text-center transition-colors flex items-center justify-center gap-1"
                         >
                           <span>Details</span>

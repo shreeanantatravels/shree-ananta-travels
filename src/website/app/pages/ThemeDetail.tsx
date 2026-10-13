@@ -700,7 +700,7 @@ export function ThemeDetail() {
                           Enquire
                         </button>
                         <Link
-                          href={`/package/${pkg.id}`}
+                          href={`/packages/${pkg.slug || pkg.id}`}
                           className="px-3.5 py-2 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-md hover:opacity-90 active:scale-95"
                           style={{ background: 'var(--theme-gradient)' }}
                         >

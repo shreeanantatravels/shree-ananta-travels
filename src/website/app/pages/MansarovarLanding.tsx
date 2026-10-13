@@ -545,7 +545,7 @@ export default function MansarovarLanding() {
                     <div className="mt-auto flex items-center gap-2 pt-2">
                       {isDatabaseId ? (
                         <Link
-                          href={`/package/${pkg._id}`}
+                          href={`/packages/${pkg.slug || pkg._id}`}
                           className="flex-1 py-3 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold text-xs uppercase tracking-wider text-center transition-colors flex items-center justify-center gap-1"
                         >
                           <span>Details</span>
