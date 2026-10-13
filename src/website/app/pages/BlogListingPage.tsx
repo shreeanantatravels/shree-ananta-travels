@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Calendar,
   Clock,
@@ -16,11 +16,11 @@ import {
   MapPin,
   TrendingUp,
   ShieldCheck,
-} from 'lucide-react';
-import { Topbar } from '../components/Topbar';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-import { ChatbotButton } from '../components/ChatbotButton';
+} from "lucide-react";
+import { Topbar } from "../components/Topbar";
+import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+import { ChatbotButton } from "../components/ChatbotButton";
 
 export interface BlogItem {
   _id: string;
@@ -83,8 +83,8 @@ export default function BlogListingPage({
   categories,
   popularPackages = [],
   pagination,
-  currentSort = 'latest',
-  currentSearch = '',
+  currentSort = "latest",
+  currentSearch = "",
 }: BlogListingPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -98,26 +98,32 @@ export default function BlogListingPage({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams ? searchParams.toString() : '');
+    const params = new URLSearchParams(
+      searchParams ? searchParams.toString() : "",
+    );
     if (searchInput.trim()) {
-      params.set('search', searchInput.trim());
+      params.set("search", searchInput.trim());
     } else {
-      params.delete('search');
+      params.delete("search");
     }
-    params.set('page', '1');
+    params.set("page", "1");
     router.push(`/blogs?${params.toString()}`);
   };
 
   const handleSortChange = (newSort: string) => {
-    const params = new URLSearchParams(searchParams ? searchParams.toString() : '');
-    params.set('sort', newSort);
-    params.set('page', '1');
+    const params = new URLSearchParams(
+      searchParams ? searchParams.toString() : "",
+    );
+    params.set("sort", newSort);
+    params.set("page", "1");
     router.push(`/blogs?${params.toString()}`);
   };
 
   const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams ? searchParams.toString() : '');
-    params.set('page', newPage.toString());
+    const params = new URLSearchParams(
+      searchParams ? searchParams.toString() : "",
+    );
+    params.set("page", newPage.toString());
     router.push(`/blogs?${params.toString()}`);
   };
 
@@ -142,7 +148,9 @@ export default function BlogListingPage({
                 <li>
                   <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
                 </li>
-                <li className="text-white font-semibold">Travel Blogs &amp; Guides</li>
+                <li className="text-white font-semibold">
+                  Travel Blogs &amp; Guides
+                </li>
               </ol>
             </nav>
 
@@ -155,97 +163,104 @@ export default function BlogListingPage({
                 Inspiration, Yatra Guides &amp; Expert Itineraries
               </h1>
               <p className="text-sm sm:text-base text-gray-300 font-normal leading-relaxed">
-                Handcrafted destination guides, seasonal tips, and holy pilgrimage insights curated by the travel experts at Shree Ananta Travels.
+                Handcrafted destination guides, seasonal tips, and holy
+                pilgrimage insights curated by the travel experts at Shree
+                Ananta Travels.
               </p>
             </div>
           </div>
         </section>
 
         {/* ── SECTION 1: MOST POPULAR BLOG & STORIES (TripToTemples Style) ── */}
-        {displayPopular.length > 0 && pagination.page === 1 && !currentSearch && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
-            <div className="border-b border-gray-200 pb-4 mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#0a1c3d] tracking-tight flex items-center gap-2">
-                  <span className="bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent">
-                    Most Popular Blog
-                  </span>{' '}
-                  &amp; Stories
-                </h2>
-                <p className="text-xs text-gray-500 mt-1">
-                  Handpicked spiritual narratives, route guides, and pilgrimage literature
-                </p>
+        {displayPopular.length > 0 &&
+          pagination.page === 1 &&
+          !currentSearch && (
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
+              <div className="border-b border-gray-200 pb-4 mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-[#0a1c3d] tracking-tight flex items-center gap-2">
+                    <span className="bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent">
+                      Most Popular Blog
+                    </span>{" "}
+                    &amp; Stories
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Handpicked spiritual narratives, route guides, and
+                    pilgrimage literature
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {displayPopular.map((post) => (
-                <article
-                  key={post._id}
-                  className="group bg-white rounded-2xl border border-gray-200/80 hover:border-amber-400/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden"
-                >
-                  {/* Thumbnail */}
-                  <Link
-                    href={`/blogs/${post.slug}`}
-                    className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100 block"
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {displayPopular.map((post) => (
+                  <article
+                    key={post._id}
+                    className="group bg-white rounded-2xl border border-gray-200/80 hover:border-amber-400/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden"
                   >
-                    <img
-                      src={post.coverImage}
-                      alt={post.coverImageAlt || post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-[#0a1c3d]/90 text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
-                      {post.category}
-                    </span>
-                  </Link>
+                    {/* Thumbnail */}
+                    <Link
+                      href={`/blogs/${post.slug}`}
+                      className="relative aspect-[16/10] w-full overflow-hidden bg-gray-100 block"
+                    >
+                      <img
+                        src={post.coverImage}
+                        alt={post.coverImageAlt || post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-[#0a1c3d]/90 text-white text-[10px] font-bold rounded-full uppercase tracking-wider">
+                        {post.category}
+                      </span>
+                    </Link>
 
-                  {/* Body */}
-                  <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                        <span>{post.readTime} min read</span>
-                        <span>•</span>
-                        <span>
-                          {post.publishedAt
-                            ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                              })
-                            : 'Recent'}
-                        </span>
+                    {/* Body */}
+                    <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[11px] text-gray-500">
+                          <span>{post.readTime} min read</span>
+                          <span>•</span>
+                          <span>
+                            {post.publishedAt
+                              ? new Date(post.publishedAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                  },
+                                )
+                              : "Recent"}
+                          </span>
+                        </div>
+
+                        <h3 className="text-sm font-bold text-gray-900 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
+                          <Link href={`/blogs/${post.slug}`}>{post.title}</Link>
+                        </h3>
+
+                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                          {post.excerpt}
+                        </p>
                       </div>
 
-                      <h3 className="text-sm font-bold text-gray-900 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
-                        <Link href={`/blogs/${post.slug}`}>{post.title}</Link>
-                      </h3>
-
-                      <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                        {post.excerpt}
-                      </p>
+                      {/* Brand Amber Gold Read More button on the left */}
+                      <div className="pt-2 border-t border-gray-100">
+                        <Link
+                          href={`/blogs/${post.slug}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-600 hover:text-amber-700 transition-colors group-hover:translate-x-0.5 duration-200"
+                        >
+                          <span>Read More</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </div>
-
-                    {/* Brand Amber Gold Read More button on the left */}
-                    <div className="pt-2 border-t border-gray-100">
-                      <Link
-                        href={`/blogs/${post.slug}`}
-                        className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-600 hover:text-amber-700 transition-colors group-hover:translate-x-0.5 duration-200"
-                      >
-                        <span>Read More</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
 
         {/* ── SECTION 2: 2-COLUMN MAIN FEED + SIDEBAR CATEGORIES ──── */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-            
             {/* ── LEFT COLUMN: ARTICLES GRID (8 COLS) ──────────────── */}
             <div className="lg:col-span-8 space-y-6">
               {/* Header with Search and Sort */}
@@ -255,13 +270,17 @@ export default function BlogListingPage({
                     All Travel Articles &amp; Yatra Guides
                   </h2>
                   <p className="text-xs text-gray-500">
-                    Showing {initialArticles.length} of {pagination.totalCount} articles
+                    Showing {initialArticles.length} of {pagination.totalCount}{" "}
+                    articles
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
                   {/* Search */}
-                  <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-48">
+                  <form
+                    onSubmit={handleSearchSubmit}
+                    className="relative w-full sm:w-48"
+                  >
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
@@ -289,12 +308,15 @@ export default function BlogListingPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {initialArticles.map((article) => {
                     const formattedDate = article.publishedAt
-                      ? new Date(article.publishedAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })
-                      : 'Recent';
+                      ? new Date(article.publishedAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                      : "Recent";
 
                     return (
                       <article
@@ -361,23 +383,30 @@ export default function BlogListingPage({
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-200/80 p-12 text-center space-y-3">
                   <BookOpen className="w-10 h-10 text-gray-400 mx-auto" />
-                  <h3 className="text-base font-bold text-gray-800">No articles found</h3>
-                  <p className="text-xs text-gray-500">Try modifying your search query.</p>
+                  <h3 className="text-base font-bold text-gray-800">
+                    No articles found
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Try modifying your search query.
+                  </p>
                 </div>
               )}
 
               {/* Numbered Pagination */}
               {pagination.totalPages > 1 && (
                 <div className="pt-6 flex items-center justify-center gap-2">
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pg) => (
+                  {Array.from(
+                    { length: pagination.totalPages },
+                    (_, i) => i + 1,
+                  ).map((pg) => (
                     <button
                       key={pg}
                       type="button"
                       onClick={() => handlePageChange(pg)}
                       className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         pg === pagination.page
-                          ? 'bg-[#0a1c3d] text-white shadow-md'
-                          : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                          ? "bg-[#0a1c3d] text-white shadow-md"
+                          : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-100"
                       }`}
                     >
                       {pg}
@@ -389,7 +418,6 @@ export default function BlogListingPage({
 
             {/* ── RIGHT COLUMN: SIDEBAR CATEGORIES & PACKAGES (4 COLS) */}
             <div className="lg:col-span-4 space-y-6">
-              
               {/* Card 1: Explore by Categories (TripToTemples style) */}
               <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs space-y-4">
                 <div className="border-b border-gray-100 pb-3 flex items-center justify-between">
@@ -411,11 +439,12 @@ export default function BlogListingPage({
                     >
                       <span className="truncate">{cat.name}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        {cat.publishedCount !== undefined && cat.publishedCount > 0 && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 group-hover:bg-amber-200/70 text-gray-600 group-hover:text-amber-900 font-semibold">
-                            {cat.publishedCount}
-                          </span>
-                        )}
+                        {cat.publishedCount !== undefined &&
+                          cat.publishedCount > 0 && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 group-hover:bg-amber-200/70 text-gray-600 group-hover:text-amber-900 font-semibold">
+                              {cat.publishedCount}
+                            </span>
+                          )}
                         <span className="text-gray-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all text-xs">
                           →
                         </span>
@@ -442,7 +471,9 @@ export default function BlogListingPage({
                       >
                         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
                           <img
-                            src={pkg.imageUrl1 || '/uploads/shree-ananta-logo.webp'}
+                            src={
+                              pkg.imageUrl1 || "/uploads/shree-ananta-logo.webp"
+                            }
                             alt={pkg.title}
                             className="w-full h-full object-cover group-hover/pkg:scale-105 transition-transform duration-300"
                             loading="lazy"
@@ -469,7 +500,9 @@ export default function BlogListingPage({
                   Need Pilgrimage Guidance?
                 </h4>
                 <p className="text-xs text-gray-300 leading-relaxed">
-                  Speak directly with our senior yatra coordinators for Kailash Mansarovar, Adi Kailash &amp; Char Dham customized itineraries.
+                  Speak directly with our senior yatra coordinators for Kailash
+                  Mansarovar, Adi Kailash &amp; Char Dham customized
+                  itineraries.
                 </p>
                 <div className="space-y-2 pt-1">
                   <a
@@ -477,7 +510,7 @@ export default function BlogListingPage({
                     className="w-full py-2 px-3 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors"
                   >
                     <Phone className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Call: +91 91510 07751</span>
+                    <span>Call: +91 917289037447</span>
                   </a>
                   <a
                     href="https://wa.me/919151007751?text=Hi%20Shree%20Ananta%20Travels,%20I%20have%20an%20enquiry%20regarding%20your%20yatra%20packages"
@@ -490,9 +523,7 @@ export default function BlogListingPage({
                   </a>
                 </div>
               </div>
-
             </div>
-
           </div>
         </section>
       </main>

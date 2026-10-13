@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState } from "react";
+import Link from "next/link";
 import {
   Calendar,
   Clock,
@@ -19,12 +19,12 @@ import {
   Mail,
   MapPin,
   TrendingUp,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { Topbar } from '../components/Topbar';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-import { ChatbotButton } from '../components/ChatbotButton';
+} from "lucide-react";
+import { toast } from "sonner";
+import { Topbar } from "../components/Topbar";
+import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+import { ChatbotButton } from "../components/ChatbotButton";
 
 export interface CategoryArticleItem {
   _id: string;
@@ -82,10 +82,10 @@ export default function CategoryListingPage({
 
   // Lead inquiry form state
   const [leadForm, setLeadForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    message: '',
+    name: "",
+    phone: "",
+    email: "",
+    message: "",
   });
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
@@ -93,39 +93,41 @@ export default function CategoryListingPage({
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!leadForm.name.trim() || !leadForm.phone.trim()) {
-      toast.error('Please provide your name and phone number.');
+      toast.error("Please provide your name and phone number.");
       return;
     }
 
     setIsSubmittingLead(true);
     try {
-      const res = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: leadForm.name.trim(),
           phone: leadForm.phone.trim(),
           email: leadForm.email.trim(),
-          message: leadForm.message.trim() || `Inquiry from ${category.name} Blog Category Page`,
+          message:
+            leadForm.message.trim() ||
+            `Inquiry from ${category.name} Blog Category Page`,
           source: `Category Page: ${category.name}`,
           destination: category.name,
         }),
       });
 
-      if (!res.ok) throw new Error('Submission failed');
+      if (!res.ok) throw new Error("Submission failed");
 
       setLeadSuccess(true);
-      toast.success('Thank you! Our travel expert will contact you shortly.');
-      setLeadForm({ name: '', phone: '', email: '', message: '' });
+      toast.success("Thank you! Our travel expert will contact you shortly.");
+      setLeadForm({ name: "", phone: "", email: "", message: "" });
     } catch (err: any) {
-      toast.error('Unable to send enquiry. Please call us directly.');
+      toast.error("Unable to send enquiry. Please call us directly.");
     } finally {
       setIsSubmittingLead(false);
     }
   };
 
   const pageTitle = category.heading?.trim() || `${category.name} Yatra Blogs`;
-  const rawDescription = category.description?.trim() || '';
+  const rawDescription = category.description?.trim() || "";
   const isLongDescription = rawDescription.length > 220;
   const displayDescription =
     isLongDescription && !isDescExpanded
@@ -146,11 +148,16 @@ export default function CategoryListingPage({
                 Home
               </Link>
               <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <Link href="/blogs" className="hover:text-amber-600 transition-colors">
+              <Link
+                href="/blogs"
+                className="hover:text-amber-600 transition-colors"
+              >
                 Blogs
               </Link>
               <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span className="text-gray-900 font-semibold">{category.name}</span>
+              <span className="text-gray-900 font-semibold">
+                {category.name}
+              </span>
             </nav>
           </div>
         </div>
@@ -179,15 +186,23 @@ export default function CategoryListingPage({
                         onClick={() => setIsDescExpanded(!isDescExpanded)}
                         className="inline-flex items-center gap-1.5 text-sm font-extrabold text-amber-600 hover:text-amber-700 cursor-pointer transition-colors"
                       >
-                        <span>{isDescExpanded ? 'Read Less' : 'Read More'}</span>
-                        {isDescExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        <span>
+                          {isDescExpanded ? "Read Less" : "Read More"}
+                        </span>
+                        {isDescExpanded ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
                 <p className="text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
-                  Explore verified travel guides, spiritual narratives, route advice, and pilgrimage updates for {category.name} curated by Shree Ananta Travels.
+                  Explore verified travel guides, spiritual narratives, route
+                  advice, and pilgrimage updates for {category.name} curated by
+                  Shree Ananta Travels.
                 </p>
               )}
             </div>
@@ -197,7 +212,6 @@ export default function CategoryListingPage({
         {/* ── MAIN CONTENT: 2-COLUMN (ARTICLES + STICKY LEAD FORM) ── */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-            
             {/* ── LEFT COLUMN: ARTICLES (8 COLS) ────────────────── */}
             <div className="lg:col-span-8 space-y-6">
               <div className="border-b border-gray-200 pb-3">
@@ -205,7 +219,8 @@ export default function CategoryListingPage({
                   Registration, Stay and other information about {category.name}
                 </h2>
                 <p className="text-xs text-gray-500 mt-1">
-                  Showing {articles.length} article{articles.length === 1 ? '' : 's'} in this category
+                  Showing {articles.length} article
+                  {articles.length === 1 ? "" : "s"} in this category
                 </p>
               </div>
 
@@ -213,12 +228,15 @@ export default function CategoryListingPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {articles.map((article) => {
                     const formattedDate = article.publishedAt
-                      ? new Date(article.publishedAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })
-                      : 'Recent';
+                      ? new Date(article.publishedAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                      : "Recent";
 
                     return (
                       <article
@@ -295,7 +313,9 @@ export default function CategoryListingPage({
                     Upcoming Guides for {category.name}
                   </h3>
                   <p className="text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
-                    Our Himalayan travel writers and pilgrimage guides are preparing new articles for {category.name}. Have immediate questions? Send us an inquiry!
+                    Our Himalayan travel writers and pilgrimage guides are
+                    preparing new articles for {category.name}. Have immediate
+                    questions? Send us an inquiry!
                   </p>
                 </div>
               )}
@@ -304,7 +324,6 @@ export default function CategoryListingPage({
             {/* ── RIGHT COLUMN: STICKY LEAD CAPTURE FORM (4 COLS) ─ */}
             <div className="lg:col-span-4">
               <div className="sticky top-24 space-y-6">
-                
                 {/* Lead Enquiry Card */}
                 <div className="bg-[#0a1c3d] rounded-2xl shadow-xl overflow-hidden border border-[#1e3a6d]">
                   {/* Card Header */}
@@ -318,13 +337,17 @@ export default function CategoryListingPage({
                   </div>
 
                   {/* Form Body */}
-                  <form onSubmit={handleLeadSubmit} className="p-5 sm:p-6 space-y-3.5">
+                  <form
+                    onSubmit={handleLeadSubmit}
+                    className="p-5 sm:p-6 space-y-3.5"
+                  >
                     {leadSuccess ? (
                       <div className="bg-emerald-900/40 border border-emerald-500/40 rounded-xl p-4 text-center space-y-2 text-white">
                         <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
                         <h4 className="text-sm font-bold">Enquiry Received!</h4>
                         <p className="text-xs text-emerald-200">
-                          Our yatra specialist will connect with you within 30 minutes.
+                          Our yatra specialist will connect with you within 30
+                          minutes.
                         </p>
                         <button
                           type="button"
@@ -346,7 +369,12 @@ export default function CategoryListingPage({
                               type="text"
                               required
                               value={leadForm.name}
-                              onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                              onChange={(e) =>
+                                setLeadForm({
+                                  ...leadForm,
+                                  name: e.target.value,
+                                })
+                              }
                               placeholder="Your Full Name"
                               className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/15 rounded-xl text-xs text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:bg-white/15"
                             />
@@ -355,7 +383,8 @@ export default function CategoryListingPage({
 
                         <div>
                           <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                            Mobile Number <span className="text-amber-400">*</span>
+                            Mobile Number{" "}
+                            <span className="text-amber-400">*</span>
                           </label>
                           <div className="relative">
                             <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
@@ -363,7 +392,12 @@ export default function CategoryListingPage({
                               type="tel"
                               required
                               value={leadForm.phone}
-                              onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                              onChange={(e) =>
+                                setLeadForm({
+                                  ...leadForm,
+                                  phone: e.target.value,
+                                })
+                              }
                               placeholder="+91 98765 43210"
                               className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/15 rounded-xl text-xs text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:bg-white/15"
                             />
@@ -379,7 +413,12 @@ export default function CategoryListingPage({
                             <input
                               type="email"
                               value={leadForm.email}
-                              onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
+                              onChange={(e) =>
+                                setLeadForm({
+                                  ...leadForm,
+                                  email: e.target.value,
+                                })
+                              }
                               placeholder="name@example.com"
                               className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/15 rounded-xl text-xs text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:bg-white/15"
                             />
@@ -393,7 +432,12 @@ export default function CategoryListingPage({
                           <textarea
                             rows={3}
                             value={leadForm.message}
-                            onChange={(e) => setLeadForm({ ...leadForm, message: e.target.value })}
+                            onChange={(e) =>
+                              setLeadForm({
+                                ...leadForm,
+                                message: e.target.value,
+                              })
+                            }
                             placeholder={`Interested in ${category.name} tour package, travel dates, or questions...`}
                             className="w-full px-3 py-2 bg-white/10 border border-white/15 rounded-xl text-xs text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:bg-white/15 leading-relaxed"
                           />
@@ -427,7 +471,7 @@ export default function CategoryListingPage({
                       className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
                     >
                       <Phone className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="font-semibold">+91 91510 07751</span>
+                      <span className="font-semibold">+91 917289037447</span>
                     </a>
                     <a
                       href={`https://wa.me/919151007751?text=Hi%20Shree%20Ananta%20Travels,%20I%20am%20interested%20in%20${encodeURIComponent(category.name)}`}
@@ -458,7 +502,10 @@ export default function CategoryListingPage({
                         >
                           <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
                             <img
-                              src={pkg.imageUrl1 || '/uploads/shree-ananta-logo.webp'}
+                              src={
+                                pkg.imageUrl1 ||
+                                "/uploads/shree-ananta-logo.webp"
+                              }
                               alt={pkg.title}
                               className="w-full h-full object-cover group-hover/pkg:scale-105 transition-transform duration-300"
                               loading="lazy"
@@ -487,11 +534,15 @@ export default function CategoryListingPage({
                   <ul className="text-xs text-gray-600 space-y-2">
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 font-bold">✓</span>
-                      <span>Government registered & official yatra operator</span>
+                      <span>
+                        Government registered & official yatra operator
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 font-bold">✓</span>
-                      <span>Verified VIP darshan passes & helipad priority</span>
+                      <span>
+                        Verified VIP darshan passes & helipad priority
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 font-bold">✓</span>
@@ -499,10 +550,8 @@ export default function CategoryListingPage({
                     </li>
                   </ul>
                 </div>
-
               </div>
             </div>
-
           </div>
         </section>
       </main>
