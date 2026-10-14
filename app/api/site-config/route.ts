@@ -110,8 +110,8 @@ export async function GET(req: Request) {
     // Priority: entered whatsapp from Admin Profile > entered contactPhone from SiteConfig
     const effectivePhone = (adminUser?.whatsapp?.trim()) || (config.contactPhone?.trim()) || '';
     
-    // If config.contactPhone is empty and effectivePhone is non-empty, populate it
-    if ((!config.contactPhone || config.contactPhone.trim() === '') && effectivePhone) {
+    // Synchronize config.contactPhone with effectivePhone
+    if (effectivePhone && config.contactPhone !== effectivePhone) {
       config.contactPhone = effectivePhone;
       config.markModified('contactPhone');
     }

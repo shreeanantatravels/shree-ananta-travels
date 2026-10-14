@@ -145,7 +145,7 @@ export function AgentProvider({
         if (userData.success && (userData.agent || userData.data)) {
           setAgent(userData.agent || userData.data);
         } else if (configData.success && configData.agent) {
-          setAgent(prev => prev || configData.agent);
+          setAgent(configData.agent);
         }
 
         if (packagesData.success && packagesData.data) {
@@ -154,7 +154,7 @@ export function AgentProvider({
 
         if (configData.success && configData.data) {
           const cfg = configData.data;
-          cfg.contactPhone = cfg.contactPhone?.trim() || configData.agent?.whatsapp?.trim() || DEFAULT_CONTACT_PHONE;
+          cfg.contactPhone = configData.agent?.whatsapp?.trim() || cfg.contactPhone?.trim() || DEFAULT_CONTACT_PHONE;
           setSiteConfig(cfg);
         }
       })
