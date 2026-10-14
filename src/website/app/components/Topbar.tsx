@@ -1,5 +1,6 @@
 "use client";
 import { useAgent } from '../context/AgentContext';
+import { getDisplayPhone, getTelHref } from '../utils/contactConfig';
 import { Phone, Mail, Info } from 'lucide-react';
 import Link from 'next/link';
 import { ProtectedEmail } from './ProtectedEmail';
@@ -8,6 +9,8 @@ export function Topbar() {
   const { agent, siteConfig } = useAgent();
 
   const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const displayPhone = getDisplayPhone(phone);
+  const telHref = getTelHref(phone);
   const email = siteConfig?.contactEmail || '';
 
   const offerText = siteConfig?.topbarOffer?.text?.trim() || "";
@@ -47,15 +50,13 @@ export function Topbar() {
       <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
         
         {/* Left: Phone */}
-        {phone ? (
-          <a
-            href={`tel:${phone}`}
-            className="flex items-center gap-1.5 hover:opacity-90 transition-opacity whitespace-nowrap"
-          >
-            <Phone className="w-3.5 h-3.5 fill-current text-white" />
-            <span>{phone}</span>
-          </a>
-        ) : <div />}
+        <a
+          href={telHref}
+          className="flex items-center gap-1.5 hover:opacity-90 transition-opacity whitespace-nowrap"
+        >
+          <Phone className="w-3.5 h-3.5 fill-current text-white" />
+          <span>{displayPhone}</span>
+        </a>
 
         {/* Center: Offer Banner */}
         {showOffer && offerText ? (

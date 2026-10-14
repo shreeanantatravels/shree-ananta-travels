@@ -391,7 +391,7 @@ export function EnquiryForm({
                     className={inputInsideClass}
                     onChange={handleChange}
                     value={formData.phone}
-                    placeholder="e.g. +91 7289037447"
+                    placeholder="e.g. +91 98765 43210"
                     required
                   />
                 </div>
@@ -709,7 +709,7 @@ export function EnquiryForm({
           </div>
         )}
 
-        <div className="bg-white/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden backdrop-blur-xl transition-all">
+        <div className={compact ? "w-full" : "bg-white/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden backdrop-blur-xl transition-all"}>
           {/* Progress Step Header with animated line */}
           <div className="bg-gray-50/90 dark:bg-gray-800/60 border-b border-gray-100 dark:border-gray-800 px-6 py-5">
             <div className="flex justify-between items-center max-w-md mx-auto relative">
@@ -734,7 +734,7 @@ export function EnquiryForm({
             </div>
           </div>
 
-          <div className="p-6 sm:p-8">
+          <div className={compact ? "p-5 sm:p-7" : "p-6 sm:p-8"}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {renderStep()}
 

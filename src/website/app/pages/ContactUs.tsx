@@ -7,6 +7,7 @@ import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
 import { ProtectedEmail } from '../components/ProtectedEmail';
 import { useAgent } from '../context/AgentContext';
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from '../utils/contactConfig';
 import { 
   MapPin, 
   Phone, 
@@ -27,11 +28,11 @@ export default function ContactUs() {
   const { siteConfig, agent } = useAgent();
 
   const address = siteConfig?.address || 'E91, East of Kailash, Delhi 110065';
-  const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const rawPhone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const displayPhone = getDisplayPhone(rawPhone);
+  const telHref = getTelHref(rawPhone);
   const email = siteConfig?.contactEmail || 'shreeanantatravels@gmail.com';
-  const rawWhatsapp = agent?.whatsapp || siteConfig?.contactPhone || '';
-  const cleanWa = rawWhatsapp.replace(/\D/g, '');
-  const whatsappNumber = cleanWa.startsWith('91') ? cleanWa : (cleanWa.length === 10 ? `91${cleanWa}` : cleanWa);
+  const whatsappUrl = getWhatsAppUrl(rawPhone, 'Hello Shree Ananta Travels! I would like to plan a tour.');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -140,24 +141,22 @@ export default function ContactUs() {
                 </div>
 
                 {/* Telephone */}
-                {phone && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-1 border border-blue-200/50 dark:border-blue-900/50">
-                      <Phone className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
-                        Direct Phone Line
-                      </p>
-                      <a 
-                        href={`tel:${phone.replace(/[^0-9+]/g, '')}`} 
-                        className="text-sm sm:text-base font-bold text-[var(--theme-primary)] hover:underline mt-0.5 block"
-                      >
-                        {phone}
-                      </a>
-                    </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-1 border border-blue-200/50 dark:border-blue-900/50">
+                    <Phone className="w-5 h-5" />
                   </div>
-                )}
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                      Direct Phone Line
+                    </p>
+                    <a 
+                      href={telHref} 
+                      className="text-sm sm:text-base font-bold text-[var(--theme-primary)] hover:underline mt-0.5 block"
+                    >
+                      {displayPhone}
+                    </a>
+                  </div>
+                </div>
 
                 {/* Email */}
                 {email && (
@@ -179,19 +178,17 @@ export default function ContactUs() {
               </div>
 
               {/* WhatsApp Button */}
-              {whatsappNumber && (
-                <div className="pt-4 border-t border-slate-100 dark:border-gray-800">
-                  <a
-                    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello Shree Ananta Travels! I would like to plan a tour.')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full inline-flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-95"
-                  >
-                    <FontAwesomeIcon icon={faWhatsapp} className="w-5 h-5" />
-                    <span>Message on WhatsApp</span>
-                  </a>
-                </div>
-              )}
+              <div className="pt-4 border-t border-slate-100 dark:border-gray-800">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-95"
+                >
+                  <FontAwesomeIcon icon={faWhatsapp} className="w-5 h-5" />
+                  <span>Message on WhatsApp</span>
+                </a>
+              </div>
             </div>
 
             {/* Trust Assurances */}
@@ -268,7 +265,7 @@ export default function ContactUs() {
                         required
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="e.g. +91 7289037447"
+                        placeholder="e.g. +91 98765 43210"
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition-all font-medium"
                       />
                     </div>

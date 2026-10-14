@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShieldCheck, Award, Headphones, IndianRupee, Sparkles, CheckCircle2, ArrowRight, Phone, Globe, Star, Users } from 'lucide-react';
 import { useAgent } from '../context/AgentContext';
+import { getTelHref } from '../utils/contactConfig';
 
 export function WhyTrustUs() {
   const { siteConfig, agent } = useAgent();
@@ -143,23 +144,13 @@ export function WhyTrustUs() {
             <ArrowRight className="w-5 h-5" />
           </Link>
 
-          {phone ? (
-            <a
-              href={`tel:${phone.replace(/\D/g, '')}`}
-              className="inline-flex items-center gap-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold px-7 py-4 rounded-full border border-gray-200 dark:border-gray-700 transition-all duration-300 text-base"
-            >
-              <Phone className="w-4.5 h-4.5 text-emerald-500" />
-              <span>Call Support Helpline</span>
-            </a>
-          ) : (
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold px-7 py-4 rounded-full border border-gray-200 dark:border-gray-700 transition-all duration-300 text-base"
-            >
-              <Phone className="w-4.5 h-4.5 text-emerald-500" />
-              <span>Contact Concierge Desk</span>
-            </Link>
-          )}
+          <a
+            href={getTelHref(phone)}
+            className="inline-flex items-center gap-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold px-7 py-4 rounded-full border border-gray-200 dark:border-gray-700 transition-all duration-300 text-base"
+          >
+            <Phone className="w-4.5 h-4.5 text-emerald-500" />
+            <span>Call Support Helpline</span>
+          </a>
         </div>
 
       </div>

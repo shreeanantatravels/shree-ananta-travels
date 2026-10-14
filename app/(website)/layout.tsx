@@ -4,50 +4,55 @@ import AgentThemeSync from "@website/app/components/AgentThemeSync";
 import connectDB from "@/lib/db/connect";
 import Package from "@/lib/db/models/Package";
 import SiteConfig from "@/lib/db/models/SiteConfig";
+import AdminUser from "@/lib/db/models/AdminUser";
+import { getDisplayPhone, getWhatsAppUrl, DEFAULT_CONTACT_PHONE } from "@/lib/utils/contactConfig";
 
-const siteGraphSchema = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://www.shreeanantatravels.com/#website",
-      url: "https://www.shreeanantatravels.com",
-      name: "Shree Ananta Travels",
-      alternateName: [
-        "kailash and Adi Kailash Yatra Agency in India",
-        "Shree Ananta Travels Delhi",
-      ],
-      description:
-        "kailash and Adi Kailash Yatra Agency in India. Leading pilgrimage and travel agency for Kailash Mansarovar, Adi Kailash, Char Dham, domestic holidays and international tour packages.",
-      publisher: {
-        "@id": "https://www.shreeanantatravels.com/#organization",
-      },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate:
-            "https://www.shreeanantatravels.com/packages?search={search_term_string}",
+function getSiteGraphSchema(phone: string) {
+  const displayPhone = getDisplayPhone(phone);
+  const waUrl = getWhatsAppUrl(phone);
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.shreeanantatravels.com/#website",
+        url: "https://www.shreeanantatravels.com",
+        name: "Shree Ananta Travels",
+        alternateName: [
+          "kailash and Adi Kailash Yatra Agency in India",
+          "Shree Ananta Travels Delhi",
+        ],
+        description:
+          "kailash and Adi Kailash Yatra Agency in India. Leading pilgrimage and travel agency for Kailash Mansarovar, Adi Kailash, Char Dham, domestic holidays and international tour packages.",
+        publisher: {
+          "@id": "https://www.shreeanantatravels.com/#organization",
         },
-        "query-input": "required name=search_term_string",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate:
+              "https://www.shreeanantatravels.com/packages?search={search_term_string}",
+          },
+          "query-input": "required name=search_term_string",
+        },
       },
-    },
-    {
-      "@type": "TravelAgency",
-      "@id": "https://www.shreeanantatravels.com/#organization",
-      name: "Shree Ananta Travels",
-      alternateName: "Kailash and Adi Kailash Yatra Agency in India",
-      url: "https://www.shreeanantatravels.com",
-      logo: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.webp",
-      image: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.webp",
-      telephone: "+91 7289037447",
-      email: "shreeanantatravels@gmail.com",
-      priceRange: "₹₹",
-      sameAs: [
-        "https://www.facebook.com/shreeanantatravels",
-        "https://www.instagram.com/shreeanantatravels",
-        "https://wa.me/917289037447"
-      ],
+      {
+        "@type": "TravelAgency",
+        "@id": "https://www.shreeanantatravels.com/#organization",
+        name: "Shree Ananta Travels",
+        alternateName: "Kailash and Adi Kailash Yatra Agency in India",
+        url: "https://www.shreeanantatravels.com",
+        logo: "https://www.shreeanantatravels.com/uploads/shree-ananta-logo.webp",
+        ...(displayPhone ? { telephone: displayPhone } : {}),
+        email: "shreeanantatravels@gmail.com",
+        priceRange: "₹₹",
+        sameAs: [
+          "https://www.facebook.com/shreeanantatravels",
+          "https://www.instagram.com/shreeanantatravels",
+          ...(waUrl && waUrl !== "#" ? [waUrl] : []),
+        ],
       description:
         "Kailash and Adi Kailash Yatra Agency in India. Providing complete Tibet permits, certified Sherpas, pure veg meals, and customized domestic & international tour packages.",
       address: {
@@ -152,7 +157,8 @@ const siteGraphSchema = {
         "Contact our travel concierge desk for customized quotes, route guidance, and 24/7 assistance.",
     },
   ],
-};
+  };
+}
 
 export default async function WebsiteLayout({
   children,
@@ -161,15 +167,27 @@ export default async function WebsiteLayout({
 }) {
   let initialPackages: any[] = [];
   let initialSiteConfig: any = null;
+  let initialAgent: any = null;
+  let dynamicPhone = DEFAULT_CONTACT_PHONE;
 
   try {
     await connectDB();
-    const [pkgs, cfg] = await Promise.all([
+    const [pkgs, cfg, adminUser] = await Promise.all([
       Package.find({ isActive: true }).sort({ createdAt: -1 }).lean(),
       SiteConfig.findOne({ _singleton: true }).lean(),
+      AdminUser.findOne().select('name businessName email whatsapp logo tagline theme').lean(),
     ]);
     initialPackages = JSON.parse(JSON.stringify(pkgs || []));
     initialSiteConfig = JSON.parse(JSON.stringify(cfg || null));
+    initialAgent = JSON.parse(JSON.stringify(adminUser || null));
+    dynamicPhone = (initialAgent?.whatsapp?.trim()) || (initialSiteConfig?.contactPhone?.trim()) || DEFAULT_CONTACT_PHONE;
+    if (initialSiteConfig) {
+      initialSiteConfig.contactPhone = dynamicPhone;
+    }
+    if (initialAgent) {
+      initialAgent.whatsapp = dynamicPhone;
+      initialAgent.phone = dynamicPhone;
+    }
   } catch (error) {
     console.error("Failed to pre-fetch website data during SSR:", error);
   }
@@ -178,12 +196,13 @@ export default async function WebsiteLayout({
     <AgentProvider
       initialPackages={initialPackages}
       initialSiteConfig={initialSiteConfig}
+      initialAgent={initialAgent}
     >
       <ThemeProvider>
         <AgentThemeSync />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteGraphSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(getSiteGraphSchema(dynamicPhone)) }}
         />
         {children}
       </ThemeProvider>

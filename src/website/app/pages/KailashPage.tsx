@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAgent, type AgentPackage } from "../context/AgentContext";
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from "../utils/contactConfig";
 import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -106,10 +107,8 @@ export default function KailashPage() {
 
   // WhatsApp Helper
   const buildWhatsAppUrl = (message: string) => {
-    const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "7289037447";
-    const digits = rawNumber.replace(/\D/g, "");
-    const cleanNumber = digits.startsWith("91") ? digits : digits.length === 10 ? `91${digits}` : "917289037447";
-    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
+    const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "";
+    return getWhatsAppUrl(rawNumber, message);
   };
 
   const handleWhatsAppClick = (eventName: string, message: string) => {
@@ -152,7 +151,9 @@ Please share package itinerary and customized pricing details.`;
     window.open(buildWhatsAppUrl(msg), "_blank");
   };
 
-  const contactPhone = siteConfig?.contactPhone || agent?.whatsapp || "+91 7289037447";
+  const rawContactPhone = siteConfig?.contactPhone || agent?.whatsapp || "";
+  const contactPhone = getDisplayPhone(rawContactPhone);
+  const contactTelHref = getTelHref(rawContactPhone);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 flex flex-col">
@@ -703,7 +704,7 @@ Please share package itinerary and customized pricing details.`;
                 <span>Chat on WhatsApp</span>
               </button>
               <a
-                href={`tel:${contactPhone.replace(/\s+/g, "")}`}
+                href={contactTelHref}
                 className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-100 text-slate-950 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2"
               >
                 <Phone className="w-4 h-4" />
@@ -726,7 +727,7 @@ Please share package itinerary and customized pricing details.`;
           <span>WhatsApp Quote</span>
         </button>
         <a
-          href={`tel:${contactPhone.replace(/\s+/g, "")}`}
+          href={contactTelHref}
           className="flex-1 bg-slate-900 hover:bg-black text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex justify-center items-center gap-1.5 transition-colors shadow-md"
         >
           <Phone className="w-4 h-4" />

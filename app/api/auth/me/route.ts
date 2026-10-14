@@ -3,6 +3,8 @@ import connectDB from '@/lib/db/connect';
 import AdminUser from '@/lib/db/models/AdminUser';
 import { getAuthUserId } from '@/lib/auth';
 
+import SiteConfig from '@/lib/db/models/SiteConfig';
+
 export async function GET() {
   try {
     await connectDB();
@@ -16,6 +18,14 @@ export async function GET() {
     
     if (!admin) {
       return NextResponse.json({ success: false, message: 'Not authorized' }, { status: 401 });
+    }
+
+    if (!admin.whatsapp) {
+      const siteConfig = await SiteConfig.findOne({ _singleton: true }).select('contactPhone').lean();
+      if (siteConfig?.contactPhone) {
+        admin.whatsapp = siteConfig.contactPhone;
+        await AdminUser.findByIdAndUpdate(userId, { $set: { whatsapp: siteConfig.contactPhone } });
+      }
     }
 
     return NextResponse.json({ success: true, data: admin, agent: admin });

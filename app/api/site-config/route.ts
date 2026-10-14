@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db/connect';
 import SiteConfig from '@/lib/db/models/SiteConfig';
+import AdminUser from '@/lib/db/models/AdminUser';
+import { DEFAULT_CONTACT_PHONE } from '@/lib/utils/contactConfig';
 import { getAuthUserId } from '@/lib/auth';
 import { deleteImageFromCloudinary } from '@/lib/cloudinary';
 
@@ -103,9 +105,34 @@ export async function GET(req: Request) {
       config.markModified('destinations');
     }
 
+    const adminUser = await AdminUser.findOne().select('name businessName email whatsapp logo tagline theme').lean();
+    
+    // Priority: entered whatsapp from Admin Profile > entered contactPhone from SiteConfig
+    const effectivePhone = (adminUser?.whatsapp?.trim()) || (config.contactPhone?.trim()) || '';
+    
+    // If config.contactPhone is empty and effectivePhone is non-empty, populate it
+    if ((!config.contactPhone || config.contactPhone.trim() === '') && effectivePhone) {
+      config.contactPhone = effectivePhone;
+      config.markModified('contactPhone');
+    }
+
     await config.save();
 
-    return NextResponse.json({ success: true, data: config });
+    return NextResponse.json({ 
+      success: true, 
+      data: config,
+      agent: adminUser ? {
+        _id: adminUser._id,
+        name: adminUser.name || 'Shree Ananta Travels',
+        businessName: adminUser.businessName || 'Shree Ananta Travels',
+        tagline: adminUser.tagline || '',
+        logo: adminUser.logo || '',
+        whatsapp: effectivePhone,
+        phone: effectivePhone,
+        email: adminUser.email || config.contactEmail || '',
+        theme: adminUser.theme || 'gold',
+      } : null,
+    });
   } catch (error: any) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
@@ -128,7 +155,7 @@ export async function PUT(req: Request) {
       const cleanPhone = String(body.contactPhone).replace(/[\s\-()]/g, '');
       if (!/^\+?[1-9]\d{9,14}$/.test(cleanPhone)) {
         return NextResponse.json(
-          { success: false, message: 'Invalid business phone number. Please provide a valid 10-15 digit number (e.g. +91 7289037447 or 7289037447).' },
+          { success: false, message: 'Invalid business phone number. Please provide a valid 10-digit number.' },
           { status: 400 }
         );
       }
@@ -185,6 +212,13 @@ export async function PUT(req: Request) {
         body,
         { new: true, runValidators: true }
       );
+    }
+
+    // Also synchronize AdminUser whatsapp when contactPhone is updated
+    if (body.contactPhone !== undefined) {
+      const syncPhone = typeof body.contactPhone === 'string' ? body.contactPhone.trim() : '';
+      await AdminUser.findByIdAndUpdate(userId, { $set: { whatsapp: syncPhone } });
+      await AdminUser.updateMany({}, { $set: { whatsapp: syncPhone } });
     }
 
     return NextResponse.json({ success: true, data: config });

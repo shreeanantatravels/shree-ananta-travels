@@ -5,6 +5,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { useGetSiteConfigQuery, useUpdateSiteConfigMutation } from '../api/siteConfigApi';
 import { toast } from 'sonner';
+import { extract10Digits } from '@/lib/utils/contactConfig';
 
 const DEFAULT_NAV_LINKS = [
   { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
@@ -39,8 +40,8 @@ export function BrandingSettings() {
   const [companyName, setCompanyName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [contactEmail, setContactEmail] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [contactPhoneDigits, setContactPhoneDigits] = useState('');
+  const [whatsappDigits, setWhatsappDigits] = useState('');
   const [address, setAddress] = useState('');
   const [facebookUrl, setFacebookUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
@@ -74,8 +75,9 @@ export function BrandingSettings() {
       setCompanyName(config.companyName || '');
       setLogoUrl(config.logoUrl || '/uploads/shree-ananta-logo.jpg');
       setContactEmail(config.contactEmail || '');
-      setContactPhone(config.contactPhone || '');
-      setWhatsappNumber(''); // whatsapp is on Agent model
+      const initialDigits = extract10Digits(config.contactPhone || (data as any)?.agent?.whatsapp || '');
+      setContactPhoneDigits(initialDigits);
+      setWhatsappDigits(initialDigits);
       setAddress(config.address || '');
       setFacebookUrl(config.facebookUrl || '');
       setInstagramUrl(config.instagramUrl || '');
@@ -300,10 +302,10 @@ export function BrandingSettings() {
 
   const handleSaveCompany = async () => {
     // Client-side phone validation
-    if (contactPhone && contactPhone.trim()) {
-      const cleanPhone = contactPhone.replace(/[\s\-()]/g, '');
-      if (!/^\+?[1-9]\d{9,14}$/.test(cleanPhone)) {
-        toast.error('Please enter a valid 10-15 digit phone number (e.g. +91 7289037447).');
+    if (contactPhoneDigits && contactPhoneDigits.trim()) {
+      const cleanDigits = contactPhoneDigits.replace(/\D/g, '');
+      if (cleanDigits.length !== 10) {
+        toast.error('Please enter a valid 10-digit phone number.');
         return;
       }
     }
@@ -315,13 +317,15 @@ export function BrandingSettings() {
       }
     }
 
+    const fullPhone = contactPhoneDigits.trim() ? `+91 ${contactPhoneDigits.replace(/\D/g, '')}` : '';
+
     setIsSavingCompany(true);
     try {
       await updateConfig({
         companyName,
         logoUrl,
         contactEmail,
-        contactPhone,
+        contactPhone: fullPhone,
         address,
         facebookUrl,
         instagramUrl,
@@ -385,6 +389,16 @@ export function BrandingSettings() {
   };
 
   const handleSave = async () => {
+    if (contactPhoneDigits && contactPhoneDigits.trim()) {
+      const cleanDigits = contactPhoneDigits.replace(/\D/g, '');
+      if (cleanDigits.length !== 10) {
+        toast.error('Please enter a valid 10-digit phone number.');
+        return;
+      }
+    }
+
+    const fullPhone = contactPhoneDigits.trim() ? `+91 ${contactPhoneDigits.replace(/\D/g, '')}` : '';
+
     setIsSavingAll(true);
     try {
       const activeState = topbarOfferText.trim() ? (topbarOfferIsActive ?? true) : false;
@@ -392,7 +406,7 @@ export function BrandingSettings() {
         companyName,
         logoUrl,
         contactEmail,
-        contactPhone,
+        contactPhone: fullPhone,
         address,
         facebookUrl,
         instagramUrl,
@@ -514,27 +528,43 @@ export function BrandingSettings() {
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                 Phone Number
               </label>
-              <Input
-                type="tel"
-                value={contactPhone}
-                onChange={e => setContactPhone(e.target.value)}
-                placeholder="e.g. +91 7289037447"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-auto"
-              />
+              <div className="flex rounded-xl border border-gray-200 bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all shadow-xs">
+                <span className="inline-flex items-center px-3.5 bg-gray-100 text-gray-700 font-semibold text-sm border-r border-gray-200 select-none">
+                  🇮🇳 +91
+                </span>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={contactPhoneDigits}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setContactPhoneDigits(val);
+                    setWhatsappDigits(val);
+                  }}
+                  placeholder="98765 43210"
+                  className="w-full px-3.5 py-2.5 bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none text-sm font-medium"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">10-digit number. Automatically synchronized with WhatsApp.</p>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                 WhatsApp Number
               </label>
-              <Input
-                type="tel"
-                value={whatsappNumber}
-                disabled
-                placeholder="Managed in Profile section"
-                className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl h-auto text-gray-500 cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-400 mt-1">WhatsApp number is managed from your Profile page</p>
+              <div className="flex rounded-xl border border-gray-200 bg-gray-100 overflow-hidden">
+                <span className="inline-flex items-center px-3.5 bg-gray-200/70 text-gray-600 font-semibold text-sm border-r border-gray-200 select-none">
+                  🇮🇳 +91
+                </span>
+                <input
+                  type="tel"
+                  disabled
+                  value={contactPhoneDigits || whatsappDigits}
+                  placeholder="Synced with Phone Number"
+                  className="w-full px-3.5 py-2.5 bg-transparent text-gray-600 placeholder-gray-400 text-sm font-medium cursor-not-allowed"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Automatically kept in sync with Business Phone & Admin Profile</p>
             </div>
           </div>
 

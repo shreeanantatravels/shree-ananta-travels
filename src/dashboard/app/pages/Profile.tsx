@@ -10,6 +10,7 @@ import {
 import { Input } from "../components/ui/input";
 import { toast } from 'sonner';
 import { useGetMeQuery, useUpdateProfileMutation, useUpdatePasswordMutation, useForgotPasswordMutation, useResetPasswordMutation } from '../api/authApi';
+import { extract10Digits } from '@/lib/utils/contactConfig';
 
 export function Profile() {
   // Fetch agent details
@@ -23,7 +24,7 @@ export function Profile() {
     firstName: '',
     lastName: '',
     email: '',
-    whatsapp: '',
+    whatsappDigits: '',
   });
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function Profile() {
         firstName: nameParts[0] || '',
         lastName: nameParts.slice(1).join(' ') || '',
         email: agent.email || '',
-        whatsapp: agent.whatsapp || '',
+        whatsappDigits: extract10Digits(agent.whatsapp || agent.phone || ''),
       });
     }
   }, [agent]);
@@ -46,17 +47,21 @@ export function Profile() {
          toast.error("Name and Email are required");
          return;
       }
-      if (profileForm.whatsapp && profileForm.whatsapp.trim()) {
-        const cleanWa = profileForm.whatsapp.replace(/[\s\-()]/g, '');
-        if (!/^\+?[1-9]\d{9,14}$/.test(cleanWa)) {
-          toast.error("Please enter a valid 10-15 digit WhatsApp number (e.g. +91 7289037447).");
+      if (profileForm.whatsappDigits && profileForm.whatsappDigits.trim()) {
+        const cleanDigits = profileForm.whatsappDigits.replace(/\D/g, '');
+        if (cleanDigits.length !== 10) {
+          toast.error("Please enter a valid 10-digit mobile number.");
           return;
         }
       }
+      const formattedWhatsapp = profileForm.whatsappDigits.trim()
+        ? `+91 ${profileForm.whatsappDigits.replace(/\D/g, '')}`
+        : '';
+
       await updateProfile({
         name: fullName,
         email: profileForm.email,
-        whatsapp: profileForm.whatsapp,
+        whatsapp: formattedWhatsapp,
       }).unwrap();
       toast.success('Profile updated successfully!');
     } catch (error: any) {
@@ -167,13 +172,23 @@ export function Profile() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Phone / WhatsApp Number</label>
-                    <Input 
-                      type="tel" 
-                      value={profileForm.whatsapp}
-                      onChange={(e) => setProfileForm({...profileForm, whatsapp: e.target.value})}
-                      placeholder="e.g. +91 7289037447"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-auto" 
-                    />
+                    <div className="flex rounded-xl border border-gray-200 bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all shadow-xs">
+                      <span className="inline-flex items-center px-3.5 bg-gray-100 text-gray-700 font-semibold text-sm border-r border-gray-200 select-none">
+                        🇮🇳 +91
+                      </span>
+                      <input 
+                        type="tel" 
+                        maxLength={10}
+                        value={profileForm.whatsappDigits}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setProfileForm({...profileForm, whatsappDigits: val});
+                        }}
+                        placeholder="98765 43210"
+                        className="w-full px-3.5 py-3 bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none text-sm font-medium" 
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1.5">Enter 10-digit mobile number. Country code +91 is applied automatically.</p>
                   </div>
                 </div>
                 <div className="flex justify-end pt-4">

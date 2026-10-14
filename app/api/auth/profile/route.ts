@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db/connect';
 import AdminUser from '@/lib/db/models/AdminUser';
+import SiteConfig from '@/lib/db/models/SiteConfig';
 import { getAuthUserId } from '@/lib/auth';
 
 export async function PUT(req: Request) {
@@ -19,7 +20,7 @@ export async function PUT(req: Request) {
       const cleanWa = String(body.whatsapp).replace(/[\s\-()]/g, '');
       if (!/^\+?[1-9]\d{9,14}$/.test(cleanWa)) {
         return NextResponse.json(
-          { success: false, message: 'Invalid WhatsApp number format. Please provide a valid 10 digit phone number (e.g. +91 7289037447 or 7289037447).' },
+          { success: false, message: 'Invalid WhatsApp number format. Please provide a valid 10-digit phone number.' },
           { status: 400 }
         );
       }
@@ -29,7 +30,7 @@ export async function PUT(req: Request) {
       const cleanPhone = String(body.phone).replace(/[\s\-()]/g, '');
       if (!/^\+?[1-9]\d{9,14}$/.test(cleanPhone)) {
         return NextResponse.json(
-          { success: false, message: 'Invalid phone number format. Please provide a valid 10 digit phone number.' },
+          { success: false, message: 'Invalid phone number format. Please provide a valid 10-15 digit phone number.' },
           { status: 400 }
         );
       }
@@ -43,6 +44,16 @@ export async function PUT(req: Request) {
 
     if (!updatedUser) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+    }
+
+    // Keep SiteConfig.contactPhone synchronized with entered WhatsApp number
+    if (body.whatsapp !== undefined) {
+      const syncPhone = typeof body.whatsapp === 'string' ? body.whatsapp.trim() : '';
+      await SiteConfig.findOneAndUpdate(
+        { _singleton: true },
+        { $set: { contactPhone: syncPhone } },
+        { upsert: true }
+      );
     }
 
     return NextResponse.json({

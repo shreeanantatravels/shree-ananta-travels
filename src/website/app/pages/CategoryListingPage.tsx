@@ -25,6 +25,8 @@ import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { ChatbotButton } from "../components/ChatbotButton";
+import { useAgent } from "../context/AgentContext";
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from "../utils/contactConfig";
 
 export interface CategoryArticleItem {
   _id: string;
@@ -77,6 +79,12 @@ export default function CategoryListingPage({
   popularPackages = [],
   pagination,
 }: CategoryListingPageProps) {
+  const { siteConfig, agent } = useAgent();
+  const phone = siteConfig?.contactPhone || agent?.whatsapp || "";
+  const displayPhone = getDisplayPhone(phone);
+  const telHref = getTelHref(phone);
+  const whatsappUrl = getWhatsAppUrl(phone, `Hi Shree Ananta Travels, I am interested in ${category.name}`);
+
   // Read more / less expansion for long category description
   const [isDescExpanded, setIsDescExpanded] = useState(false);
 
@@ -467,14 +475,14 @@ export default function CategoryListingPage({
                   {/* Quick Direct Connect Strip */}
                   <div className="p-4 bg-white/5 border-t border-white/10 flex items-center justify-between text-xs text-white">
                     <a
-                      href="tel:+919151007751"
+                      href={telHref}
                       className="flex items-center gap-1.5 hover:text-amber-400 transition-colors"
                     >
                       <Phone className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="font-semibold">+91 917289037447</span>
+                      <span className="font-semibold">{displayPhone}</span>
                     </a>
                     <a
-                      href={`https://wa.me/919151007751?text=Hi%20Shree%20Ananta%20Travels,%20I%20am%20interested%20in%20${encodeURIComponent(category.name)}`}
+                      href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"

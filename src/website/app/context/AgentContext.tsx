@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { DEFAULT_CONTACT_PHONE } from '@/lib/utils/contactConfig';
 
 /* ── Types ─────────────────────────────────────────────────────── */
 export interface AgentPackage {
@@ -143,6 +144,8 @@ export function AgentProvider({
       .then(([userData, packagesData, configData]) => {
         if (userData.success && (userData.agent || userData.data)) {
           setAgent(userData.agent || userData.data);
+        } else if (configData.success && configData.agent) {
+          setAgent(prev => prev || configData.agent);
         }
 
         if (packagesData.success && packagesData.data) {
@@ -150,7 +153,9 @@ export function AgentProvider({
         }
 
         if (configData.success && configData.data) {
-          setSiteConfig(configData.data);
+          const cfg = configData.data;
+          cfg.contactPhone = cfg.contactPhone?.trim() || configData.agent?.whatsapp?.trim() || DEFAULT_CONTACT_PHONE;
+          setSiteConfig(cfg);
         }
       })
       .catch(() => setError('Failed to connect to server'))

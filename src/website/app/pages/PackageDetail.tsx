@@ -36,6 +36,7 @@ import { ChatbotButton } from "../components/ChatbotButton";
 import { PlanTourModal } from "../components/PlanTourModal";
 import { useState, useEffect } from "react";
 import { useAgent } from "../context/AgentContext";
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from "../utils/contactConfig";
 
 const getBadgeStyles = (badge: string): string => {
   return "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-orange-500/20";
@@ -204,19 +205,12 @@ export default function PackageDetail() {
   const handleWhatsAppShare = () => {
     if (!packageData) return;
     const phone = agent?.whatsapp || siteConfig?.contactPhone || "";
-    const cleanPhone = phone.replace(/[^0-9]/g, "");
     const priceTxt =
       packageData.price && packageData.price > 0
         ? `₹${packageData.price.toLocaleString()} per person`
         : "Price on Request";
     const message = `Hello! 🌟 I'm interested in the "${packageData.title}" package (${packageData.location}).\nDuration: ${packageData.duration}\nPrice: ${priceTxt}.\nPlease share the full itinerary details.\n\nLink: ${typeof window !== "undefined" ? window.location.href : ""}`;
-    if (!cleanPhone) {
-      if (typeof window !== "undefined") window.location.href = "/contact";
-      return;
-    }
-    const targetPhone = cleanPhone.startsWith("91") ? cleanPhone : (cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone);
-    const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(getWhatsAppUrl(phone, message), "_blank");
   };
 
   const handleCopyLink = () => {
@@ -866,42 +860,26 @@ export default function PackageDetail() {
               </div>
 
               {/* Direct Call Helper */}
-              {phoneNum ? (
-                <div className="p-4 bg-slate-100 dark:bg-gray-800/80 rounded-2xl flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
-                      Have Questions?
-                    </p>
-                    <a
-                      href={`tel:${phoneNum.replace(/[^0-9+]/g, '')}`}
-                      className="text-xs font-extrabold text-gray-900 dark:text-white hover:text-[var(--theme-primary)]"
-                    >
-                      {phoneNum}
-                    </a>
-                  </div>
-                  <button
-                    onClick={handleWhatsAppShare}
-                    className="p-2.5 bg-[#25D366]/10 dark:bg-gray-700 text-[#25D366] rounded-xl shadow-sm hover:scale-105 transition-transform"
-                    aria-label="Ask on WhatsApp"
+              <div className="p-4 bg-slate-100 dark:bg-gray-800/80 rounded-2xl flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                    Have Questions?
+                  </p>
+                  <a
+                    href={getTelHref(phoneNum)}
+                    className="text-xs font-extrabold text-gray-900 dark:text-white hover:text-[var(--theme-primary)]"
                   >
-                    <FontAwesomeIcon icon={faWhatsapp} className="w-4 h-4" />
-                  </button>
+                    {getDisplayPhone(phoneNum)}
+                  </a>
                 </div>
-              ) : (
-                <div className="p-4 bg-slate-100 dark:bg-gray-800/80 rounded-2xl flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
-                      Have Questions?
-                    </p>
-                    <Link
-                      href="/contact"
-                      className="text-xs font-extrabold text-[var(--theme-primary)] hover:underline"
-                    >
-                      Contact our Team
-                    </Link>
-                  </div>
-                </div>
-              )}
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="p-2.5 bg-[#25D366]/10 dark:bg-gray-700 text-[#25D366] rounded-xl shadow-sm hover:scale-105 transition-transform"
+                  aria-label="Ask on WhatsApp"
+                >
+                  <FontAwesomeIcon icon={faWhatsapp} className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

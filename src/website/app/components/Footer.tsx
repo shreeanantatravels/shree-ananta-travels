@@ -4,6 +4,7 @@ import { Mail, Phone, MapPin, MessageCircle, ArrowRight } from 'lucide-react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import Link from 'next/link';
 import { useAgent } from '../context/AgentContext';
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from '../utils/contactConfig';
 import { PlanTourModal } from './PlanTourModal';
 import { ProtectedEmail } from './ProtectedEmail';
 import logo from "../../assets/tgt-logo.png";
@@ -15,14 +16,14 @@ export function Footer() {
   const displayName   = siteConfig?.companyName || agent?.businessName || agent?.name || 'Shree Ananta Travels';
   const tagline       = agent?.tagline || 'Your trusted partner for unforgettable travel experiences around the world. Creating memories that last a lifetime.';
   
-  const phone         = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const rawPhone      = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const displayPhone  = getDisplayPhone(rawPhone);
+  const telHref       = getTelHref(rawPhone);
   const email         = siteConfig?.contactEmail || '';
   const address       = siteConfig?.address || '';
   
-  const rawWhatsapp   = agent?.whatsapp || siteConfig?.contactPhone || '';
-  const cleanWhatsapp = rawWhatsapp.replace(/\D/g, '');
-  const whatsappMsg   = encodeURIComponent(`Hi ${displayName}! I'm looking for travel packages and details.`);
-  const whatsappLink  = cleanWhatsapp.length >= 10 ? `https://wa.me/${cleanWhatsapp}?text=${whatsappMsg}` : '';
+  const whatsappMsg   = `Hi ${displayName}! I'm looking for travel packages and details.`;
+  const whatsappLink  = getWhatsAppUrl(rawPhone, whatsappMsg);
 
   const facebookHref  = siteConfig?.facebookUrl || '#';
   const instagramHref = siteConfig?.instagramUrl || '#';
@@ -65,13 +66,13 @@ export function Footer() {
 
   const ContactBlock = () => (
     <ul className="space-y-3.5 text-sm">
-      {phone && (
+      {displayPhone && (
         <li className="flex items-center gap-3 group">
           <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[var(--theme-accent)] group-hover:bg-[var(--theme-primary)] group-hover:text-white transition-all shrink-0">
             <Phone className="w-4 h-4" />
           </div>
-          <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-gray-300 hover:text-white transition-colors font-medium">
-            {phone}
+          <a href={telHref} className="text-gray-300 hover:text-white transition-colors font-medium">
+            {displayPhone}
           </a>
         </li>
       )}

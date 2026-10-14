@@ -6,13 +6,14 @@ import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
 import { ProtectedEmail } from '../components/ProtectedEmail';
 import { useAgent } from '../context/AgentContext';
+import { getDisplayPhone } from '../utils/contactConfig';
 
 export default function TermsConditions() {
   const { siteConfig, agent } = useAgent();
   const displayName = siteConfig?.companyName || agent?.businessName || agent?.name || 'Shree Ananta Travels';
   
   const address = siteConfig?.address || agent?.address || '';
-  const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const phone = getDisplayPhone(siteConfig?.contactPhone || agent?.whatsapp || '');
   const email = siteConfig?.contactEmail || agent?.email || '';
 
   return (

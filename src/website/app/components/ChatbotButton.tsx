@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { useState } from 'react';
 import { useAgent } from '../context/AgentContext';
+import { getWhatsAppUrl } from '../utils/contactConfig';
 
 interface ChatbotButtonProps {
   hidden?: boolean;
@@ -15,17 +16,9 @@ export function ChatbotButton({ hidden = false }: ChatbotButtonProps) {
   if (hidden) return null;
 
   const handleClick = () => {
-    // Priority: agent.whatsapp (set during onboarding) > siteConfig.contactPhone > fallback
     const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || '';
-    // Strip non-digits, ensure country code
-    const digits = rawNumber.replace(/\D/g, '');
-    if (!digits) {
-      window.location.href = '/contact';
-      return;
-    }
-    const whatsappNumber = digits.startsWith('91') ? digits : (digits.length === 10 ? `91${digits}` : digits);
     const message = siteConfig?.defaultWhatsappMessage || "Hello! I need help with travel planning.";
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(getWhatsAppUrl(rawNumber, message), '_blank');
   };
 
   return (

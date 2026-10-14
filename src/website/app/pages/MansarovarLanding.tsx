@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAgent } from "../context/AgentContext";
+import { getTelHref, getWhatsAppUrl } from "../utils/contactConfig";
 import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -74,10 +75,7 @@ export default function MansarovarLanding() {
   // WhatsApp helper
   const buildWhatsAppUrl = (message: string) => {
     const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "";
-    const digits = rawNumber.replace(/\D/g, "");
-    if (!digits) return "/contact";
-    const whatsappNumber = digits.startsWith("91") ? digits : (digits.length === 10 ? `91${digits}` : digits);
-    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    return getWhatsAppUrl(rawNumber, message);
   };
 
   const handleWhatsAppClick = (eventName: string, message: string) => {
@@ -895,8 +893,7 @@ export default function MansarovarLanding() {
               });
             }
             const rawNumber = agent?.whatsapp || siteConfig?.contactPhone || "";
-            const digits = rawNumber.replace(/\D/g, "");
-            window.location.href = `tel:+91${digits.replace(/^91/, "")}`;
+            window.location.href = getTelHref(rawNumber);
           }}
           className="flex-1 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transition-colors shadow-md"
         >

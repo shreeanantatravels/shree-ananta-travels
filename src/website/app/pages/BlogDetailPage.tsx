@@ -25,6 +25,8 @@ import { Footer } from '../components/Footer';
 import { ChatbotButton } from '../components/ChatbotButton';
 import { PlanTourModal } from '../components/PlanTourModal';
 import { type BlogItem } from './BlogListingPage';
+import { useAgent } from '../context/AgentContext';
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from '../utils/contactConfig';
 
 function getHeadingText(children: React.ReactNode): string {
   if (!children) return '';
@@ -115,10 +117,12 @@ export default function BlogDetailPage({
     }
   };
 
-  const whatsappMsg = encodeURIComponent(
-    `Hi Shree Ananta Travels! I read your article "${article.title}" and would like to plan a tour.`
-  );
-  const whatsappUrl = `https://wa.me/917289037447?text=${whatsappMsg}`;
+  const { siteConfig, agent } = useAgent();
+  const phone = siteConfig?.contactPhone || agent?.whatsapp || '';
+  const displayPhone = getDisplayPhone(phone);
+  const telHref = getTelHref(phone);
+  const whatsappMsg = `Hi Shree Ananta Travels! I read your article "${article.title}" and would like to plan a tour.`;
+  const whatsappUrl = getWhatsAppUrl(phone, whatsappMsg);
 
   const isUpdated =
     article.updatedAt &&
@@ -547,10 +551,10 @@ export default function BlogDetailPage({
                   Speak directly with our pilgrimage and holiday specialists.
                 </p>
                 <a
-                  href="tel:+917289037447"
+                  href={telHref}
                   className="block py-2.5 px-4 bg-[#0a1c3d] hover:bg-[#d4af37] text-white hover:text-[#0a1c3d] text-xs font-bold rounded-xl transition-all"
                 >
-                  Call +91 7289037447
+                  Call {displayPhone}
                 </a>
               </div>
             </aside>

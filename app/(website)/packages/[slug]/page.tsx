@@ -3,11 +3,14 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/db/connect';
 import Package from '@/lib/db/models/Package';
+import SiteConfig from '@/lib/db/models/SiteConfig';
+import AdminUser from '@/lib/db/models/AdminUser';
 import PackageDetail from '@website/app/pages/PackageDetail';
 import {
   generatePackageSeoTitle,
   generatePackageMetaDescription,
 } from '@/lib/utils/packageSeoHelper';
+import { getDisplayPhone, DEFAULT_CONTACT_PHONE } from '@/lib/utils/contactConfig';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
 
@@ -117,6 +120,15 @@ export default async function PackageSlugDetailPage({
       ? pkg.originalPrice
       : undefined;
 
+  let phone = DEFAULT_CONTACT_PHONE;
+  try {
+    const [cfg, admin] = await Promise.all([
+      SiteConfig.findOne({ _singleton: true }).select('contactPhone').lean(),
+      AdminUser.findOne().select('whatsapp').lean(),
+    ]);
+    phone = admin?.whatsapp?.trim() || cfg?.contactPhone?.trim() || DEFAULT_CONTACT_PHONE;
+  } catch {}
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'TouristTrip',
@@ -132,7 +144,7 @@ export default async function PackageSlugDetailPage({
       name: 'Shree Ananta Travels',
       url: SITE_URL,
       image: `${SITE_URL}/uploads/shree-ananta-logo.jpg`,
-      telephone: '+91 7289037447',
+      ...(getDisplayPhone(phone) ? { telephone: getDisplayPhone(phone) } : {}),
       email: 'shreeanantatravels@gmail.com',
       address: {
         '@type': 'PostalAddress',

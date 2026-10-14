@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Link from "next/link";
 import {
@@ -11,8 +12,14 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { ProtectedEmail } from "./ProtectedEmail";
+import { useAgent } from "../context/AgentContext";
+import { getDisplayPhone, getTelHref } from "../utils/contactConfig";
 
 export function SeoOverviewSection() {
+  const { siteConfig, agent } = useAgent();
+  const phone = siteConfig?.contactPhone || agent?.whatsapp || "";
+  const displayPhone = getDisplayPhone(phone);
+  const telHref = getTelHref(phone);
   return (
     <section className="py-16 bg-white dark:bg-gray-900/90 border-t border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -183,7 +190,10 @@ export function SeoOverviewSection() {
             </span>
             <span className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-[var(--theme-primary)]" />
-              <strong>Call / WhatsApp:</strong> +91 7289037447
+              <strong>Call / WhatsApp:</strong>{" "}
+              <a href={telHref} className="hover:underline text-gray-900 dark:text-gray-100">
+                {displayPhone}
+              </a>
             </span>
             <span className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[var(--theme-primary)]" />

@@ -1,5 +1,9 @@
 import { Metadata } from 'next';
 import MansarovarLanding from '@website/app/pages/MansarovarLanding';
+import connectDB from '@/lib/db/connect';
+import SiteConfig from '@/lib/db/models/SiteConfig';
+import AdminUser from '@/lib/db/models/AdminUser';
+import { getDisplayPhone, DEFAULT_CONTACT_PHONE } from '@/lib/utils/contactConfig';
 
 export const metadata: Metadata = {
   title: {
@@ -44,9 +48,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function KailashMansarovarPage() {
+export default async function KailashMansarovarPage() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
   
+  let phone = DEFAULT_CONTACT_PHONE;
+  try {
+    await connectDB();
+    const [cfg, admin] = await Promise.all([
+      SiteConfig.findOne({ _singleton: true }).select('contactPhone').lean(),
+      AdminUser.findOne().select('whatsapp').lean(),
+    ]);
+    phone = admin?.whatsapp?.trim() || cfg?.contactPhone?.trim() || DEFAULT_CONTACT_PHONE;
+  } catch {}
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -133,7 +147,7 @@ export default function KailashMansarovarPage() {
       '@id': 'https://www.shreeanantatravels.com/#organization',
       name: 'Shree Ananta Travels',
       url: baseUrl,
-      telephone: '+91 7289037447',
+      ...(getDisplayPhone(phone) ? { telephone: getDisplayPhone(phone) } : {}),
       email: 'shreeanantatravels@gmail.com',
       image: `${baseUrl}/uploads/shree-ananta-logo.jpg`,
       address: {

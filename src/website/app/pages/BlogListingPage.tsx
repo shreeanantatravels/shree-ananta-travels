@@ -21,6 +21,8 @@ import { Topbar } from "../components/Topbar";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { ChatbotButton } from "../components/ChatbotButton";
+import { useAgent } from "../context/AgentContext";
+import { getDisplayPhone, getTelHref, getWhatsAppUrl } from "../utils/contactConfig";
 
 export interface BlogItem {
   _id: string;
@@ -86,6 +88,12 @@ export default function BlogListingPage({
   currentSort = "latest",
   currentSearch = "",
 }: BlogListingPageProps) {
+  const { siteConfig, agent } = useAgent();
+  const phone = siteConfig?.contactPhone || agent?.whatsapp || "";
+  const displayPhone = getDisplayPhone(phone);
+  const telHref = getTelHref(phone);
+  const whatsappUrl = getWhatsAppUrl(phone, "Hi Shree Ananta Travels, I have an enquiry regarding your yatra packages");
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(currentSearch);
@@ -506,14 +514,14 @@ export default function BlogListingPage({
                 </p>
                 <div className="space-y-2 pt-1">
                   <a
-                    href="tel:+919151007751"
+                    href={telHref}
                     className="w-full py-2 px-3 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors"
                   >
                     <Phone className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Call: +91 917289037447</span>
+                    <span>Call: {displayPhone}</span>
                   </a>
                   <a
-                    href="https://wa.me/919151007751?text=Hi%20Shree%20Ananta%20Travels,%20I%20have%20an%20enquiry%20regarding%20your%20yatra%20packages"
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-md"
