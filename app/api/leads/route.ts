@@ -69,13 +69,18 @@ export async function POST(req: Request) {
 
     if (sanitized.budgetRupees !== undefined && sanitized.budgetRupees !== null && sanitized.budgetRupees !== '') {
       if (typeof sanitized.budgetRupees === 'string') {
-        const digits = sanitized.budgetRupees.replace(/,/g, '').match(/\d+/g);
-        if (digits && digits.length > 0) {
-          sanitized.budgetRupees = digits.length >= 2
-            ? Math.round((Number(digits[0]) + Number(digits[1])) / 2)
-            : Number(digits[0]);
+        const trimmed = sanitized.budgetRupees.trim();
+        // If it's pure integer digits without range symbols, store as number; otherwise preserve string intact
+        if (/^\d+$/.test(trimmed)) {
+          sanitized.budgetRupees = Number(trimmed);
+        } else {
+          sanitized.budgetRupees = trimmed;
         }
       }
+    }
+
+    if (sanitized.hotelBooked === 'yes') {
+      sanitized.hotelType = '';
     }
 
     const newLead = await Lead.create(sanitized);

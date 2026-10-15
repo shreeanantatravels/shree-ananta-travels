@@ -28,6 +28,7 @@ import {
   ArrowRightLeft,
   Package,
   Flame,
+  Hotel,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -315,6 +316,13 @@ function ContactBlock({ phone, email }: { phone: string; email?: string }) {
   );
 }
 
+const HOTEL_TYPE_LABELS: Record<string, string> = {
+  '3-star': '3★ Comfort',
+  '4-star': '4★ Premium',
+  '5-star': '5★ Luxury',
+  'resort': 'Resort / Villa',
+};
+
 // ── TravelersAndBudget ─────────────────────────────────────────────────────────
 
 function TravelersAndBudget({
@@ -351,7 +359,7 @@ function TravelersAndBudget({
               Budget
             </span>
           </div>
-          <p className="text-xs font-bold text-slate-900 truncate">{budget}</p>
+          <p className="text-xs font-bold text-slate-900 truncate" title={budget}>{budget}</p>
         </div>
       ) : null}
     </div>
@@ -403,6 +411,17 @@ export function LeadCard({
           />
 
           <TravelersAndBudget travelers={form.travelers} budget={form.budget} />
+
+          {(form.hotelBooked || form.hotelType) && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50/90 border border-amber-200/90 text-amber-900 text-xs">
+              <Hotel className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+              <span className="font-bold text-[11px] truncate">
+                {form.hotelBooked === "yes"
+                  ? "Hotel: Already Booked"
+                  : `Hotel: ${HOTEL_TYPE_LABELS[form.hotelType || ""] || form.hotelType || "Need Recommendations"}`}
+              </span>
+            </div>
+          )}
 
           <ContactBlock phone={form.phone} email={form.email} />
 

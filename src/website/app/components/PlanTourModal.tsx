@@ -51,7 +51,7 @@ export function PlanTourModal({ isOpen, onClose, preselectedPackage }: PlanTourM
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[999999] overflow-y-auto bg-black/75 backdrop-blur-md p-3 sm:p-6 flex items-center justify-center animate-in fade-in duration-200"
+      className="fixed inset-0 z-[999999] overflow-y-auto bg-slate-900/40 backdrop-blur-sm p-3 sm:p-6 flex items-center justify-center animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

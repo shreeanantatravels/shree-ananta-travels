@@ -29,6 +29,8 @@ export interface FormLead extends BaseLead {
   travelers: number;
   budget: string;
   message: string;
+  hotelBooked?: string;
+  hotelType?: string;
 }
 
 export interface PackageLead extends BaseLead {
@@ -38,6 +40,27 @@ export interface PackageLead extends BaseLead {
   travelers: number;
   budget: string;
   startDate?: string;
+  hotelBooked?: string;
+  hotelType?: string;
+}
+
+export function formatBudgetDisplay(val: any): string {
+  if (val === undefined || val === null || val === '') return '';
+  if (typeof val === 'number') {
+    if (val === 17500) return '₹10,000 - ₹25,000';
+    if (val === 37500) return '₹25,000 - ₹50,000';
+    if (val === 75000) return '₹50,000 - ₹1,00,000';
+    return `₹${val.toLocaleString('en-IN')}`;
+  }
+  const str = String(val).trim();
+  if (str === '17500') return '₹10,000 - ₹25,000';
+  if (str === '37500') return '₹25,000 - ₹50,000';
+  if (str === '75000') return '₹50,000 - ₹1,00,000';
+  if (str.startsWith('₹')) return str;
+  if (/^\d+$/.test(str)) {
+    return `₹${Number(str).toLocaleString('en-IN')}`;
+  }
+  return str;
 }
 
 export type Lead = PopupLead | FormLead | PackageLead;
@@ -86,7 +109,9 @@ export function CRMProvider({ children }: { children: ReactNode }) {
           startDate: l.departureDate?.split('T')[0],
           duration: l.numberOfDays ? `${l.numberOfDays} days` : '',
           travelers: (l.adults || 0) + (l.children || 0),
-          budget: l.budgetRupees ? `₹${l.budgetRupees}` : '',
+          budget: formatBudgetDisplay(l.budgetRupees),
+          hotelBooked: l.hotelBooked || '',
+          hotelType: l.hotelType || '',
           message: l.specialRequests || ''
         }));
         setLeadsData(transformedLeads);

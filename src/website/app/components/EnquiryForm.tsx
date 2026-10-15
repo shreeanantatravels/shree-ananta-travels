@@ -292,20 +292,6 @@ export function EnquiryForm({
 
     setIsSubmitting(true);
     try {
-      let parsedBudget: any = formData.budgetRupees;
-      if (
-        typeof formData.budgetRupees === "string" &&
-        formData.budgetRupees.trim() !== ""
-      ) {
-        const digits = formData.budgetRupees.replace(/,/g, "").match(/\d+/g);
-        if (digits && digits.length > 0) {
-          parsedBudget =
-            digits.length >= 2
-              ? Math.round((Number(digits[0]) + Number(digits[1])) / 2)
-              : Number(digits[0]);
-        }
-      }
-
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
@@ -313,7 +299,8 @@ export function EnquiryForm({
         },
         body: JSON.stringify({
           ...formData,
-          budgetRupees: parsedBudget,
+          budgetRupees: formData.budgetRupees?.trim() || "",
+          hotelType: formData.hotelBooked === "yes" ? "" : formData.hotelType,
           ...(prefilledPackageName
             ? { packageName: prefilledPackageName }
             : {}),
@@ -600,7 +587,12 @@ export function EnquiryForm({
                   <select
                     name="hotelBooked"
                     className={`${inputInsideClass} cursor-pointer`}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      if (e.target.value === "yes") {
+                        setFormData((prev) => ({ ...prev, hotelType: "" }));
+                      }
+                    }}
                     value={formData.hotelBooked}
                   >
                     <option value="no">Need hotel recommendations</option>
@@ -609,28 +601,37 @@ export function EnquiryForm({
                 </div>
               </FormField>
 
-              <FormField label="Hotel Category Preference">
+              <FormField
+                label="Hotel Category Preference"
+                tooltip={formData.hotelBooked === "yes" ? "Disabled — already booked" : undefined}
+              >
                 <div className="grid grid-cols-2 gap-2">
                   {hotelCategoryOptions.map((hc) => {
-                    const selected = formData.hotelType === hc.value;
+                    const isHotelBooked = formData.hotelBooked === "yes";
+                    const selected = !isHotelBooked && formData.hotelType === hc.value;
                     return (
                       <button
                         key={hc.value}
                         type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            hotelType: hc.value,
-                          }))
-                        }
-                        className={`p-2.5 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
-                          selected
-                            ? "border-[var(--theme-primary)] bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 ring-2 ring-[var(--theme-primary)]/30"
-                            : "border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        disabled={isHotelBooked}
+                        onClick={() => {
+                          if (!isHotelBooked) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              hotelType: hc.value,
+                            }));
+                          }
+                        }}
+                        className={`p-2.5 rounded-xl border text-left transition-all duration-200 ${
+                          isHotelBooked
+                            ? "opacity-40 cursor-not-allowed bg-gray-100/70 dark:bg-gray-800/40 border-gray-200/60 dark:border-gray-700/60"
+                            : selected
+                              ? "border-[var(--theme-primary)] bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 ring-2 ring-[var(--theme-primary)]/30 cursor-pointer"
+                              : "border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                         }`}
                       >
                         <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center justify-between">
-                          <span>{hc.label}</span>
+                          <span className={isHotelBooked ? "text-gray-400 dark:text-gray-500" : ""}>{hc.label}</span>
                           {selected && (
                             <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                           )}
@@ -710,121 +711,161 @@ export function EnquiryForm({
         )}
 
         <div className={compact ? "w-full" : "bg-white/95 dark:bg-gray-900/95 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden backdrop-blur-xl transition-all"}>
-          {/* Progress Step Header with animated line */}
-          <div className="bg-gray-50/90 dark:bg-gray-800/60 border-b border-gray-100 dark:border-gray-800 px-6 py-5">
-            <div className="flex justify-between items-center max-w-md mx-auto relative">
-              {/* Background connector line */}
-              <div className="absolute top-5 left-4 right-4 h-1 bg-gray-200 dark:bg-gray-700 rounded-full -z-0" />
-              {/* Active progress fill line */}
-              <div
-                className="absolute top-5 left-4 h-1 bg-gradient-to-r from-[var(--theme-primary)] to-emerald-500 rounded-full transition-all duration-500 -z-0"
-                style={{ width: `calc(${progressPercent}% * 0.9)` }}
-              />
-
-              {steps.map((s) => (
-                <ProgressStep
-                  key={s.number}
-                  number={s.number}
-                  label={s.label}
-                  icon={s.icon}
-                  active={currentStep === s.number}
-                  completed={currentStep > s.number}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className={compact ? "p-5 sm:p-7" : "p-6 sm:p-8"}>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {renderStep()}
-
-              {/* Navigation buttons */}
-              <div className="flex items-center justify-between gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
-                {currentStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep((prev) => prev - 1)}
-                    className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" /> Back
-                  </button>
-                ) : (
-                  <div />
-                )}
-
-                {currentStep < 4 ? (
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="ml-auto px-8 py-3.5 bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white rounded-2xl text-xs font-extrabold tracking-wider uppercase transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2 cursor-pointer"
-                  >
-                    <span>Continue</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="ml-auto px-9 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSubmitting ? (
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        <span>Send Request</span>
-                      </>
-                    )}
-                  </button>
-                )}
+          {showSuccess ? (
+            /* Premium in-card Success Confirmation */
+            <div className="p-8 sm:p-12 text-center flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+              <div className="relative mb-5">
+                <div className="w-20 h-20 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-3xl flex items-center justify-center shadow-xl shadow-emerald-500/30 text-white">
+                  <CheckCircle2 className="w-11 h-11" />
+                </div>
+                <div className="absolute -inset-2 bg-emerald-400/20 rounded-3xl blur-xl -z-10" />
               </div>
-            </form>
-          </div>
 
-          {/* Trust badges footer */}
-          <div className="bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800/80 px-6 py-3 flex flex-wrap items-center justify-around gap-4 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> 100% Free
-              Consultation
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" /> Fast
-              2-hr Quotes
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />{" "}
-              Best Price Guarantee
-            </span>
-          </div>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 mb-2 border border-emerald-200 dark:border-emerald-800">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-500" /> Request Sent Successfully
+              </span>
+
+              <h3
+                className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                We&apos;re Planning Your Trip!
+              </h3>
+
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed mb-6 font-medium">
+                Thank you, <strong className="text-gray-900 dark:text-white font-bold">{formData.name || 'Traveler'}</strong>! We will review your request and call/WhatsApp you within <span className="text-emerald-600 dark:text-emerald-400 font-bold">2 hours</span> with your curated itinerary and best price quote.
+              </p>
+
+              {/* Trip Highlights Summary Card */}
+              <div className="w-full max-w-md bg-gray-50/90 dark:bg-gray-800/60 rounded-2xl p-4 border border-gray-200/80 dark:border-gray-700/80 mb-6 text-left">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Trip Details Summary
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  {formData.toLocation && (
+                    <div className="space-y-0.5">
+                      <span className="text-gray-400 text-[10px] font-semibold uppercase block">Destination</span>
+                      <span className="font-bold text-gray-900 dark:text-gray-100 truncate block">{formData.toLocation}</span>
+                    </div>
+                  )}
+                  {formData.numberOfDays && (
+                    <div className="space-y-0.5">
+                      <span className="text-gray-400 text-[10px] font-semibold uppercase block">Duration</span>
+                      <span className="font-bold text-gray-900 dark:text-gray-100 block">{formData.numberOfDays} Days</span>
+                    </div>
+                  )}
+                  {formData.budgetRupees && (
+                    <div className="space-y-0.5">
+                      <span className="text-gray-400 text-[10px] font-semibold uppercase block">Budget</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 block">{formData.budgetRupees}</span>
+                    </div>
+                  )}
+                  {formData.phone && (
+                    <div className="space-y-0.5">
+                      <span className="text-gray-400 text-[10px] font-semibold uppercase block">Contact</span>
+                      <span className="font-bold text-gray-900 dark:text-gray-100 block">{formData.phone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSuccessClose}
+                className="w-full max-w-md py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 cursor-pointer"
+              >
+                Got It
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Progress Step Header with animated line */}
+              <div className="bg-gray-50/90 dark:bg-gray-800/60 border-b border-gray-100 dark:border-gray-800 px-6 py-5">
+                <div className="flex justify-between items-center max-w-md mx-auto relative">
+                  {/* Background connector line */}
+                  <div className="absolute top-5 left-4 right-4 h-1 bg-gray-200 dark:bg-gray-700 rounded-full -z-0" />
+                  {/* Active progress fill line */}
+                  <div
+                    className="absolute top-5 left-4 h-1 bg-gradient-to-r from-[var(--theme-primary)] to-emerald-500 rounded-full transition-all duration-500 -z-0"
+                    style={{ width: `calc(${progressPercent}% * 0.9)` }}
+                  />
+
+                  {steps.map((s) => (
+                    <ProgressStep
+                      key={s.number}
+                      number={s.number}
+                      label={s.label}
+                      icon={s.icon}
+                      active={currentStep === s.number}
+                      completed={currentStep > s.number}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className={compact ? "p-5 sm:p-7" : "p-6 sm:p-8"}>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {renderStep()}
+
+                  {/* Navigation buttons */}
+                  <div className="flex items-center justify-between gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
+                    {currentStep > 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep((prev) => prev - 1)}
+                        className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" /> Back
+                      </button>
+                    ) : (
+                      <div />
+                    )}
+
+                    {currentStep < 4 ? (
+                      <button
+                        type="button"
+                        onClick={handleNextStep}
+                        className="ml-auto px-8 py-3.5 bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-secondary)] text-white rounded-2xl text-xs font-extrabold tracking-wider uppercase transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 flex items-center gap-2 cursor-pointer"
+                      >
+                        <span>Continue</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="ml-auto px-9 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSubmitting ? (
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            <span>Send Request</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+              {/* Trust badges footer */}
+              <div className="bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800/80 px-6 py-3 flex flex-wrap items-center justify-around gap-4 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> 100% Free Consultation
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[var(--theme-primary)]" /> Fast 2-hr Quotes
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> Best Price Guarantee
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Success Modal */}
-      {showSuccess && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-            <h3
-              className="text-2xl font-black text-gray-900 dark:text-white mb-2"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Request Sent Successfully!
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-              Thank you! We will review your request and call you within 2 hours
-              to discuss your custom travel plan.
-            </p>
-            <button
-              onClick={handleSuccessClose}
-              className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer"
-            >
-              Got It
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
