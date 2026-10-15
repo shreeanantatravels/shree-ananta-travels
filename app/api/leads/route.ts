@@ -33,6 +33,16 @@ export async function POST(req: Request) {
       sanitized.toLocation = sanitized.destination;
     }
 
+    // Map budget to budgetRupees
+    if (sanitized.budget && !sanitized.budgetRupees) {
+      sanitized.budgetRupees = sanitized.budget;
+    }
+
+    // Map message to specialRequests
+    if (sanitized.message && !sanitized.specialRequests) {
+      sanitized.specialRequests = sanitized.message;
+    }
+
     // Map passengers string (e.g., "1", "2", "3-5", "6+") to adults count
     if (sanitized.passengers && sanitized.adults === undefined) {
       if (sanitized.passengers === '3-5') sanitized.adults = 4;
