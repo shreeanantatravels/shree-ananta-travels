@@ -11,6 +11,12 @@ export interface IItineraryDay {
   transport?: string;
 }
 
+export interface IRegistrationStep {
+  stepNumber: string;
+  title: string;
+  description: string;
+}
+
 export interface IPackageSEO {
   title?: string;
   description?: string;
@@ -37,6 +43,19 @@ export interface IPackage extends Document {
   hasOffer: boolean;
   badges: string[];
   tags: string[];
+  route?: string;
+  departure?: string;
+  tourStyle?: string;
+  routeBannerTitle?: string;
+  routeBannerSubtitle?: string;
+  registrationTitle?: string;
+  registrationSteps?: IRegistrationStep[];
+  travelEssentialsTitle?: string;
+  travelEssentialsSubtitle?: string;
+  travelEssentials?: string[];
+  trustFeatures?: string[];
+  conciergeTitle?: string;
+  conciergeSubtitle?: string;
   seo: IPackageSEO;
   redirectFromSlugs: string[];
   inclusions: string[];
@@ -46,6 +65,15 @@ export interface IPackage extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const RegistrationStepSchema = new Schema<IRegistrationStep>(
+  {
+    stepNumber: { type: String, default: '' },
+    title: { type: String, default: '' },
+    description: { type: String, default: '' },
+  },
+  { _id: false }
+);
 
 const ItineraryDaySchema = new Schema<IItineraryDay>({
   dayNumber: { type: Number, required: true },
@@ -158,6 +186,68 @@ const PackageSchema = new Schema<IPackage>(
     termsAndConditions: {
       type: [String],
       default: [],
+    },
+    route: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    departure: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    tourStyle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    routeBannerTitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    routeBannerSubtitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    registrationTitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    registrationSteps: {
+      type: [RegistrationStepSchema],
+      default: [],
+    },
+    travelEssentialsTitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    travelEssentialsSubtitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    travelEssentials: {
+      type: [String],
+      default: [],
+    },
+    trustFeatures: {
+      type: [String],
+      default: [],
+    },
+    conciergeTitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    conciergeSubtitle: {
+      type: String,
+      trim: true,
+      default: '',
     },
     itinerary: {
       type: [ItineraryDaySchema],

@@ -30,6 +30,12 @@ export interface PackageData {
   duration: string;
   category: 'domestic' | 'international' | 'kailash';
   packageType: string;
+  route?: string;
+  departure?: string;
+  tourStyle?: string;
+  routeBannerTitle?: string;
+  routeBannerSubtitle?: string;
+  trustFeatures?: string[];
   imageUrl1?: string;
   imageUrl2?: string;
   imageUrl3?: string;

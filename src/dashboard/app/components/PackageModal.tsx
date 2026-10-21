@@ -51,6 +51,13 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
   const [category, setCategory] = useState('domestic');
   const [description, setDescription] = useState('');
 
+  // Dynamic Route & Style Fields
+  const [route, setRoute] = useState('');
+  const [departure, setDeparture] = useState('');
+  const [tourStyle, setTourStyle] = useState('');
+  const [routeBannerTitle, setRouteBannerTitle] = useState('');
+  const [routeBannerSubtitle, setRouteBannerSubtitle] = useState('');
+
   const [originalPrice, setOriginalPrice] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState('');
   const [priceType, setPriceType] = useState<'fixed' | 'onRequest'>('fixed');
@@ -155,7 +162,19 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       setInclusions(parseArrayField(initialData.inclusions));
       setExclusions(parseArrayField(initialData.exclusions));
       setTermsAndConditions(parseArrayField(initialData.termsAndConditions));
-      setSelectedType(initialData.packageType || '');
+      
+      const pkgType = initialData.packageType || '';
+      if (pkgType && !['pilgrimage', 'beach', 'mountain', 'honeymoon'].includes(pkgType)) {
+        setCustomTypes(prev => (prev.includes(pkgType) ? prev : [...prev, pkgType]));
+      }
+      setSelectedType(pkgType);
+
+      // Route and style highlights
+      setRoute(initialData.route || '');
+      setDeparture(initialData.departure || '');
+      setTourStyle(initialData.tourStyle || '');
+      setRouteBannerTitle(initialData.routeBannerTitle || '');
+      setRouteBannerSubtitle(initialData.routeBannerSubtitle || '');
 
       setTags(parseArrayField(initialData.tags));
       setSeoTitle(initialData.seo?.title || '');
@@ -193,6 +212,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
 
       setLocation(''); setDuration('');
       setCategory('domestic'); setDescription('');
+      setRoute(''); setDeparture(''); setTourStyle(''); setRouteBannerTitle(''); setRouteBannerSubtitle('');
       setPriceType('fixed');
       setOriginalPrice(''); setDiscountedPrice('');
       setIsBestseller(false); setHasOffer(false); setIsTrending(false);
@@ -415,6 +435,11 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       formData.append('category', category);
       formData.append('packageType', selectedType || 'other');
       formData.append('description', description);
+      formData.append('route', route);
+      formData.append('departure', departure);
+      formData.append('tourStyle', tourStyle);
+      formData.append('routeBannerTitle', routeBannerTitle);
+      formData.append('routeBannerSubtitle', routeBannerSubtitle);
       formData.append('originalPrice', origAmt.toString());
       formData.append('discountedPrice', discAmt.toString());
       formData.append('isTrending', String(isTrending));
@@ -650,6 +675,71 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
               <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} placeholder="Enter package description..." className={inp} />
+            </div>
+
+            {/* Trip Route, Hub & Style Highlights */}
+            <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-indigo-600" />
+                  <span>Highlights Bar & Route Details</span>
+                  <span className="text-[10px] font-normal text-gray-400">(Dynamic fields shown on package page)</span>
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Route Summary</label>
+                  <Input
+                    value={route}
+                    onChange={e => setRoute(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Via Lucknow & Hilsa"
+                    className={inp + " bg-white h-auto"}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Departure Hub / City</label>
+                  <Input
+                    value={departure}
+                    onChange={e => setDeparture(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Lucknow, India"
+                    className={inp + " bg-white h-auto"}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Tour Style</label>
+                  <Input
+                    value={tourStyle}
+                    onChange={e => setTourStyle(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Spiritual Pilgrimage"
+                    className={inp + " bg-white h-auto"}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/60">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Curated Route Banner Title (Optional)</label>
+                  <Input
+                    value={routeBannerTitle}
+                    onChange={e => setRouteBannerTitle(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Lucknow Overland & Helicopter Route"
+                    className={inp + " bg-white h-auto"}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Curated Route Banner Subtitle (Optional)</label>
+                  <Input
+                    value={routeBannerSubtitle}
+                    onChange={e => setRouteBannerSubtitle(e.target.value)}
+                    type="text"
+                    placeholder="e.g., Depart from Lucknow → Nepalgunj → Flight to Simikot..."
+                    className={inp + " bg-white h-auto"}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Itinerary Section */}

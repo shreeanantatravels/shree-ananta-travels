@@ -108,6 +108,9 @@ export async function POST(req: Request) {
     if (body.inclusions) body.inclusions = safeParseJson(body.inclusions, []);
     if (body.exclusions) body.exclusions = safeParseJson(body.exclusions, []);
     if (body.termsAndConditions) body.termsAndConditions = safeParseJson(body.termsAndConditions, []);
+    if (body.registrationSteps) body.registrationSteps = safeParseJson(body.registrationSteps, []);
+    if (body.travelEssentials) body.travelEssentials = safeParseJson(body.travelEssentials, []);
+    if (body.trustFeatures) body.trustFeatures = safeParseJson(body.trustFeatures, []);
     if (body.originalPrice !== undefined) body.originalPrice = Number(body.originalPrice) || 0;
     if (body.discountedPrice !== undefined) body.discountedPrice = Number(body.discountedPrice) || 0;
     if (body.isTrending !== undefined) body.isTrending = String(body.isTrending) === 'true';

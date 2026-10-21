@@ -18,14 +18,11 @@ import {
   CheckCircle2,
   XCircle,
   Headphones,
-  Zap,
   Mountain,
   Navigation,
   Bed,
   Utensils,
   Bus,
-  FileText,
-  Info,
   Maximize2,
   X,
   PhoneCall,
@@ -59,6 +56,8 @@ export default function PackageDetail() {
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [relatedPackages, setRelatedPackages] = useState<any[]>([]);
   const [selectedRouteDay, setSelectedRouteDay] = useState<number | null>(null);
+  const [showInclusions, setShowInclusions] = useState(false);
+  const [showExclusions, setShowExclusions] = useState(false);
 
   // Fetch package details
   useEffect(() => {
@@ -115,6 +114,14 @@ export default function PackageDetail() {
               : typeof pkg.termsAndConditions === "string" && pkg.termsAndConditions.trim()
                 ? [pkg.termsAndConditions]
                 : [],
+            route: pkg.route || "",
+            departure: pkg.departure || "",
+            tourStyle: pkg.tourStyle || "",
+            routeBannerTitle: pkg.routeBannerTitle || "",
+            routeBannerSubtitle: pkg.routeBannerSubtitle || "",
+            trustFeatures: Array.isArray(pkg.trustFeatures) ? pkg.trustFeatures : [],
+            conciergeTitle: pkg.conciergeTitle || "",
+            conciergeSubtitle: pkg.conciergeSubtitle || "",
           });
           setActiveImage(images[0] || "");
         } else {
@@ -232,7 +239,7 @@ export default function PackageDetail() {
             <Sparkles className="w-6 h-6 text-[var(--theme-primary)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
           <p className="text-gray-600 dark:text-gray-400 font-semibold text-lg animate-pulse">
-            Loading Kailash Mansarovar Package...
+            Loading Package Details...
           </p>
         </div>
         <Footer />
@@ -286,6 +293,46 @@ export default function PackageDetail() {
         ? "/international"
         : "/domestic";
 
+  // Dynamic Type & Category Formatting (handles preset & any custom types added via modal)
+  const formatPackageType = (type?: string, cat?: string) => {
+    if (!type || type === "other") {
+      if (cat === "kailash") return "Kailash Mansarovar Yatra";
+      if (cat === "international") return "International Tour";
+      return "Domestic Tour";
+    }
+
+    // Only the 4 standard dashboard dropdown keys need friendly label mappings
+    const SYSTEM_TYPE_MAP: Record<string, string> = {
+      pilgrimage: "Pilgrimage / Yatra",
+      beach: "Beach Holiday",
+      mountain: "Mountain Adventure",
+      honeymoon: "Honeymoon Special",
+    };
+
+    const clean = type.trim();
+    const lower = clean.toLowerCase();
+
+    if (SYSTEM_TYPE_MAP[lower]) {
+      return SYSTEM_TYPE_MAP[lower];
+    }
+
+    // Any other type is manually entered from dashboard modal: format nicely
+    return clean
+      .replace(/[-_]/g, " ")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
+  const packageTypeLabel = formatPackageType(packageData.packageType, packageData.category);
+
+  // Dynamic route, departure & style highlights
+  const displayRoute = packageData.route || (packageData.itinerary?.[0]?.route ? packageData.itinerary[0].route : packageData.location);
+  const displayDeparture = packageData.departure || (packageData.category === "kailash" ? "Lucknow / Kathmandu" : "Ex-India / Multiple Cities");
+  const displayTourStyle = packageData.tourStyle || packageTypeLabel;
+  const displayPricing = packageData.price && packageData.price > 0 ? `₹${packageData.price.toLocaleString()}` : "Price on Request";
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans selection:bg-[var(--theme-primary)] selection:text-white">
       <Topbar />
@@ -337,7 +384,7 @@ export default function PackageDetail() {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-full uppercase tracking-wider border border-amber-200/60 dark:border-amber-800/60">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Sacred Pilgrimage Yatra
+              {packageTypeLabel}
             </span>
 
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full uppercase tracking-wider border border-blue-200/60 dark:border-blue-800/60">
@@ -363,7 +410,7 @@ export default function PackageDetail() {
                 {packageData.title}
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed font-normal">
-                Sacred journey to Mount Kailash & Lake Mansarovar via Lucknow, Nepalgunj, Simikot, Hilsa, and Taklakot (Purang). Comprehensive yatra arrangements with experienced ground support, vegetarian meals, and guided parikrama.
+                {packageData.description}
               </p>
             </div>
 
@@ -622,7 +669,7 @@ export default function PackageDetail() {
             <div className="absolute bottom-5 left-5 right-5 text-white flex items-end justify-between pointer-events-none">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-widest text-amber-300">
-                  Featured Yatra Photograph
+                  {isKailash ? "Featured Yatra Photograph" : "Featured Tour Photograph"}
                 </span>
                 <p className="text-2xl font-black">{packageData.title}</p>
               </div>
@@ -677,8 +724,8 @@ export default function PackageDetail() {
               <p className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-wider truncate">
                 Route
               </p>
-              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-900 dark:text-white leading-tight break-words line-clamp-2" title="Via Lucknow & Hilsa">
-                Via Lucknow & Hilsa
+              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-900 dark:text-white leading-tight break-words line-clamp-2" title={displayRoute}>
+                {displayRoute}
               </p>
             </div>
           </div>
@@ -692,8 +739,8 @@ export default function PackageDetail() {
               <p className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-wider truncate">
                 Departure
               </p>
-              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-900 dark:text-white leading-tight break-words line-clamp-2" title="Lucknow, India">
-                Lucknow, India
+              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-900 dark:text-white leading-tight break-words line-clamp-2" title={displayDeparture}>
+                {displayDeparture}
               </p>
             </div>
           </div>
@@ -707,8 +754,8 @@ export default function PackageDetail() {
               <p className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-wider truncate">
                 Tour Style
               </p>
-              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-900 dark:text-white leading-tight break-words line-clamp-2" title="Spiritual Pilgrimage">
-                Spiritual Pilgrimage
+              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-900 dark:text-white leading-tight break-words line-clamp-2" title={displayTourStyle}>
+                {displayTourStyle}
               </p>
             </div>
           </div>
@@ -722,8 +769,8 @@ export default function PackageDetail() {
               <p className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-wider truncate">
                 Pricing Mode
               </p>
-              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-emerald-600 dark:text-emerald-400 leading-tight break-words line-clamp-2" title="Price on Request">
-                Price on Request
+              <p className="text-[11px] sm:text-xs md:text-sm font-bold text-emerald-600 dark:text-emerald-400 leading-tight break-words line-clamp-2" title={displayPricing}>
+                {displayPricing}
               </p>
             </div>
           </div>
@@ -742,17 +789,16 @@ export default function PackageDetail() {
                 Route Map
               </a>
               <a href="#itinerary" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
-                Itinerary ({packageData.itinerary?.length || 11} Days)
+                Itinerary ({packageData.itinerary?.length || 0} Days)
               </a>
               <a href="#inclusions" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
                 Inclusions & Exclusions
               </a>
-              <a href="#information" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
-                Registration & Advisory
-              </a>
-              <a href="#terms" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
-                Terms & Conditions
-              </a>
+              {packageData.termsAndConditions?.length > 0 && (
+                <a href="#terms" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
+                  Terms & Conditions
+                </a>
+              )}
             </div>
 
             <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
@@ -800,22 +846,24 @@ export default function PackageDetail() {
                 )}
               </div>
 
-              {/* Spiritual Route Feature Banner */}
+              {/* Curated Route Feature Banner */}
               <div className="mt-6 p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">🕉️</span>
+                  <span className="text-xl">{isKailash ? "🕉️" : "✨"}</span>
                   <div>
                     <p className="font-bold text-amber-900 dark:text-amber-200">
-                      Lucknow Overland & Helicopter Route
+                      {packageData.routeBannerTitle || (packageData.route ? `${packageData.title} (${packageData.route})` : packageData.title)}
                     </p>
                     <p className="text-amber-700 dark:text-amber-300">
-                      Depart from Lucknow → Nepalgunj → Flight to Simikot → Helicopter to Hilsa → Taklakot (Purang) → Mansarovar & Kailash.
+                      {packageData.routeBannerSubtitle || (packageData.route ? `Curated travel route: ${packageData.route} with complete accommodations, transfers & sightseeing.` : `Handcrafted curated itinerary with complete accommodations, transfers & guided sightseeing in ${packageData.location}.`)}
                     </p>
                   </div>
                 </div>
-                <span className="px-3 py-1 bg-amber-200/60 dark:bg-amber-900/60 text-amber-900 dark:text-amber-100 rounded-lg font-bold self-start sm:self-center">
-                  11 Days / 10 Nights
-                </span>
+                {packageData.duration && (
+                  <span className="px-3 py-1 bg-amber-200/60 dark:bg-amber-900/60 text-amber-900 dark:text-amber-100 rounded-lg font-bold self-start sm:self-center whitespace-nowrap">
+                    {packageData.duration}
+                  </span>
+                )}
               </div>
             </section>
 
@@ -835,18 +883,18 @@ export default function PackageDetail() {
               }}
             />
 
-            {/* ━━━ Section G: Complete 11-Day Itinerary ━━━ */}
+            {/* ━━━ Section G: Complete Itinerary ━━━ */}
             <section id="itinerary" className="scroll-mt-20 bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-gray-800 shadow-md">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2.5">
                     <Calendar className="w-6 h-6 text-[var(--theme-primary)]" />
                     <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-                      Complete 11-Day Itinerary
+                      Complete {packageData.itinerary?.length ? `${packageData.itinerary.length}-Day` : ""} Itinerary
                     </h2>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Day-by-day spiritual schedule from arrival in Lucknow to the sacred Mount Kailash Parikrama and return.
+                    Day-by-day detailed schedule and sightseeing plan for {packageData.title}.
                   </p>
                 </div>
 
@@ -1012,136 +1060,202 @@ export default function PackageDetail() {
             </section>
 
             {/* ━━━ Section H: Inclusions and Exclusions ━━━ */}
-            <section id="inclusions" className="scroll-mt-20 grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Inclusions */}
-              <div className="bg-emerald-50/40 dark:bg-emerald-950/20 rounded-3xl p-6 sm:p-7 border border-emerald-200/70 dark:border-emerald-900/50 shadow-md">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/20">
-                    <CheckCircle2 className="w-5 h-5" />
+            <section id="inclusions" className="scroll-mt-20 space-y-4">
+              {/* Section Header with Quick Toggle Both */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-[var(--theme-primary)] flex items-center justify-center font-bold">
+                    <ShieldCheck className="w-5 h-5 text-[var(--theme-primary)]" />
                   </div>
-                  <h2 className="text-lg font-black text-emerald-900 dark:text-emerald-200">
-                    Package Inclusions
-                  </h2>
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
+                      Inclusions & Exclusions
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Transparent breakdown of what is covered in your tour package
+                    </p>
+                  </div>
                 </div>
 
-                <ul className="space-y-2.5">
-                  {packageData.inclusions?.map((inc: string, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2.5 bg-white/90 dark:bg-gray-800/80 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/40 text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200"
+                {((packageData.inclusions?.length || 0) > 0 || (packageData.exclusions?.length || 0) > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const shouldOpen = !showInclusions || !showExclusions;
+                      setShowInclusions(shouldOpen);
+                      setShowExclusions(shouldOpen);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-slate-50 dark:hover:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                  >
+                    {showInclusions && showExclusions ? (
+                      <>
+                        <span>Collapse Both</span>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </>
+                    ) : (
+                      <>
+                        <span>Expand Both</span>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Two Column Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                {/* 1. Inclusions Card */}
+                <div className="bg-emerald-50/40 dark:bg-emerald-950/20 rounded-3xl p-5 sm:p-6 border border-emerald-200/70 dark:border-emerald-900/50 shadow-md transition-all">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/20 flex-shrink-0">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-emerald-900 dark:text-emerald-200">
+                          Package Inclusions
+                        </h3>
+                        <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                          {packageData.inclusions?.length || 0} items included
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowInclusions(!showInclusions)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer flex-shrink-0"
                     >
-                      <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
-                        ✓
-                      </span>
-                      <span>{inc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Exclusions */}
-              <div className="bg-rose-50/40 dark:bg-rose-950/20 rounded-3xl p-6 sm:p-7 border border-rose-200/70 dark:border-rose-900/50 shadow-md">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold shadow-md shadow-rose-600/20">
-                    <XCircle className="w-5 h-5" />
+                      <span>{showInclusions ? "Hide" : `View All (${packageData.inclusions?.length || 0})`}</span>
+                      {showInclusions ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </button>
                   </div>
-                  <h2 className="text-lg font-black text-rose-900 dark:text-rose-200">
-                    Package Exclusions
-                  </h2>
-                </div>
 
-                <ul className="space-y-2.5">
-                  {packageData.exclusions?.map((exc: string, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2.5 bg-white/90 dark:bg-gray-800/80 p-3 rounded-xl border border-rose-100 dark:border-rose-900/40 text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200"
+                  {/* Collapsed Preview Hint */}
+                  {!showInclusions && (
+                    <div
+                      onClick={() => setShowInclusions(true)}
+                      className="mt-4 p-3 rounded-2xl bg-white/70 dark:bg-gray-800/60 border border-emerald-100 dark:border-emerald-900/30 text-xs text-gray-600 dark:text-gray-300 flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors"
                     >
-                      <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
-                        ✕
+                      <span className="truncate">
+                        {packageData.inclusions?.[0]
+                          ? `Includes: ${packageData.inclusions[0]}...`
+                          : "Click to see all included items"}
                       </span>
-                      <span>{exc}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-2 flex-shrink-0 flex items-center gap-1">
+                        Show <ChevronDown className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  )}
 
-            {/* ━━━ Section I: Registration Process & Important Information ━━━ */}
-            <section id="information" className="scroll-mt-20 bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-gray-800 shadow-md space-y-6">
-              <div className="flex items-center gap-2.5 mb-2">
-                <FileText className="w-6 h-6 text-[var(--theme-primary)]" />
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-                  Yatra Registration & Advisory
-                </h2>
-              </div>
+                  {/* Expanded Inclusions List */}
+                  {showInclusions && (
+                    <div className="mt-4 pt-4 border-t border-emerald-200/60 dark:border-emerald-900/40 space-y-2.5">
+                      <ul className="space-y-2.5">
+                        {packageData.inclusions?.map((inc: string, index: number) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2.5 bg-white/90 dark:bg-gray-800/80 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/40 text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200"
+                          >
+                            <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
+                              ✓
+                            </span>
+                            <span>{inc}</span>
+                          </li>
+                        ))}
+                      </ul>
 
-              {/* Registration Steps */}
-              <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">
-                  📋 6-Step Registration Process
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  <div className="p-3.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl border border-slate-200 dark:border-gray-700/60">
-                    <span className="text-xs font-black text-[var(--theme-primary)]">STEP 01</span>
-                    <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1">Complete Registration Form</h4>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                      Fill the Kailash Mansarovar Yatra Registration Form accurately with all personal details.
-                    </p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl border border-slate-200 dark:border-gray-700/60">
-                    <span className="text-xs font-black text-[var(--theme-primary)]">STEP 02</span>
-                    <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1">Submit Required Documents</h4>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                      Attach clear copies of first & last page of valid passport, 4 passport photos, and PAN Card.
-                    </p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl border border-slate-200 dark:border-gray-700/60">
-                    <span className="text-xs font-black text-[var(--theme-primary)]">STEP 03</span>
-                    <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1">Make Registration Payment</h4>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                      Pay registration amount through designated corporate bank account and retain transaction reference.
-                    </p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl border border-slate-200 dark:border-gray-700/60">
-                    <span className="text-xs font-black text-[var(--theme-primary)]">STEP 04</span>
-                    <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1">Share Details with Team</h4>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                      Email completed form, passport copies, photos, and payment receipt to Shree Ananta Travels.
-                    </p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl border border-slate-200 dark:border-gray-700/60">
-                    <span className="text-xs font-black text-[var(--theme-primary)]">STEP 05</span>
-                    <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1">Submit Hard Copies</h4>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                      Send required self-attested hard copies to the Shree Ananta Travels office address as advised.
-                    </p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 dark:bg-gray-800/60 rounded-2xl border border-slate-200 dark:border-gray-700/60">
-                    <span className="text-xs font-black text-[var(--theme-primary)]">STEP 06</span>
-                    <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1">Confirmation & Guidance</h4>
-                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                      Receive booking confirmation, pre-departure briefing, and complete visa/permit assistance.
-                    </p>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowInclusions(false)}
+                        className="w-full mt-3 py-2 px-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white/80 dark:bg-gray-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <span>Hide Inclusions</span>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* Essential Purchases at Purang */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-gray-800/40 border border-slate-200 dark:border-gray-700/60">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-1.5">
-                  <Info className="w-4 h-4 text-blue-500" />
-                  <span>Essential Purchases at Purang for Lucknow Route</span>
-                </h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                  We recommend purchasing necessary trekking accessories and provisions at Purang market before beginning Parikrama:
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-gray-700">🥢 Trekking sticks</span>
-                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-gray-700">💧 Mansarovar Jal Container</span>
-                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-gray-700">💨 Portable Oxygen Cans</span>
-                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-gray-700">😷 Face masks & Buffs</span>
-                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-gray-700">🍎 Fresh Fruits & Juices</span>
-                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-gray-700">🍫 Energy Bars & Dry Fruits</span>
+                {/* 2. Exclusions Card */}
+                <div className="bg-rose-50/40 dark:bg-rose-950/20 rounded-3xl p-5 sm:p-6 border border-rose-200/70 dark:border-rose-900/50 shadow-md transition-all">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold shadow-md shadow-rose-600/20 flex-shrink-0">
+                        <XCircle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-rose-900 dark:text-rose-200">
+                          Package Exclusions
+                        </h3>
+                        <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400">
+                          {packageData.exclusions?.length || 0} items not included
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowExclusions(!showExclusions)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer flex-shrink-0"
+                    >
+                      <span>{showExclusions ? "Hide" : `View All (${packageData.exclusions?.length || 0})`}</span>
+                      {showExclusions ? (
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Collapsed Preview Hint */}
+                  {!showExclusions && (
+                    <div
+                      onClick={() => setShowExclusions(true)}
+                      className="mt-4 p-3 rounded-2xl bg-white/70 dark:bg-gray-800/60 border border-rose-100 dark:border-rose-900/30 text-xs text-gray-600 dark:text-gray-300 flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <span className="truncate">
+                        {packageData.exclusions?.[0]
+                          ? `Excludes: ${packageData.exclusions[0]}...`
+                          : "Click to see all excluded items"}
+                      </span>
+                      <span className="text-rose-600 dark:text-rose-400 font-bold ml-2 flex-shrink-0 flex items-center gap-1">
+                        Show <ChevronDown className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Expanded Exclusions List */}
+                  {showExclusions && (
+                    <div className="mt-4 pt-4 border-t border-rose-200/60 dark:border-rose-900/40 space-y-2.5">
+                      <ul className="space-y-2.5">
+                        {packageData.exclusions?.map((exc: string, index: number) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-2.5 bg-white/90 dark:bg-gray-800/80 p-3 rounded-xl border border-rose-100 dark:border-rose-900/40 text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200"
+                          >
+                            <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">
+                              ✕
+                            </span>
+                            <span>{exc}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowExclusions(false)}
+                        className="w-full mt-3 py-2 px-3 rounded-xl border border-rose-200 dark:border-rose-800 bg-white/80 dark:bg-gray-800/80 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <span>Hide Exclusions</span>
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
@@ -1183,12 +1297,17 @@ export default function PackageDetail() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     <span className="text-xs uppercase font-extrabold text-white/80 tracking-wider">
-                      Dedicated Yatra Concierge
+                      {packageData.conciergeTitle || (isKailash ? "Dedicated Yatra Concierge" : "Dedicated Tour Concierge")}
                     </span>
                   </div>
-                  <h4 className="text-xl font-bold">Have Questions About This Yatra?</h4>
+                  <h4 className="text-xl font-bold">
+                    {isKailash ? "Have Questions About This Yatra?" : "Have Questions About This Tour?"}
+                  </h4>
                   <p className="text-xs text-white/80 mt-0.5">
-                    Speak directly with our senior Kailash Yatra coordinators for personalized guidance.
+                    {packageData.conciergeSubtitle ||
+                      (isKailash
+                        ? "Speak directly with our senior pilgrimage coordinators for personalized guidance."
+                        : "Speak directly with our holiday travel specialists for personalized assistance.")}
                   </p>
                 </div>
               </div>
@@ -1258,24 +1377,34 @@ export default function PackageDetail() {
 
               {/* Trust Features */}
               <div className="pt-4 border-t border-slate-200 dark:border-gray-800 space-y-2.5 text-xs text-gray-600 dark:text-gray-300 font-medium">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center flex-shrink-0 font-bold">
-                    ✓
-                  </div>
-                  <span>100% Customized Group & Private Yatras</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold">
-                    ✓
-                  </div>
-                  <span>Complete Visa, Permits & Documentation</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 flex items-center justify-center flex-shrink-0 font-bold">
-                    ✓
-                  </div>
-                  <span>In-House Sherpas, Cooks & Emergency Oxygen</span>
-                </div>
+                {(packageData.trustFeatures && packageData.trustFeatures.length > 0
+                  ? packageData.trustFeatures
+                  : isKailash
+                    ? [
+                        "100% Customized Group & Private Yatras",
+                        "Complete Visa, Permits & Documentation",
+                        "In-House Sherpas, Cooks & Emergency Oxygen",
+                      ]
+                    : [
+                        "100% Handcrafted Verified Itineraries",
+                        "Complete Booking, Hotel & Transfer Support",
+                        "24x7 Dedicated Ground Support & Assistance",
+                      ]
+                ).map((feature: string, idx: number) => {
+                  const colors = [
+                    "bg-emerald-50 dark:bg-emerald-950 text-emerald-600",
+                    "bg-blue-50 dark:bg-blue-950 text-blue-600",
+                    "bg-amber-50 dark:bg-amber-950 text-amber-600",
+                  ];
+                  return (
+                    <div key={idx} className="flex items-center gap-2.5">
+                      <div className={`w-6 h-6 rounded-full ${colors[idx % colors.length]} flex items-center justify-center flex-shrink-0 font-bold`}>
+                        ✓
+                      </div>
+                      <span>{feature}</span>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Direct Phone Support */}
@@ -1309,7 +1438,7 @@ export default function PackageDetail() {
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-primary)]">
-                  Explore More Yatras
+                  {isKailash ? "Explore More Yatras" : "Explore More Tours"}
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-1">
                   Similar Curated Tour Packages
