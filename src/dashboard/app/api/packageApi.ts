@@ -6,6 +6,11 @@ export interface ItineraryItem {
   title: string;
   description: string;
   _id?: string;
+  route?: string;
+  altitude?: string;
+  stay?: string;
+  meals?: string;
+  transport?: string;
 }
 
 export interface PackageSEO {

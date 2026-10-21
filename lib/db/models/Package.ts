@@ -4,6 +4,11 @@ export interface IItineraryDay {
   dayNumber: number;
   title: string;
   description: string;
+  route?: string;
+  altitude?: string;
+  stay?: string;
+  meals?: string;
+  transport?: string;
 }
 
 export interface IPackageSEO {
@@ -46,6 +51,11 @@ const ItineraryDaySchema = new Schema<IItineraryDay>({
   dayNumber: { type: Number, required: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
+  route: { type: String, default: '' },
+  altitude: { type: String, default: '' },
+  stay: { type: String, default: '' },
+  meals: { type: String, default: '' },
+  transport: { type: String, default: '' },
 });
 
 const PackageSchema = new Schema<IPackage>(

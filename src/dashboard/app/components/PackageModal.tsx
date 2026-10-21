@@ -1,5 +1,9 @@
 "use client";
-import { X, Tag, Award, TrendingUp, Plus, Trash2, Calendar, CheckCircle2, XCircle, Loader2, Sparkles, Link as LinkIcon, AlertCircle, Check } from 'lucide-react';
+import { 
+  X, Tag, Award, TrendingUp, Plus, Trash2, Calendar, CheckCircle2, XCircle, 
+  Loader2, Sparkles, Link as LinkIcon, AlertCircle, Check,
+  ArrowUp, ArrowDown, ChevronDown, ChevronUp, MapPin, Utensils, Bed, Bus
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useCreatePackageMutation, useUpdatePackageMutation, PackageData } from '../api/packageApi';
 import { toast } from 'sonner';
@@ -24,6 +28,12 @@ interface ItineraryDay {
   dayNumber: number;
   title: string;
   description: string;
+  route?: string;
+  altitude?: string;
+  stay?: string;
+  meals?: string;
+  transport?: string;
+  isCollapsed?: boolean;
 }
 
 export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps) {
@@ -154,11 +164,17 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       setRelatedKeywords(parseArrayField(initialData.seo?.relatedKeywords));
 
       setItineraryDays(
-        (initialData.itinerary || []).map((d, i) => ({
+        (initialData.itinerary || []).map((d: any, i) => ({
           id: d._id || String(i),
-          dayNumber: d.dayNumber,
-          title: d.title,
-          description: d.description,
+          dayNumber: d.dayNumber ?? (i + 1),
+          title: d.title || '',
+          description: d.description || '',
+          route: d.route || '',
+          altitude: d.altitude || '',
+          stay: d.stay || '',
+          meals: d.meals || '',
+          transport: d.transport || '',
+          isCollapsed: false,
         }))
       );
       setImagePreviews([
@@ -253,7 +269,122 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
   };
 
   const addItineraryDay = () =>
-    setItineraryDays(prev => [...prev, { id: Date.now().toString(), dayNumber: prev.length + 1, title: '', description: '' }]);
+    setItineraryDays(prev => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        dayNumber: prev.length + 1,
+        title: '',
+        description: '• ',
+        route: '',
+        altitude: '',
+        stay: '',
+        meals: '',
+        transport: '',
+        isCollapsed: false,
+      },
+    ]);
+
+  const moveDay = (index: number, direction: 'up' | 'down') => {
+    setItineraryDays(prev => {
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIndex, 0, moved);
+      return next.map((day, idx) => ({ ...day, dayNumber: idx + 1 }));
+    });
+  };
+
+  const removeDay = (dayId: string) => {
+    setItineraryDays(prev => {
+      const filtered = prev.filter(d => d.id !== dayId);
+      return filtered.map((day, idx) => ({ ...day, dayNumber: idx + 1 }));
+    });
+  };
+
+  const toggleDayCollapse = (dayId: string) => {
+    setItineraryDays(prev =>
+      prev.map(d => (d.id === dayId ? { ...d, isCollapsed: !d.isCollapsed } : d))
+    );
+  };
+
+  const expandAllItinerary = () => {
+    setItineraryDays(prev => prev.map(d => ({ ...d, isCollapsed: false })));
+  };
+
+  const collapseAllItinerary = () => {
+    setItineraryDays(prev => prev.map(d => ({ ...d, isCollapsed: true })));
+  };
+
+  const handleItineraryKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, dayId: string) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+
+      // Automatically add a newline with a bullet prefix
+      const nextBullet = '\n• ';
+      const updated = val.substring(0, start) + nextBullet + val.substring(end);
+
+      setItineraryDays(prev =>
+        prev.map(d => (d.id === dayId ? { ...d, description: updated } : d))
+      );
+
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + nextBullet.length;
+      }, 0);
+    }
+  };
+
+  const handleItineraryFocus = (dayId: string, currentVal: string) => {
+    if (!currentVal || currentVal.trim() === '') {
+      setItineraryDays(prev =>
+        prev.map(d => (d.id === dayId ? { ...d, description: '• ' } : d))
+      );
+    }
+  };
+
+  const addBulletToDay = (dayId: string) => {
+    setItineraryDays(prev =>
+      prev.map(d => {
+        if (d.id !== dayId) return d;
+        const val = d.description ? d.description.trimEnd() : '';
+        const updated = val ? `${val}\n• ` : '• ';
+        return { ...d, description: updated };
+      })
+    );
+  };
+
+  const autoFormatToBullets = (dayId: string, currentVal: string) => {
+    if (!currentVal || !currentVal.trim()) {
+      setItineraryDays(prev =>
+        prev.map(d => (d.id === dayId ? { ...d, description: '• ' } : d))
+      );
+      return;
+    }
+
+    let parts = currentVal.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+    // If it's a single paragraph with periods (sentences), split by sentence
+    if (parts.length === 1 && parts[0].includes('. ')) {
+      parts = parts[0].split(/(?<=\.)\s+/).map(l => l.trim()).filter(Boolean);
+    }
+
+    const formatted = parts
+      .map(part => {
+        const clean = part.replace(/^([•\-\*]|\d+[\.\)])\s*/, '').trim();
+        return `• ${clean}`;
+      })
+      .join('\n');
+
+    setItineraryDays(prev =>
+      prev.map(d => (d.id === dayId ? { ...d, description: formatted } : d))
+    );
+    toast.success('Day details formatted into bullet points!');
+  };
 
   const handleCreate = async () => {
     if (!title || !location || !duration || !description) {
@@ -305,10 +436,15 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
           relatedKeywords,
         })
       );
-      formData.append('itinerary', JSON.stringify(itineraryDays.map(d => ({
-        dayNumber: d.dayNumber,
-        title: d.title || `Day ${d.dayNumber}`,
-        description: d.description || '...'
+      formData.append('itinerary', JSON.stringify(itineraryDays.map((d, idx) => ({
+        dayNumber: idx + 1,
+        title: d.title || `Day ${idx + 1}`,
+        description: d.description || '',
+        route: d.route || '',
+        altitude: d.altitude || '',
+        stay: d.stay || '',
+        meals: d.meals || '',
+        transport: d.transport || '',
       }))));
       formData.append('isActive', 'true');
 
@@ -517,41 +653,283 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
             </div>
 
             {/* Itinerary Section */}
-            <div className="bg-indigo-50 rounded p-4 border border-indigo-100">
-              <div className="flex items-center gap-2 mb-1">
-                <Calendar className="w-4 h-4 text-indigo-600" />
-                <h3 className="text-sm font-semibold text-gray-900">Itinerary</h3>
+            <div className="bg-indigo-50/70 rounded-xl p-4 border border-indigo-100">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-indigo-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Day-by-Day Itinerary ({itineraryDays.length} Days)
+                  </h3>
+                  <span className="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full shadow-2xs">
+                    Structured & Bullets
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={expandAllItinerary}
+                    className="text-[11px] font-semibold text-indigo-700 hover:text-indigo-900 bg-white px-2.5 py-1 rounded border border-indigo-200 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Expand All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={collapseAllItinerary}
+                    className="text-[11px] font-semibold text-gray-600 hover:text-gray-900 bg-white px-2.5 py-1 rounded border border-gray-200 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Collapse All
+                  </button>
+                </div>
               </div>
+
               <div className="space-y-3 mt-3">
-                {itineraryDays.map((day, index) => (
-                  <div key={day.id} className="bg-white rounded p-3 border border-gray-200 shadow-sm relative">
-                    <button onClick={() => setItineraryDays(prev => prev.filter(d => d.id !== day.id))}
-                      className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 rounded">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">{index + 1}</span>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Day {index + 1}</span>
+                {itineraryDays.map((day, index) => {
+                  const pointsCount = (day.description || '').split(/\r?\n/).filter(l => l.trim()).length;
+                  const isCollapsed = !!day.isCollapsed;
+
+                  return (
+                    <div
+                      key={day.id}
+                      className="bg-white rounded-lg border border-indigo-100 shadow-xs overflow-hidden transition-all"
+                    >
+                      {/* Day Card Header */}
+                      <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50 border-b border-indigo-50/80">
+                        <div
+                          className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer"
+                          onClick={() => toggleDayCollapse(day.id)}
+                        >
+                          <span className="px-2.5 py-1 rounded-md bg-indigo-600 text-white text-xs font-bold tracking-wide shadow-xs flex-shrink-0">
+                            Day {index + 1}
+                          </span>
+                          <span className="font-bold text-xs text-gray-800 truncate">
+                            {day.title || `Day ${index + 1} Schedule`}
+                          </span>
+                          {(day.route || day.altitude) && (
+                            <span className="hidden sm:inline-flex text-[10px] text-gray-500 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 truncate">
+                              {[day.route, day.altitude].filter(Boolean).join(' • ')}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Controls: Reorder, Collapse, Delete */}
+                        <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                          <button
+                            type="button"
+                            onClick={() => moveDay(index, 'up')}
+                            disabled={index === 0}
+                            className="p-1 text-gray-400 hover:text-indigo-600 disabled:opacity-25 disabled:cursor-not-allowed rounded hover:bg-indigo-50 transition-colors"
+                            title="Move Day Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveDay(index, 'down')}
+                            disabled={index === itineraryDays.length - 1}
+                            className="p-1 text-gray-400 hover:text-indigo-600 disabled:opacity-25 disabled:cursor-not-allowed rounded hover:bg-indigo-50 transition-colors"
+                            title="Move Day Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleDayCollapse(day.id)}
+                            className="p-1 text-gray-400 hover:text-gray-700 rounded hover:bg-gray-100 transition-colors"
+                            title={isCollapsed ? 'Expand Day' : 'Collapse Day'}
+                          >
+                            {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeDay(day.id)}
+                            className="p-1 text-gray-400 hover:text-red-500 rounded hover:bg-red-50 transition-colors ml-1"
+                            title="Delete Day"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Day Card Body */}
+                      {!isCollapsed && (
+                        <div className="p-3.5 space-y-3">
+                          {/* Title */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                              Day Title
+                            </label>
+                            <Input
+                              value={day.title}
+                              onChange={e =>
+                                setItineraryDays(prev =>
+                                  prev.map(d => (d.id === day.id ? { ...d, title: e.target.value } : d))
+                                )
+                              }
+                              type="text"
+                              placeholder="e.g., Lucknow → Nepalgunj"
+                              className={inp + ' h-auto text-xs font-semibold'}
+                            />
+                          </div>
+
+                          {/* Route Summary & Altitude */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                              <label className="block text-[10px] font-medium text-gray-600 mb-1 flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-indigo-500" />
+                                <span>Route & Distance</span>
+                              </label>
+                              <Input
+                                value={day.route || ''}
+                                onChange={e =>
+                                  setItineraryDays(prev =>
+                                    prev.map(d => (d.id === day.id ? { ...d, route: e.target.value } : d))
+                                  )
+                                }
+                                type="text"
+                                placeholder="e.g., 180 km / 4–5 hrs by road"
+                                className={inp + ' h-auto text-xs'}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-medium text-gray-600 mb-1">
+                                Altitude / Elevation
+                              </label>
+                              <Input
+                                value={day.altitude || ''}
+                                onChange={e =>
+                                  setItineraryDays(prev =>
+                                    prev.map(d => (d.id === day.id ? { ...d, altitude: e.target.value } : d))
+                                  )
+                                }
+                                type="text"
+                                placeholder="e.g., 15,060 ft / 4,860 m"
+                                className={inp + ' h-auto text-xs'}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Stay, Meals, Transport */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-slate-50/70 p-2.5 rounded-lg border border-slate-100">
+                            <div>
+                              <label className="block text-[10px] font-medium text-gray-600 mb-1 flex items-center gap-1">
+                                <Bed className="w-3 h-3 text-amber-500" />
+                                <span>Accommodation / Stay</span>
+                              </label>
+                              <Input
+                                value={day.stay || ''}
+                                onChange={e =>
+                                  setItineraryDays(prev =>
+                                    prev.map(d => (d.id === day.id ? { ...d, stay: e.target.value } : d))
+                                  )
+                                }
+                                type="text"
+                                placeholder="e.g., Hotel 3-Star / Twin Sharing"
+                                className={inp + ' h-auto text-xs bg-white'}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-medium text-gray-600 mb-1 flex items-center gap-1">
+                                <Utensils className="w-3 h-3 text-emerald-500" />
+                                <span>Meals</span>
+                              </label>
+                              <Input
+                                value={day.meals || ''}
+                                onChange={e =>
+                                  setItineraryDays(prev =>
+                                    prev.map(d => (d.id === day.id ? { ...d, meals: e.target.value } : d))
+                                  )
+                                }
+                                type="text"
+                                placeholder="e.g., Breakfast, Lunch & Dinner"
+                                className={inp + ' h-auto text-xs bg-white'}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-medium text-gray-600 mb-1 flex items-center gap-1">
+                                <Bus className="w-3 h-3 text-blue-500" />
+                                <span>Transport</span>
+                              </label>
+                              <Input
+                                value={day.transport || ''}
+                                onChange={e =>
+                                  setItineraryDays(prev =>
+                                    prev.map(d => (d.id === day.id ? { ...d, transport: e.target.value } : d))
+                                  )
+                                }
+                                type="text"
+                                placeholder="e.g., Flight / Helicopter / Coach"
+                                className={inp + ' h-auto text-xs bg-white'}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Activities Textarea */}
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5 mt-2">
+                              <label className="text-xs font-semibold text-gray-700 flex items-center gap-2">
+                                <span>Activities & Sightseeing</span>
+                                <span className="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">
+                                  Press Enter for new bullet
+                                </span>
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => addBulletToDay(day.id)}
+                                  className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-0.5 rounded-md transition-colors border border-indigo-200 cursor-pointer"
+                                  title="Add a new bullet point line"
+                                >
+                                  + Add Bullet
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => autoFormatToBullets(day.id, day.description)}
+                                  title="Automatically convert text into clean bullet points"
+                                  className="text-[11px] font-medium text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2.5 py-0.5 rounded-md transition-colors border border-amber-200 cursor-pointer"
+                                >
+                                  ⚡ Auto-Format
+                                </button>
+                              </div>
+                            </div>
+
+                            <Textarea
+                              value={day.description}
+                              onChange={e =>
+                                setItineraryDays(prev =>
+                                  prev.map(d => (d.id === day.id ? { ...d, description: e.target.value } : d))
+                                )
+                              }
+                              onKeyDown={e => handleItineraryKeyDown(e, day.id)}
+                              onFocus={() => handleItineraryFocus(day.id, day.description)}
+                              rows={4}
+                              placeholder={
+                                '• Arrival in Lucknow and transfer to hotel.\n• Check-in after 1:00 PM.\n• Evening dinner and orientation for the journey ahead.'
+                              }
+                              className={inp + ' text-xs leading-relaxed bg-white'}
+                            />
+
+                            {/* Live Counter & Info */}
+                            <div className="flex items-center justify-between text-xs text-gray-500 mt-1.5 px-0.5">
+                              <span className="text-indigo-700 font-medium">
+                                {pointsCount} {pointsCount === 1 ? 'activity listed' : 'activities listed'}
+                              </span>
+                              <span className="text-[11px] text-gray-400">
+                                Displays as formatted bullets on public website
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <Input 
-                      value={day.title} 
-                      onChange={e => setItineraryDays(prev => prev.map(d => d.id === day.id ? { ...d, title: e.target.value } : d))}
-                      type="text" 
-                      placeholder="Day Title" 
-                      className={inp + " mb-2 h-auto"} 
-                    />
-                    <Textarea 
-                      value={day.description}
-                      onChange={e => setItineraryDays(prev => prev.map(d => d.id === day.id ? { ...d, description: e.target.value } : d))}
-                      rows={2} 
-                      placeholder="Day details..." 
-                      className={inp} 
-                    />
-                  </div>
-                ))}
-                <button onClick={addItineraryDay}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-white border-2 border-dashed border-indigo-300 text-indigo-600 rounded hover:bg-indigo-50 transition-all text-sm font-medium">
-                  <Plus className="w-4 h-4" /> Add Day
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={addItineraryDay}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white border-2 border-dashed border-indigo-300 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all text-sm font-bold shadow-2xs cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Add Itinerary Day
                 </button>
               </div>
             </div>
