@@ -2,9 +2,10 @@
 import { 
   X, Tag, Award, TrendingUp, Plus, Trash2, Calendar, CheckCircle2, XCircle, 
   Loader2, Sparkles, Link as LinkIcon, AlertCircle, Check,
-  ArrowUp, ArrowDown, ChevronDown, ChevronUp, MapPin, Utensils, Bed, Bus
+  ArrowUp, ArrowDown, ChevronDown, ChevronUp, MapPin, Utensils, Bed, Bus,
+  Navigation, Mountain
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { useCreatePackageMutation, useUpdatePackageMutation, PackageData } from '../api/packageApi';
 import { toast } from 'sonner';
 import { Input } from "./ui/input";
@@ -28,6 +29,7 @@ interface ItineraryDay {
   dayNumber: number;
   title: string;
   description: string;
+  city?: string;
   route?: string;
   altitude?: string;
   stay?: string;
@@ -67,6 +69,8 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
 
   const [hasOffer, setHasOffer] = useState(false);
   const [isTrending, setIsTrending] = useState(false);
+  const [enableRouteMap, setEnableRouteMap] = useState(false);
+  const [enableAltitude, setEnableAltitude] = useState(false);
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
   const [imagePreviews, setImagePreviews] = useState<[string | null, string | null, string | null, string | null]>([null, null, null, null]);
   const [imageFiles, setImageFiles] = useState<[File | null, File | null, File | null, File | null]>([null, null, null, null]);
@@ -89,6 +93,93 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
   const [customTypes, setCustomTypes] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState('');
   const [showTypeModal, setShowTypeModal] = useState(false);
+
+  // Quick City & Route Builder
+  const [quickCityInput, setQuickCityInput] = useState('');
+  const [quickCitiesBulk, setQuickCitiesBulk] = useState('');
+  const [isBulkCitiesOpen, setIsBulkCitiesOpen] = useState(false);
+  const quickCityInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddQuickCity = () => {
+    const trimmed = quickCityInput.trim();
+    if (!trimmed) return;
+
+    const nextDayNum = itineraryDays.length + 1;
+    const prevDay = itineraryDays.length > 0 ? itineraryDays[itineraryDays.length - 1] : null;
+    const prevCity = prevDay?.city?.trim();
+
+    setItineraryDays(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(),
+        dayNumber: nextDayNum,
+        title: `${trimmed} Tour`,
+        description: `• Sightseeing and exploration in ${trimmed}.`,
+        city: trimmed,
+        route: prevCity ? `${prevCity} → ${trimmed}` : trimmed,
+        altitude: '',
+        stay: '',
+        meals: '',
+        transport: '',
+        isCollapsed: false,
+      },
+    ]);
+    setEnableRouteMap(true);
+    setQuickCityInput('');
+    setTimeout(() => quickCityInputRef.current?.focus(), 50);
+  };
+
+  const handleQuickCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddQuickCity();
+    }
+  };
+
+  const handleAddBulkCities = () => {
+    if (!quickCitiesBulk.trim()) return;
+    const cities = quickCitiesBulk
+      .split(/[,;\n\r]+/)
+      .map(c => c.replace(/^[•\-\*\d+\.\)]+\s*/u, '').trim())
+      .filter(Boolean);
+
+    if (cities.length === 0) return;
+
+    setItineraryDays(prev => {
+      let currentLength = prev.length;
+      const newDays = cities.map((city, idx) => {
+        const dayNum = currentLength + idx + 1;
+        const prevCity = idx > 0 ? cities[idx - 1] : (prev.length > 0 ? prev[prev.length - 1].city : '');
+        return {
+          id: Math.random().toString(),
+          dayNumber: dayNum,
+          title: `${city} Exploration`,
+          description: `• Arrival and sightseeing in ${city}.`,
+          city: city,
+          route: prevCity ? `${prevCity} → ${city}` : city,
+          altitude: '',
+          stay: '',
+          meals: '',
+          transport: '',
+          isCollapsed: false,
+        };
+      });
+      return [...prev, ...newDays];
+    });
+
+    setEnableRouteMap(true);
+    setQuickCitiesBulk('');
+    setIsBulkCitiesOpen(false);
+    toast.success(`Added ${cities.length} day stops to route!`);
+  };
+
+  const handleRemoveCityFromDay = (dayId: string) => {
+    setItineraryDays(prev => prev.map(d => (d.id === dayId ? { ...d, city: '' } : d)));
+  };
+
+  const routeCitiesList = itineraryDays
+    .filter(d => Boolean(d.city && d.city.trim()))
+    .map(d => ({ id: d.id, dayNumber: d.dayNumber, city: d.city!.trim() }));
 
   // Check slug availability via API
   const checkSlugAvailability = async (slugToCheck: string) => {
@@ -182,12 +273,22 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       setFocusKeyword(initialData.seo?.focusKeyword || '');
       setRelatedKeywords(parseArrayField(initialData.seo?.relatedKeywords));
 
+      setEnableRouteMap(
+        initialData.enableRouteMap ??
+        (initialData.category === 'kailash' || (initialData.itinerary && initialData.itinerary.some((d: any) => !!d.city)))
+      );
+      setEnableAltitude(
+        initialData.enableAltitude ??
+        (initialData.category === 'kailash' || (initialData.itinerary && initialData.itinerary.some((d: any) => !!d.altitude)))
+      );
+
       setItineraryDays(
         (initialData.itinerary || []).map((d: any, i) => ({
           id: d._id || String(i),
           dayNumber: d.dayNumber ?? (i + 1),
           title: d.title || '',
           description: d.description || '',
+          city: d.city || '',
           route: d.route || '',
           altitude: d.altitude || '',
           stay: d.stay || '',
@@ -216,6 +317,8 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       setPriceType('fixed');
       setOriginalPrice(''); setDiscountedPrice('');
       setIsBestseller(false); setHasOffer(false); setIsTrending(false);
+      setEnableRouteMap(false);
+      setEnableAltitude(false);
       setInclusions([]); setExclusions([]); setTermsAndConditions([]); setSelectedType('');
       setTags([]);
       setSeoTitle(''); setSeoDescription(''); setFocusKeyword(''); setRelatedKeywords([]);
@@ -296,6 +399,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
         dayNumber: prev.length + 1,
         title: '',
         description: '• ',
+        city: '',
         route: '',
         altitude: '',
         stay: '',
@@ -461,10 +565,15 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
           relatedKeywords,
         })
       );
+      const hasAnyAltitude = itineraryDays.some(d => Boolean(d.altitude && d.altitude.trim()));
+      const hasAnyCity = itineraryDays.some(d => Boolean(d.city && d.city.trim()));
+      formData.append('enableRouteMap', String(enableRouteMap || hasAnyCity));
+      formData.append('enableAltitude', String(hasAnyAltitude));
       formData.append('itinerary', JSON.stringify(itineraryDays.map((d, idx) => ({
         dayNumber: idx + 1,
         title: d.title || `Day ${idx + 1}`,
         description: d.description || '',
+        city: d.city || '',
         route: d.route || '',
         altitude: d.altitude || '',
         stay: d.stay || '',
@@ -486,13 +595,24 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       else formData.append('imageUrl4', imagePreviews[3] || '');
 
       if (isEditMode && initialData._id) {
-        await updatePackage({ id: initialData._id, data: formData }).unwrap();
+        const res = await updatePackage({ id: initialData._id, data: formData }).unwrap();
         toast.success('Package updated successfully!');
+        if (res?.data) {
+          const updated = res.data;
+          setImagePreviews([
+            updated.imageUrl1 || imagePreviews[0],
+            updated.imageUrl2 || imagePreviews[1],
+            updated.imageUrl3 || imagePreviews[2],
+            updated.imageUrl4 || imagePreviews[3],
+          ]);
+          setImageFiles([null, null, null, null]);
+        }
+        // Modal stays open so admin can continue editing without interruption!
       } else {
         await createPackage(formData).unwrap();
         toast.success('Package created successfully!');
+        onClose();
       }
-      onClose();
     } catch (e: any) {
       toast.error(e.data?.message || (isEditMode ? 'Failed to update package' : 'Failed to create package'));
     }
@@ -742,6 +862,157 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
               </div>
             </div>
 
+            {/* 3. Dedicated Interactive Route Map Section (Outside Itinerary) */}
+            <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-slate-50/80 rounded-xl p-4 border border-indigo-200 shadow-2xs space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-indigo-600 text-white shadow-xs">
+                    <Navigation className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                      Interactive Route Map
+                      {routeCitiesList.length > 0 && (
+                        <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200">
+                          {routeCitiesList.length} {routeCitiesList.length === 1 ? 'City Stop' : 'City Stops'}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-gray-500">
+                      City stops connect automatically to draw the live roadmap on public website.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none bg-white px-3 py-1.5 rounded-lg border border-indigo-200 shadow-2xs">
+                    <input
+                      type="checkbox"
+                      checked={enableRouteMap}
+                      onChange={e => setEnableRouteMap(e.target.checked)}
+                      className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <span className="text-xs font-bold text-indigo-950">
+                      Show Map on Website
+                    </span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsBulkCitiesOpen(prev => !prev)}
+                    className="text-xs font-semibold text-indigo-700 bg-white hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-200 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    {isBulkCitiesOpen ? 'Close Bulk Add' : '+ Bulk Add Cities'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Connected Route Stops Path Preview */}
+              {routeCitiesList.length > 0 ? (
+                <div className="bg-white/95 p-3 rounded-lg border border-indigo-100 flex flex-wrap items-center gap-2 max-h-36 overflow-y-auto">
+                  <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1">
+                    Route Path:
+                  </span>
+                  {routeCitiesList.map((stop, idx) => (
+                    <Fragment key={stop.id}>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-xs font-semibold text-indigo-900 shadow-2xs group hover:border-indigo-300 transition-colors">
+                        <span className="text-[10px] font-bold text-indigo-500 whitespace-nowrap">Day {stop.dayNumber}:</span>
+                        <input
+                          type="text"
+                          value={stop.city}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setItineraryDays(prev =>
+                              prev.map(d => (d.id === stop.id ? { ...d, city: val } : d))
+                            );
+                          }}
+                          className="bg-transparent border-0 p-0 text-xs font-semibold text-indigo-950 focus:ring-1 focus:ring-indigo-400 focus:bg-white rounded px-1 min-w-[70px] max-w-[130px] outline-none"
+                          title="Click to edit city name"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCityFromDay(stop.id)}
+                          title="Remove city stop"
+                          className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-indigo-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-0.5 cursor-pointer"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </span>
+                      {idx < routeCitiesList.length - 1 && (
+                        <span className="text-indigo-400 font-bold select-none text-xs">➔</span>
+                      )}
+                    </Fragment>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white/80 p-3 rounded-lg border border-dashed border-indigo-200 text-xs text-gray-400 text-center">
+                  📍 No city stops added yet. Type below to add Day 1, Day 2, Day 3... and watch your map route generate!
+                </div>
+              )}
+
+              {/* Quick Add City Input (Day by Day) */}
+              <div className="flex gap-2 items-center bg-white p-2 rounded-lg border border-indigo-200 shadow-2xs">
+                <div className="relative flex-1">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500" />
+                  <input
+                    ref={quickCityInputRef}
+                    type="text"
+                    value={quickCityInput}
+                    onChange={e => setQuickCityInput(e.target.value)}
+                    onKeyDown={handleQuickCityKeyDown}
+                    placeholder={`Enter City for Day ${itineraryDays.length + 1} (e.g., Lucknow, Nepalgunj, Simikot, Darchen...) & press Enter`}
+                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-transparent border-0 focus:ring-0 focus:outline-none placeholder:text-gray-400 font-medium"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddQuickCity}
+                  disabled={!quickCityInput.trim()}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-md transition-all shadow-2xs cursor-pointer flex-shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Add Day {itineraryDays.length + 1} Stop</span>
+                </button>
+              </div>
+
+              {/* Bulk Cities Expandable Box */}
+              {isBulkCitiesOpen && (
+                <div className="p-3 bg-white rounded-lg border border-indigo-200 shadow-2xs space-y-2 animate-in fade-in duration-150">
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    Type or paste multiple cities separated by commas (e.g., <em>Lucknow, Nepalgunj, Simikot, Hilsa, Purang, Darchen</em>). Each will automatically create Day 1, Day 2, Day 3...
+                  </p>
+                  <textarea
+                    rows={2}
+                    value={quickCitiesBulk}
+                    onChange={e => setQuickCitiesBulk(e.target.value)}
+                    placeholder="e.g., Lucknow, Nepalgunj, Simikot, Hilsa, Purang, Darchen, Mansarovar"
+                    className="w-full p-2.5 text-xs bg-slate-50 border border-gray-200 rounded-md focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none font-medium"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsBulkCitiesOpen(false);
+                        setQuickCitiesBulk('');
+                      }}
+                      className="px-2.5 py-1 text-xs text-gray-500 hover:text-gray-700 rounded cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddBulkCities}
+                      disabled={!quickCitiesBulk.trim()}
+                      className="inline-flex items-center gap-1 px-3 py-1 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 rounded shadow-2xs cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Build Route Days</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Itinerary Section */}
             <div className="bg-indigo-50/70 rounded-xl p-4 border border-indigo-100">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -794,9 +1065,9 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                           <span className="font-bold text-xs text-gray-800 truncate">
                             {day.title || `Day ${index + 1} Schedule`}
                           </span>
-                          {(day.route || day.altitude) && (
-                            <span className="hidden sm:inline-flex text-[10px] text-gray-500 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 truncate">
-                              {[day.route, day.altitude].filter(Boolean).join(' • ')}
+                          {(day.city || day.route || day.altitude) && (
+                            <span className="hidden sm:inline-flex text-[10px] text-gray-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 truncate gap-1.5">
+                              {[day.city ? `📍 ${day.city}` : '', day.route, day.altitude ? `⛰️ ${day.altitude}` : ''].filter(Boolean).join(' • ')}
                             </span>
                           )}
                         </div>
@@ -861,7 +1132,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                             />
                           </div>
 
-                          {/* Route Summary & Altitude */}
+                          {/* Route Summary & Altitude (Clean 2-Column Grid) */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             <div>
                               <label className="block text-[10px] font-medium text-gray-600 mb-1 flex items-center gap-1">
@@ -880,9 +1151,12 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                                 className={inp + ' h-auto text-xs'}
                               />
                             </div>
+
                             <div>
-                              <label className="block text-[10px] font-medium text-gray-600 mb-1">
-                                Altitude / Elevation
+                              <label className="block text-[10px] font-semibold text-amber-700 mb-1 flex items-center gap-1">
+                                <Mountain className="w-3 h-3 text-amber-600" />
+                                <span>Altitude / Elevation</span>
+                                <span className="text-[9px] font-normal text-amber-600/70">(Optional)</span>
                               </label>
                               <Input
                                 value={day.altitude || ''}
@@ -892,8 +1166,8 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                                   )
                                 }
                                 type="text"
-                                placeholder="e.g., 15,060 ft / 4,860 m"
-                                className={inp + ' h-auto text-xs'}
+                                placeholder="e.g., 404 ft / 4,500 m"
+                                className={inp + ' h-auto text-xs bg-amber-50/40 border-amber-200'}
                               />
                             </div>
                           </div>
@@ -1124,6 +1398,9 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                 items={inclusions}
                 onAdd={val => setInclusions(prev => [...prev, val])}
                 onRemove={idx => setInclusions(prev => prev.filter((_, i) => i !== idx))}
+                onClearAll={() => setInclusions([])}
+                onAddMany={vals => setInclusions(prev => [...prev, ...vals.filter(v => !prev.includes(v))])}
+                onReplaceAll={vals => setInclusions(vals)}
                 placeholder="e.g., Breakfast"
                 accentColor="green"
                 icon={<CheckCircle2 className="w-4 h-4" />}
@@ -1133,6 +1410,9 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                 items={exclusions}
                 onAdd={val => setExclusions(prev => [...prev, val])}
                 onRemove={idx => setExclusions(prev => prev.filter((_, i) => i !== idx))}
+                onClearAll={() => setExclusions([])}
+                onAddMany={vals => setExclusions(prev => [...prev, ...vals.filter(v => !prev.includes(v))])}
+                onReplaceAll={vals => setExclusions(vals)}
                 placeholder="e.g., Personal Expense"
                 accentColor="red"
                 icon={<XCircle className="w-4 h-4" />}
@@ -1143,6 +1423,9 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                   items={termsAndConditions}
                   onAdd={val => setTermsAndConditions(prev => [...prev, val])}
                   onRemove={idx => setTermsAndConditions(prev => prev.filter((_, i) => i !== idx))}
+                  onClearAll={() => setTermsAndConditions([])}
+                  onAddMany={vals => setTermsAndConditions(prev => [...prev, ...vals.filter(v => !prev.includes(v))])}
+                  onReplaceAll={vals => setTermsAndConditions(vals)}
                   placeholder="e.g., 50% advance payment required"
                   accentColor="gray"
                   icon={<CheckCircle2 className="w-4 h-4" />}

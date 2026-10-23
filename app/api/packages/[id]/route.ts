@@ -159,6 +159,8 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
     if (body.isTrending !== undefined) body.isTrending = String(body.isTrending) === 'true';
     if (body.hasOffer !== undefined) body.hasOffer = String(body.hasOffer) === 'true';
     if (body.isActive !== undefined) body.isActive = String(body.isActive) === 'true';
+    if (body.enableRouteMap !== undefined) body.enableRouteMap = String(body.enableRouteMap) === 'true';
+    if (body.enableAltitude !== undefined) body.enableAltitude = String(body.enableAltitude) === 'true';
 
     // Handle slug update and redirect preservation
     if (body.slug !== undefined) {

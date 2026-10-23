@@ -6,6 +6,7 @@ export interface ItineraryItem {
   title: string;
   description: string;
   _id?: string;
+  city?: string;
   route?: string;
   altitude?: string;
   stay?: string;
@@ -30,6 +31,8 @@ export interface PackageData {
   duration: string;
   category: 'domestic' | 'international' | 'kailash';
   packageType: string;
+  enableRouteMap?: boolean;
+  enableAltitude?: boolean;
   route?: string;
   departure?: string;
   tourStyle?: string;

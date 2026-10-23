@@ -23,10 +23,12 @@ import {
   RouteLocation,
   RouteSegment,
 } from "../data/packageRoutes";
+import { buildDynamicRouteFromItinerary } from "../data/geoCities";
 
 interface PackageRouteMapProps {
   packageSlug: string;
   packageTitle: string;
+  enableRouteMap?: boolean;
   itinerary?: Array<any>;
   selectedDay?: number | null;
   onSelectDay?: (day: number | null) => void;
@@ -50,6 +52,7 @@ const DAY_FOCUS_MAP: Record<number, string> = {
 export function PackageRouteMap({
   packageSlug,
   packageTitle,
+  enableRouteMap,
   itinerary = [],
   selectedDay = null,
   onSelectDay,
@@ -68,8 +71,43 @@ export function PackageRouteMap({
   const [isMapReady, setIsMapReady] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Retrieve route dataset for the given package
-  const routeData: PackageRouteData | null = findPackageRoute(packageSlug, packageTitle);
+  // Retrieve route dataset (static curated or dynamically synthesized)
+  const [routeData, setRouteData] = useState<PackageRouteData | null>(() =>
+    findPackageRoute(packageSlug, packageTitle)
+  );
+  const [isBuildingDynamic, setIsBuildingDynamic] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const staticRoute = findPackageRoute(packageSlug, packageTitle);
+    if (staticRoute) {
+      setRouteData(staticRoute);
+      setIsBuildingDynamic(false);
+      return;
+    }
+
+    // Build dynamically from itinerary if route map is not explicitly disabled
+    if (enableRouteMap !== false && itinerary && itinerary.length > 0) {
+      setIsBuildingDynamic(true);
+      buildDynamicRouteFromItinerary(packageSlug, packageTitle, itinerary)
+        .then((dynamicRoute) => {
+          if (isMounted) {
+            setRouteData(dynamicRoute);
+            setIsBuildingDynamic(false);
+          }
+        })
+        .catch(() => {
+          if (isMounted) setIsBuildingDynamic(false);
+        });
+    } else {
+      setRouteData(null);
+      setIsBuildingDynamic(false);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [packageSlug, packageTitle, itinerary, enableRouteMap]);
 
   // Sync external selectedDay prop changes
   useEffect(() => {
@@ -432,8 +470,30 @@ export function PackageRouteMap({
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
 
-  // ━━━ If No Route Data Exists for this package ━━━
+  // ━━━ If No Route Data Exists or Route Map Disabled ━━━
+  if (enableRouteMap === false && !findPackageRoute(packageSlug, packageTitle)) {
+    return null;
+  }
+
+  if (isBuildingDynamic) {
+    return (
+      <section
+        id="route-map"
+        className="scroll-mt-20 bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-gray-800 shadow-md"
+      >
+        <div className="flex items-center justify-center flex-col gap-3 py-12">
+          <div className="w-10 h-10 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+          <p className="text-xs font-bold text-gray-600 dark:text-gray-300 animate-pulse">
+            Generating Dynamic GPS Itinerary Map for {packageTitle}...
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   if (!routeData) {
+    if (enableRouteMap !== true) return null;
+
     return (
       <section
         id="route-map"
@@ -540,7 +600,15 @@ export function PackageRouteMap({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+        <div
+          className="flex items-center gap-1.5 overflow-x-auto thin-scrollbar pb-2 pt-0.5 text-xs scroll-smooth"
+          style={{ scrollbarWidth: "thin" }}
+          onWheel={(e) => {
+            if (e.deltaY !== 0 && e.currentTarget.scrollWidth > e.currentTarget.clientWidth) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+        >
           <button
             onClick={() => handleDayChange(null)}
             className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer ${
@@ -552,7 +620,10 @@ export function PackageRouteMap({
             🌟 All Route
           </button>
 
-          {Array.from({ length: 11 }, (_, i) => i + 1).map((dayNum) => {
+          {Array.from(
+            { length: Math.max(1, itinerary?.length || 0, ...routeData.locations.flatMap((l) => l.dayNumbers)) },
+            (_, i) => i + 1
+          ).map((dayNum) => {
             const hasSegments = routeData.segments.some((s) => s.dayNumbers.includes(dayNum));
             const hasLocations = routeData.locations.some((l) => l.dayNumbers.includes(dayNum));
             if (!hasSegments && !hasLocations) return null;

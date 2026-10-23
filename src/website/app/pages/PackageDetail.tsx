@@ -94,12 +94,19 @@ export default function PackageDetail() {
             description:
               pkg.description ||
               "Handcrafted travel package curated with personalized accommodations, transfers, and guided sightseeing.",
+            enableRouteMap:
+              pkg.enableRouteMap ??
+              (pkg.category === "kailash" || (pkg.itinerary && pkg.itinerary.some((i: any) => !!i.city))),
+            enableAltitude:
+              pkg.enableAltitude ??
+              (pkg.category === "kailash" || (pkg.itinerary && pkg.itinerary.some((i: any) => !!i.altitude))),
             itinerary:
               pkg.itinerary && pkg.itinerary.length > 0
                 ? pkg.itinerary.map((i: any, index: number) => ({
                     day: i.dayNumber ?? index + 1,
                     title: i.title || `Day ${i.dayNumber ?? index + 1}`,
                     description: i.description || "",
+                    city: i.city || "",
                     route: i.route || "",
                     altitude: i.altitude || "",
                     stay: i.stay || "",
@@ -785,9 +792,11 @@ export default function PackageDetail() {
               <a href="#overview" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
                 Overview
               </a>
-              <a href="#route-map" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
-                Route Map
-              </a>
+              {packageData.enableRouteMap !== false && (
+                <a href="#route-map" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
+                  Route Map
+                </a>
+              )}
               <a href="#itinerary" className="px-3 py-1.5 rounded-lg hover:text-[var(--theme-primary)] hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors">
                 Itinerary ({packageData.itinerary?.length || 0} Days)
               </a>
@@ -871,6 +880,7 @@ export default function PackageDetail() {
             <PackageRouteMap
               packageSlug={packageData.slug || identifier || ""}
               packageTitle={packageData.title}
+              enableRouteMap={packageData.enableRouteMap}
               itinerary={packageData.itinerary}
               selectedDay={selectedRouteDay}
               onSelectDay={(day) => setSelectedRouteDay(day)}
@@ -957,22 +967,24 @@ export default function PackageDetail() {
                           </div>
 
                           <div className="flex items-center gap-2 flex-shrink-0 text-gray-400">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedRouteDay(item.day);
-                                const mapEl = document.getElementById("route-map");
-                                if (mapEl) {
-                                  mapEl.scrollIntoView({ behavior: "smooth", block: "start" });
-                                }
-                              }}
-                              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900 transition-colors cursor-pointer"
-                              title="Show this day's route on the interactive map"
-                            >
-                              <Navigation className="w-3 h-3 text-amber-500" />
-                              <span>View on Map</span>
-                            </button>
+                            {packageData.enableRouteMap !== false && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedRouteDay(item.day);
+                                  const mapEl = document.getElementById("route-map");
+                                  if (mapEl) {
+                                    mapEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }
+                                }}
+                                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900 transition-colors cursor-pointer"
+                                title="Show this day's route on the interactive map"
+                              >
+                                <Navigation className="w-3 h-3 text-amber-500" />
+                                <span>View on Map</span>
+                              </button>
+                            )}
                             {isOpen ? <ChevronUp className="w-5 h-5 text-[var(--theme-primary)]" /> : <ChevronDown className="w-5 h-5" />}
                           </div>
                         </button>
@@ -1032,7 +1044,7 @@ export default function PackageDetail() {
                               }
 
                               return (
-                                <ul className="space-y-2 mt-2">
+                                <ul className="space-y-2.5">
                                   {rawLines.map((line: string, idx: number) => {
                                     const cleanText = line.replace(/^([•\-\*]|\d+[\.\)])\s*/, "").trim();
                                     return (

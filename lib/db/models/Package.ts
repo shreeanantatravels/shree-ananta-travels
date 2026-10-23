@@ -4,6 +4,7 @@ export interface IItineraryDay {
   dayNumber: number;
   title: string;
   description: string;
+  city?: string;
   route?: string;
   altitude?: string;
   stay?: string;
@@ -58,6 +59,8 @@ export interface IPackage extends Document {
   conciergeSubtitle?: string;
   seo: IPackageSEO;
   redirectFromSlugs: string[];
+  enableRouteMap?: boolean;
+  enableAltitude?: boolean;
   inclusions: string[];
   exclusions: string[];
   termsAndConditions: string[];
@@ -79,6 +82,7 @@ const ItineraryDaySchema = new Schema<IItineraryDay>({
   dayNumber: { type: Number, required: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
+  city: { type: String, default: '' },
   route: { type: String, default: '' },
   altitude: { type: String, default: '' },
   stay: { type: String, default: '' },
@@ -248,6 +252,14 @@ const PackageSchema = new Schema<IPackage>(
       type: String,
       trim: true,
       default: '',
+    },
+    enableRouteMap: {
+      type: Boolean,
+      default: false,
+    },
+    enableAltitude: {
+      type: Boolean,
+      default: false,
     },
     itinerary: {
       type: [ItineraryDaySchema],
