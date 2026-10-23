@@ -29,7 +29,7 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   ranthambore: { lat: 26.0173, lng: 76.5026, name: "Ranthambore", state: "Rajasthan", aliases: ["sawai madhopur"] },
   chittorgarh: { lat: 24.8887, lng: 74.6269, name: "Chittorgarh", state: "Rajasthan", aliases: ["chittor"] },
   kumbhalgarh: { lat: 25.1479, lng: 73.5875, name: "Kumbhalgarh", state: "Rajasthan" },
-  khatushyam: { lat: 27.4334, lng: 75.3087, name: "Khatu Shyam Ji", state: "Rajasthan", aliases: ["khatu", "khatu shyam"] },
+  khatushyam: { lat: 27.4334, lng: 75.3087, name: "Khatu Shyam Ji", state: "Rajasthan", aliases: ["khatu", "khatu shyam", "sikar", "khatushyamji"] },
   salasar: { lat: 27.7214, lng: 74.7216, name: "Salasar Balaji", state: "Rajasthan", aliases: ["salasar"] },
   nathdwara: { lat: 24.9317, lng: 73.8197, name: "Nathdwara", state: "Rajasthan", aliases: ["shrinathji"] },
   mandawa: { lat: 28.0553, lng: 75.1428, name: "Mandawa", state: "Rajasthan", aliases: ["shekhawati"] },
@@ -62,6 +62,7 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   kumarakom: { lat: 9.6175, lng: 76.4301, name: "Kumarakom", state: "Kerala" },
   kovalam: { lat: 8.4004, lng: 76.9787, name: "Kovalam", state: "Kerala" },
   trivandrum: { lat: 8.5241, lng: 76.9366, name: "Thiruvananthapuram", state: "Kerala", aliases: ["trivandrum", "padmanabhaswamy"] },
+  thiruvananthapuram: { lat: 8.5241, lng: 76.9366, name: "Thiruvananthapuram", state: "Kerala", aliases: ["trivandrum", "padmanabhaswamy"] },
   wayanad: { lat: 11.6854, lng: 76.1320, name: "Wayanad", state: "Kerala" },
   varkala: { lat: 8.7379, lng: 76.7163, name: "Varkala", state: "Kerala" },
   kozhikode: { lat: 11.2588, lng: 75.7804, name: "Kozhikode", state: "Kerala", aliases: ["calicut"] },
@@ -88,6 +89,18 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   kausani: { lat: 29.8543, lng: 79.5967, name: "Kausani", state: "Uttarakhand" },
   almora: { lat: 29.5971, lng: 79.6591, name: "Almora", state: "Uttarakhand" },
   ranikhet: { lat: 29.6434, lng: 79.4322, name: "Ranikhet", state: "Uttarakhand" },
+  chopta: { lat: 30.4853, lng: 79.1764, name: "Chopta", state: "Uttarakhand" },
+  tungnath: { lat: 30.4891, lng: 79.2173, name: "Tungnath", state: "Uttarakhand" },
+  chandrashila: { lat: 30.4900, lng: 79.2200, name: "Chandrashila", state: "Uttarakhand" },
+  triyuginarayan: { lat: 30.6405, lng: 78.9866, name: "Triyuginarayan Temple", state: "Uttarakhand", aliases: ["triyuginarayan"] },
+  devprayag: { lat: 30.1459, lng: 78.5986, name: "Devprayag", state: "Uttarakhand" },
+  karnaprayag: { lat: 30.2583, lng: 79.2173, name: "Karnaprayag", state: "Uttarakhand", aliases: ["karanprayag"] },
+  sonprayag: { lat: 30.6315, lng: 78.9972, name: "Sonprayag", state: "Uttarakhand" },
+  gaurikund: { lat: 30.6528, lng: 79.0272, name: "Gaurikund", state: "Uttarakhand" },
+  phata: { lat: 30.5750, lng: 79.0350, name: "Phata", state: "Uttarakhand" },
+  sersi: { lat: 30.5890, lng: 79.0430, name: "Sersi", state: "Uttarakhand" },
+  sitapur: { lat: 30.6120, lng: 78.9950, name: "Sitapur", state: "Uttarakhand" },
+  mana: { lat: 30.7644, lng: 79.4975, name: "Mana Village", state: "Uttarakhand", aliases: ["mana"] },
 
   // ━━━ HIMACHAL, PUNJAB, KASHMIR & LADAKH ━━━
   delhi: { lat: 28.6139, lng: 77.2090, name: "Delhi", state: "Delhi", aliases: ["new delhi", "igi airport"] },
@@ -152,11 +165,12 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   purang: { lat: 30.2980, lng: 81.1760, name: "Purang / Taklakot", country: "Tibet", aliases: ["taklakot"] },
   mansarovar: { lat: 30.6720, lng: 81.4720, name: "Lake Mansarovar", country: "Tibet", aliases: ["lake mansarovar", "manasarovar"] },
   darchen: { lat: 30.9760, lng: 81.2870, name: "Darchen Base", country: "Tibet", aliases: ["kailash base"] },
+  yamdwar: { lat: 30.9850, lng: 81.2500, name: "Yam Dwar", country: "Tibet", aliases: ["yam dwar", "tarboche"] },
   dirapuk: { lat: 31.0920, lng: 81.2980, name: "Dirapuk Monastery", country: "Tibet", aliases: ["north face"] },
   dolmala: { lat: 31.1160, lng: 81.3550, name: "Dolma La Pass", country: "Tibet", aliases: ["dolma la"] },
-  zuthulpuk: { lat: 31.0180, lng: 81.3910, name: "Zuthulpuk Cave", country: "Tibet" },
+  zuthulpuk: { lat: 31.0180, lng: 81.3910, name: "Zuthulpuk Cave", country: "Tibet", aliases: ["zutulpuk"] },
   saga: { lat: 29.3270, lng: 85.2340, name: "Saga", country: "Tibet" },
-  shigatse: { lat: 29.2667, lng: 88.8833, name: "Shigatse", country: "Tibet" },
+  shigatse: { lat: 29.2667, lng: 88.8833, name: "Shigatse", country: "Tibet", aliases: ["xigatse"] },
   lhasa: { lat: 29.6500, lng: 91.1000, name: "Lhasa", country: "Tibet", aliases: ["potala palace"] },
   gyantse: { lat: 28.9167, lng: 89.6000, name: "Gyantse", country: "Tibet" },
   kathmandu: { lat: 27.7172, lng: 85.3240, name: "Kathmandu", country: "Nepal", aliases: ["pashupatinath"] },
@@ -200,25 +214,39 @@ export function lookupCityCoordinates(rawText: string): GeoPoint | null {
 
   if (!cleaned) return null;
 
-  // 1. Direct key match (e.g., "madurai", "jaipur")
+  // 1. Direct key match (e.g., "madurai", "jaipur", "khatushyam")
   const directKey = cleaned.replace(/\s+/g, "");
   if (VERIFIED_DESTINATIONS[directKey]) {
     return VERIFIED_DESTINATIONS[directKey];
   }
 
-  // 2. Scan dictionary keys and aliases
-  for (const [key, point] of Object.entries(VERIFIED_DESTINATIONS)) {
-    if (cleaned === key || cleaned === point.name.toLowerCase()) {
+  // 2. Exact name match first
+  for (const [, point] of Object.entries(VERIFIED_DESTINATIONS)) {
+    if (cleaned === point.name.toLowerCase()) {
       return point;
     }
-    // Match as whole word or phrase
-    const regex = new RegExp(`\\b${key}\\b`, "i");
-    const nameRegex = new RegExp(`\\b${point.name.toLowerCase()}\\b`, "i");
+  }
+
+  // 3. Whole-word / phrase match against keys, names, and aliases
+  for (const [key, point] of Object.entries(VERIFIED_DESTINATIONS)) {
+    const keyEscaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const nameEscaped = point.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b${keyEscaped}\\b`, "i");
+    const nameRegex = new RegExp(`\\b${nameEscaped}\\b`, "i");
+
     if (regex.test(cleaned) || nameRegex.test(cleaned)) {
       return point;
     }
-    if (point.aliases && point.aliases.some((alias) => cleaned.includes(alias.toLowerCase()))) {
-      return point;
+
+    if (point.aliases) {
+      for (const alias of point.aliases) {
+        const a = alias.toLowerCase().trim();
+        if (!a) continue;
+        const aliasEscaped = a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        if (new RegExp(`\\b${aliasEscaped}\\b`, "i").test(cleaned)) {
+          return point;
+        }
+      }
     }
   }
 
@@ -238,8 +266,7 @@ export async function resolveCityForDay(day: {
 }): Promise<GeoPoint | null> {
   const explicitCity = (day.city || "").trim();
 
-  // 1. If user explicitly provided a city, ONLY resolve that city!
-  // NEVER pollute with random words from day.title or day.route
+  // 1. If explicit city provided, resolve that first
   if (explicitCity) {
     const local = lookupCityCoordinates(explicitCity);
     if (local) return local;
@@ -266,10 +293,27 @@ export async function resolveCityForDay(day: {
     return null;
   }
 
-  // 2. Legacy fallback for old packages where city field was never set
-  const candidates = [day.route, day.title].filter(Boolean) as string[];
-  for (const query of candidates) {
-    const local = lookupCityCoordinates(query);
+  // 2. Intelligently inspect route and title
+  // When a day has "A → B" or "A to B", the destination of the day is B!
+  const textCandidates = [day.route, day.title].filter(Boolean) as string[];
+  for (const text of textCandidates) {
+    // If text contains arrows or "to", check the destination part first
+    const arrowParts = text.split(/[→➤\->]+/);
+    if (arrowParts.length > 1) {
+      const destPart = arrowParts[arrowParts.length - 1].trim();
+      const destMatch = lookupCityCoordinates(destPart);
+      if (destMatch) return destMatch;
+    }
+
+    const toParts = text.split(/\s+to\s+/i);
+    if (toParts.length > 1) {
+      const destPart = toParts[toParts.length - 1].trim();
+      const destMatch = lookupCityCoordinates(destPart);
+      if (destMatch) return destMatch;
+    }
+
+    // Direct whole-text scan
+    const local = lookupCityCoordinates(text);
     if (local) return local;
   }
 
@@ -375,7 +419,6 @@ export async function buildDynamicRouteFromItinerary(
 ): Promise<PackageRouteData | null> {
   if (!Array.isArray(itinerary) || itinerary.length === 0) return null;
 
-  // Extract stops for each day
   interface DayStop {
     dayNumber: number;
     geo: GeoPoint;
@@ -384,51 +427,84 @@ export async function buildDynamicRouteFromItinerary(
 
   const detectedStops: DayStop[] = [];
 
-  // Check if user has explicitly entered any city stops
-  const hasExplicitCities = itinerary.some((d) => Boolean(d.city && d.city.trim()));
-
   for (let idx = 0; idx < itinerary.length; idx++) {
     const day = itinerary[idx];
     const dayNum = day.dayNumber ?? day.day ?? idx + 1;
+    const explicitCity = (day.city || "").trim();
 
-    if (hasExplicitCities) {
-      // STRICT MODE: ONLY plot days that have an explicit city!
-      // NEVER pull random cities from old day titles (e.g. Kathmandu, Simikot) for unassigned days!
-      const explicitCity = (day.city || "").trim();
-      if (!explicitCity) continue;
+    let geo: GeoPoint | null = null;
+    if (explicitCity) {
+      geo = await resolveCityForDay({ city: explicitCity });
+    }
+    if (!geo) {
+      geo = await resolveCityForDay(day);
+    }
 
-      const geo = await resolveCityForDay({ city: explicitCity });
-      if (geo) {
-        detectedStops.push({ dayNumber: dayNum, geo, dayData: day });
-      }
-    } else {
-      // Legacy fallback for old packages without explicit city field
-      const geo = await resolveCityForDay(day);
-      if (geo) {
-        detectedStops.push({ dayNumber: dayNum, geo, dayData: day });
-      } else if (detectedStops.length > 0) {
-        const prevStop = detectedStops[detectedStops.length - 1];
-        detectedStops.push({ dayNumber: dayNum, geo: prevStop.geo, dayData: day });
-      }
+    if (geo) {
+      detectedStops.push({ dayNumber: dayNum, geo, dayData: day });
+    } else if (detectedStops.length > 0) {
+      // Repeat previous stop if this day was just local sightseeing in the same place
+      const prevStop = detectedStops[detectedStops.length - 1];
+      detectedStops.push({ dayNumber: dayNum, geo: prevStop.geo, dayData: day });
     }
   }
 
   if (detectedStops.length === 0) return null;
 
-  // Group consecutive days in the same city into single unique location markers
-  const locations: RouteLocation[] = [];
-  const cityDayMap: Map<string, { geo: GeoPoint; dayNumbers: number[]; days: any[] }> = new Map();
+  // Check if Day 1 has an explicit origin city distinct from Day 1 stop
+  // e.g. "Haridwar to Barkot" or "Delhi → Khatu Shyam Ji"
+  const firstDay = itinerary[0];
+  if (firstDay && detectedStops.length > 0) {
+    const firstText = `${firstDay.route || ""} ${firstDay.title || ""}`;
+    const arrowParts = firstText.split(/[→➤\->]+/);
+    let originCandidate = "";
+    if (arrowParts.length > 1) {
+      originCandidate = arrowParts[0].trim();
+    } else {
+      const toParts = firstText.split(/\s+to\s+/i);
+      if (toParts.length > 1) originCandidate = toParts[0].trim();
+    }
+
+    if (originCandidate) {
+      const originGeo = lookupCityCoordinates(originCandidate);
+      if (
+        originGeo &&
+        originGeo.name.toLowerCase() !== detectedStops[0].geo.name.toLowerCase()
+      ) {
+        // Prepend starting city as Day 1 Departure Point
+        detectedStops.unshift({
+          dayNumber: 1,
+          geo: originGeo,
+          dayData: {
+            ...firstDay,
+            title: `Departure from ${originGeo.name}`,
+          },
+        });
+      }
+    }
+  }
+
+  // Group CONSECUTIVE days in the same city (preserves loop / round-trip returns!)
+  interface GroupedStop {
+    geo: GeoPoint;
+    dayNumbers: number[];
+    days: any[];
+  }
+  const groupedStops: GroupedStop[] = [];
 
   for (const item of detectedStops) {
-    const cityKey = `${item.geo.name.toLowerCase()}`;
-    const existing = cityDayMap.get(cityKey);
-    if (existing) {
-      if (!existing.dayNumbers.includes(item.dayNumber)) {
-        existing.dayNumbers.push(item.dayNumber);
-        existing.days.push(item.dayData);
+    const lastGroup = groupedStops[groupedStops.length - 1];
+    const isSameAsLast =
+      lastGroup &&
+      lastGroup.geo.name.toLowerCase() === item.geo.name.toLowerCase();
+
+    if (isSameAsLast) {
+      if (!lastGroup.dayNumbers.includes(item.dayNumber)) {
+        lastGroup.dayNumbers.push(item.dayNumber);
+        lastGroup.days.push(item.dayData);
       }
     } else {
-      cityDayMap.set(cityKey, {
+      groupedStops.push({
         geo: item.geo,
         dayNumbers: [item.dayNumber],
         days: [item.dayData],
@@ -436,31 +512,32 @@ export async function buildDynamicRouteFromItinerary(
     }
   }
 
-  let stopIndex = 0;
-  for (const [, data] of cityDayMap.entries()) {
-    const firstDay = data.days[0];
+  const locations: RouteLocation[] = [];
+  groupedStops.forEach((data, stopIndex) => {
+    const firstDayItem = data.days[0];
     const dayLabels = data.dayNumbers.map((d) => `Day ${d}`).join(", ");
     const type =
       stopIndex === 0
         ? "start"
-        : stopIndex === cityDayMap.size - 1
+        : stopIndex === groupedStops.length - 1
         ? "stop"
         : "stop";
 
     locations.push({
-      id: `loc-${data.geo.name.toLowerCase().replace(/\s+/g, "-")}`,
+      id: `loc-${stopIndex}-${data.geo.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
       name: data.geo.name,
       hindiName: data.geo.state ? `${data.geo.state}` : data.geo.country,
       coordinates: [data.geo.lat, data.geo.lng],
       dayNumbers: data.dayNumbers,
-      description: `${dayLabels}: ${firstDay?.title || data.geo.name}. ${firstDay?.stay ? `Accommodation: ${firstDay.stay}` : ""}`,
+      description: `${dayLabels}: ${firstDayItem?.title || data.geo.name}. ${
+        firstDayItem?.stay ? `Accommodation: ${firstDayItem.stay}` : ""
+      }`,
       type: type,
       badge: dayLabels,
     });
-    stopIndex++;
-  }
+  });
 
-  // Build segments connecting sequential unique cities
+  // Build segments connecting sequential stops
   const segments: RouteSegment[] = [];
   let totalKm = 0;
 
@@ -470,7 +547,7 @@ export async function buildDynamicRouteFromItinerary(
     const dist = calculateDistanceKm(fromLoc.coordinates, toLoc.coordinates);
     totalKm += dist;
 
-    // Fetch real road highway path or smooth bezier fallback
+    // Fetch real road highway path or smooth fallback
     const path = await fetchRoadGeometry(fromLoc.coordinates, toLoc.coordinates);
 
     segments.push({
@@ -489,7 +566,10 @@ export async function buildDynamicRouteFromItinerary(
     packageSlug,
     slugAliases: [packageSlug],
     title: packageTitle,
-    totalDistance: totalKm > 0 ? `Approx. ${totalKm} km Route` : undefined,
+    totalDistance:
+      totalKm > 0
+        ? `Approx. ${totalKm} km Route`
+        : `${locations[0]?.name || ""} Destination Tour`,
     locations,
     segments,
   };

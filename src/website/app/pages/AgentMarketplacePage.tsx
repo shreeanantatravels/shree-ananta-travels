@@ -67,7 +67,13 @@ export default function AgentMarketplacePage({
     const title = (pkg.title || '').toLowerCase().trim();
     const desc = (pkg.description || '').toLowerCase().trim();
     const pkgType = (pkg.packageType || '').toLowerCase().trim();
-    const combined = `${title} ${loc} ${desc} ${pkgType}`;
+    const tags = (pkg.tags || []).join(' ').toLowerCase();
+    const route = ((pkg as any).route || '').toLowerCase();
+    const itineraryCities = ((pkg as any).itinerary || [])
+      .map((it: any) => `${it.city || ''} ${it.title || ''}`)
+      .join(' ')
+      .toLowerCase();
+    const combined = `${title} ${loc} ${desc} ${pkgType} ${tags} ${route} ${itineraryCities}`;
 
     // 1. Direct phrase or substring match
     if (combined.includes(q)) {
@@ -75,10 +81,11 @@ export default function AgentMarketplacePage({
     }
 
     // 2. Meaningful keywords match (ignoring common stop words like "and")
+    // Keep 2-letter meaningful terms like "do" for "Do Dham"
     const queryWords = q
       .replace(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
-      .filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+      .filter(w => w.length >= 2 && !STOP_WORDS.has(w));
 
     if (queryWords.length === 0) {
       // If query was ONLY stop words (e.g. "and"), do exact word boundary check
@@ -87,8 +94,8 @@ export default function AgentMarketplacePage({
     }
 
     // 3. Word boundary or prefix match for significant keywords
-    // e.g. "andaman" matches "Andaman" or "Andamans", but "and" won't match "Chandrashila"
-    return queryWords.some(word => {
+    // For multi-word queries (e.g. "char dham", "do dham"), require every term to match so "Do Dham" doesn't falsely match "Char Dham"
+    return queryWords.every(word => {
       const regex = new RegExp(`\\b${word}`, 'i');
       return regex.test(combined);
     });

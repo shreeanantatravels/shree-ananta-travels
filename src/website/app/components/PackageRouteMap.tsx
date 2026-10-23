@@ -300,7 +300,7 @@ export function PackageRouteMap({
 
       if (allCoords.length > 0) {
         const bounds = L.latLngBounds(allCoords);
-        map.fitBounds(bounds, { padding: [40, 40] });
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
       }
 
       setIsMapReady(true);
@@ -368,7 +368,7 @@ export function PackageRouteMap({
 
     if (allCoords.length > 0) {
       const bounds = L.latLngBounds(allCoords);
-      map.fitBounds(bounds, { padding: [40, 40], animate: true });
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13, animate: true });
     }
   }, [routeData]);
 
@@ -486,7 +486,7 @@ export function PackageRouteMap({
   }
 
   if (!routeData) {
-    if (enableRouteMap !== true) return null;
+    if (enableRouteMap === false || !itinerary || itinerary.length === 0) return null;
 
     return (
       <section

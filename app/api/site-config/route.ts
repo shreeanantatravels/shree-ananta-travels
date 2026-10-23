@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db/connect';
 import SiteConfig from '@/lib/db/models/SiteConfig';
+import Package from '@/lib/db/models/Package';
 import AdminUser from '@/lib/db/models/AdminUser';
 import { DEFAULT_CONTACT_PHONE } from '@/lib/utils/contactConfig';
 import { getAuthUserId } from '@/lib/auth';
@@ -79,31 +80,32 @@ export async function GET(req: Request) {
       await config.save();
     }
 
-    // Seed or populate destinations with real curated destinations if empty or test data
-    const REAL_DESTINATIONS: any[] = [
-      { name: 'Kashmir', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&q=80' },
-      { name: 'Kerala', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80' },
-      { name: 'Goa', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80' },
-      { name: 'Rajasthan', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&q=80' },
-      { name: 'Manali & Himachal', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1588083949404-c4f1ed1323b3?w=800&q=80' },
-      { name: 'Ladakh', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80' },
-      { name: 'Golden Triangle', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80' },
-      { name: 'Andaman & Nicobar', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&q=80' },
-      { name: 'Varanasi', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80' },
-      { name: 'Dubai', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80' },
-      { name: 'Maldives', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80' },
-      { name: 'Bali', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80' },
-      { name: 'Switzerland', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80' },
-      { name: 'Thailand', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=800&q=80' },
-      { name: 'Singapore', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80' },
-    ];
-
     const forceReset = new URL(req.url).searchParams.has('seed');
     if (!config.destinations) {
       config.destinations = [];
       config.markModified('destinations');
     } else if (forceReset) {
-      config.destinations = REAL_DESTINATIONS;
+      // Dynamically extract real destinations from packages in database
+      const packages = await Package.find({ isActive: { $ne: false } }).select('location category imageUrl1 imageUrl2').lean();
+      const destMap = new Map<string, any>();
+      packages.forEach((pkg: any) => {
+        if (!pkg.location) return;
+        const loc = pkg.location.trim();
+        if (!loc) return;
+        const cat = pkg.category === 'international' ? 'international' : 'domestic';
+        const key = `${cat}:${loc.toLowerCase()}`;
+        if (!destMap.has(key)) {
+          destMap.set(key, {
+            name: loc,
+            category: cat,
+            active: true,
+            trending: true,
+            image: pkg.imageUrl1 || pkg.imageUrl2 || '',
+            showInNavbar: false,
+          });
+        }
+      });
+      config.destinations = Array.from(destMap.values());
       config.markModified('destinations');
     }
 

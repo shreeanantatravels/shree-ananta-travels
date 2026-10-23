@@ -71,7 +71,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
 
   const [hasOffer, setHasOffer] = useState(false);
   const [isTrending, setIsTrending] = useState(false);
-  const [enableRouteMap, setEnableRouteMap] = useState(false);
+  const [enableRouteMap, setEnableRouteMap] = useState(true);
   const [enableAltitude, setEnableAltitude] = useState(false);
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
   const [imagePreviews, setImagePreviews] = useState<[string | null, string | null, string | null, string | null]>([null, null, null, null]);
@@ -315,8 +315,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
       setRelatedKeywords(parseArrayField(initialData.seo?.relatedKeywords));
 
       setEnableRouteMap(
-        initialData.enableRouteMap ??
-        (initialData.category === 'kailash' || (initialData.itinerary && initialData.itinerary.some((d: any) => !!d.city)))
+        initialData.enableRouteMap ?? true
       );
       setEnableAltitude(
         initialData.enableAltitude ??

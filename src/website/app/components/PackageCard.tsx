@@ -257,7 +257,7 @@ export function PackageCard({
       <div className="p-5 flex-1 flex flex-col">
         <div>
           {/* Location / Theme Text */}
-          <p className="text-sm font-semibold mb-1 uppercase tracking-wide" style={{ color: 'var(--theme-primary)' }}>
+          <p className="text-sm font-semibold mb-1 tracking-wide" style={{ color: 'var(--theme-primary)' }}>
             {location}
           </p>
           

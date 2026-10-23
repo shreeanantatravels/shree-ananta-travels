@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Save, Trash2, Upload, Globe2, Home, MapPin, Loader2, Award, ShieldCheck, BarChart3, BookOpen, Info, Check } from 'lucide-react';
+import { Plus, Save, Trash2, Upload, Globe2, Home, MapPin, Loader2, Award, ShieldCheck, BarChart3, BookOpen, Info, Check, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -286,24 +286,6 @@ type DestCategory = 'domestic' | 'international';
 const MAX_DESTINATIONS = 18;
 type DestMode = 'domestic' | 'international' | 'both';
 
-const REAL_CURATED_DESTINATIONS: DestinationData[] = [
-  { name: 'Kashmir', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800&q=80' },
-  { name: 'Kerala', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80' },
-  { name: 'Goa', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80' },
-  { name: 'Rajasthan', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&q=80' },
-  { name: 'Manali & Himachal', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1588083949404-c4f1ed1323b3?w=800&q=80' },
-  { name: 'Ladakh', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80' },
-  { name: 'Golden Triangle', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80' },
-  { name: 'Andaman & Nicobar', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&q=80' },
-  { name: 'Varanasi', category: 'domestic', active: true, trending: true, image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80' },
-  { name: 'Dubai', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80' },
-  { name: 'Maldives', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80' },
-  { name: 'Bali', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80' },
-  { name: 'Switzerland', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&q=80' },
-  { name: 'Thailand', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=800&q=80' },
-  { name: 'Singapore', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80' },
-];
-
 function DestinationsTab() {
   const { data: configData, isLoading: configLoading } = useGetSiteConfigQuery();
   const [updateConfig] = useUpdateSiteConfigMutation();
@@ -332,6 +314,74 @@ function DestinationsTab() {
       if (configData?.data?.destinations) {
         setDestinations(configData.data.destinations);
       }
+    } finally {
+      setActiveLoadingKey(null);
+    }
+  };
+
+  // Helper to extract clean destination names from real website packages
+  const extractCleanDestinationName = (pkg: any): string => {
+    const title = (pkg.title || '').split('–')[0].split('-')[0].trim();
+    if (/kailash/i.test(title)) return 'Kailash Mansarovar';
+    if (/char\s*dham/i.test(title)) return 'Char Dham';
+    if (/do\s*dham/i.test(title)) return 'Do Dham Yatra';
+    if (/kerala/i.test(title)) return 'Kerala';
+    if (/rajasthan/i.test(title)) return 'Rajasthan';
+    if (/pushkar|khatu\s*shyam/i.test(title)) return 'Pushkar & Khatu Shyam Ji';
+    if (/south\s*yatra|madurai|rameshwaram/i.test(title)) return 'South India';
+    if (/himalayan|chopta/i.test(title)) return 'Himalayas';
+    
+    if (pkg.location && !pkg.location.includes(',')) {
+      return pkg.location.trim();
+    }
+    if (title.includes(':')) {
+      return title.split(':')[0].trim();
+    }
+    if (pkg.location) {
+      return pkg.location.split(',')[0].trim();
+    }
+    return title.replace(/Tour Package|Tour|Yatra|Package/gi, '').trim() || 'Featured Destination';
+  };
+
+  // Dynamically load real destinations from existing database packages
+  const handleLoadRealFromDB = async () => {
+    setActiveLoadingKey('seed-real-destinations');
+    try {
+      const res = await fetch('/api/packages?limit=100');
+      const json = await res.json();
+      const pkgs = json.data || json.packages || (Array.isArray(json) ? json : []);
+
+      const destMap = new Map<string, DestinationData>();
+      pkgs.forEach((p: any) => {
+        if (p.isActive === false) return;
+        const name = extractCleanDestinationName(p);
+        if (!name) return;
+        const cat: DestCategory = p.category === 'international' ? 'international' : 'domestic';
+        const key = `${cat}:${name.toLowerCase()}`;
+        if (!destMap.has(key)) {
+          destMap.set(key, {
+            name: name,
+            category: cat,
+            active: true,
+            trending: true,
+            image: p.imageUrl1 || p.imageUrl2 || '',
+            showInNavbar: false,
+          });
+        }
+      });
+
+      const realFromPackages = Array.from(destMap.values());
+      if (realFromPackages.length === 0) {
+        toast.info('No packages found in DB to extract destinations.');
+        return;
+      }
+      await saveDestinationsDirectly(
+        realFromPackages,
+        'seed-real-destinations',
+        `Loaded ${realFromPackages.length} real destinations from your website packages!`
+      );
+    } catch {
+      toast.error('Failed to load destinations from packages');
     } finally {
       setActiveLoadingKey(null);
     }
@@ -668,19 +718,17 @@ function DestinationsTab() {
 
           <button
             type="button"
-            onClick={() => {
-              saveDestinationsDirectly(REAL_CURATED_DESTINATIONS, 'seed-real-destinations', 'Real destinations loaded and saved!');
-            }}
+            onClick={handleLoadRealFromDB}
             disabled={activeLoadingKey !== null}
             className="flex items-center gap-2 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 disabled:bg-gray-100 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-semibold transition-all shadow-xs"
-            title="Populate list with real curated destinations"
+            title="Auto-extract and load real destinations from your website packages"
           >
             {activeLoadingKey === 'seed-real-destinations' ? (
               <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
             ) : (
-              <Globe2 className="w-4 h-4 text-emerald-600" />
+              <Sparkles className="w-4 h-4 text-emerald-600" />
             )}
-            Load Real Destinations
+            Load From My Packages
           </button>
 
           <button

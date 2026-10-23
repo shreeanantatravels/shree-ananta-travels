@@ -29,6 +29,36 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/domestic/haridwar-yamunotri-gangotri-kedarnath-badrinath',
+        destination: '/domestic/char-dham',
+        permanent: true,
+      },
+      {
+        source: '/domestic/haridwar-guptkashi-kedarnath-badrinath',
+        destination: '/domestic/kedarnath-and-badrinath',
+        permanent: true,
+      },
+      {
+        source: '/domestic/jaipur-pushkar-jodhpur-jaisalmer-udaipur',
+        destination: '/domestic/rajasthan',
+        permanent: true,
+      },
+      {
+        source: '/domestic/munnar-thekkady-alleppey-kochi',
+        destination: '/domestic/kerala',
+        permanent: true,
+      },
+      {
+        source: '/domestic/madurai-rameshwaram-kanyakumari-thiruvananthapuram-trivandrum',
+        destination: '/domestic/south-india',
+        permanent: true,
+      },
+      {
+        source: '/domestic/madurai-rameshwaram-kanyakumari',
+        destination: '/domestic/south-india',
+        permanent: true,
+      },
+      {
         source: '/domestic/manali-%26-himachal',
         destination: '/domestic/manali-and-himachal',
         permanent: true,
