@@ -240,32 +240,38 @@ export function PackageRouteMap({
 
       routeData.locations.forEach((loc: RouteLocation, index: number) => {
         const isStart = loc.type === "start";
+        const isEnd = loc.type === "end" || index === routeData.locations.length - 1;
         const isSacred = loc.type === "sacred_site";
         const isPass = loc.type === "mountain_pass";
+
+        const badgeLabel = loc.dayNumbers && loc.dayNumbers.length > 0
+          ? (loc.dayNumbers.length === 1 ? `D${loc.dayNumbers[0]}` : `D${loc.dayNumbers[0]}-${loc.dayNumbers[loc.dayNumbers.length - 1]}`)
+          : `${index + 1}`;
 
         const iconHtml = `
           <div class="route-marker-container group" style="transform: translate(-50%, -50%);">
             <div class="relative flex items-center justify-center">
-              <!-- Halo / Ping for key sites -->
-              ${
-                isSacred || isPass
-                  ? '<div class="absolute -inset-1.5 rounded-full bg-amber-400/40 animate-ping opacity-60"></div>'
-                  : ""
-              }
+              <!-- Halo / Ping for key sites or active day selection -->
+              <div class="pin-halo absolute -inset-2 rounded-full bg-amber-400/50 animate-ping opacity-75 ${
+                isSacred || isPass ? "" : "hidden"
+              }"></div>
+
               <!-- Pin Circle -->
-              <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-lg border-2 border-white transition-transform duration-200 group-hover:scale-125 cursor-pointer ${
+              <div class="pin-circle min-w-[34px] h-[34px] px-1.5 rounded-full flex items-center justify-center text-[10px] font-black shadow-xl border-2 border-white transition-all duration-300 group-hover:scale-125 cursor-pointer ${
                 isStart
                   ? "bg-slate-900 text-amber-400 ring-2 ring-slate-900"
+                  : isEnd
+                  ? "bg-emerald-700 text-white ring-2 ring-emerald-500"
                   : isPass
                   ? "bg-red-600 text-white ring-2 ring-red-400"
                   : isSacred
                   ? "bg-amber-500 text-slate-950 ring-2 ring-amber-400"
                   : "bg-amber-400 text-slate-950 ring-2 ring-amber-300"
               }">
-                ${index + 1}
+                ${badgeLabel}
               </div>
               <!-- Floating label above pin -->
-              <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md bg-slate-900/90 text-white text-[10px] font-bold shadow-md border border-white/20 pointer-events-none">
+              <div class="pin-label absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md bg-slate-900/90 text-white text-[10px] font-bold shadow-md border border-white/20 pointer-events-none transition-all duration-200">
                 ${loc.name}
               </div>
             </div>
@@ -275,8 +281,8 @@ export function PackageRouteMap({
         const customIcon = L.divIcon({
           className: "custom-div-icon",
           html: iconHtml,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16],
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
         });
 
         const marker = L.marker(loc.coordinates, { icon: customIcon }).addTo(map);
@@ -382,7 +388,8 @@ export function PackageRouteMap({
     // 1. Update Polylines Styling
     Object.values(polylines).forEach((item: any) => {
       const { polyline, glowLine, baseColor, weight, dashArray, seg } = item;
-      const isSegmentInDay = currentDay === null || seg.dayNumbers.includes(currentDay);
+      const isDay1InitialSegment = currentDay === 1 && seg.fromId === routeData.locations[0]?.id;
+      const isSegmentInDay = currentDay === null || seg.dayNumbers.includes(currentDay) || isDay1InitialSegment;
 
       if (currentDay === null) {
         // Reset all lines to active state
@@ -416,7 +423,7 @@ export function PackageRouteMap({
         polyline.setStyle({
           color: baseColor,
           weight: Math.max(2, weight - 1),
-          opacity: 0.25,
+          opacity: 0.2,
           dashArray: dashArray,
         });
         glowLine.setStyle({
@@ -425,40 +432,94 @@ export function PackageRouteMap({
       }
     });
 
-    // 2. Focus and zoom map to active day if specific day is selected
-    if (currentDay !== null && leafletLibRef.current) {
-      const L = leafletLibRef.current;
-      const dayCoords: [number, number][] = [];
+    // 2. Update Markers Styling (Active Day Highlight & Dimming)
+    Object.values(markers).forEach((item: any) => {
+      const { marker, loc } = item;
+      const el = marker.getElement();
+      if (!el) return;
 
-      routeData.locations
-        .filter((loc) => loc.dayNumbers.includes(currentDay))
-        .forEach((loc) => dayCoords.push(loc.coordinates));
+      const isLocInDay = currentDay === null || loc.dayNumbers.includes(currentDay);
 
-      routeData.segments
-        .filter((seg) => seg.dayNumbers.includes(currentDay))
-        .forEach((seg) => seg.path.forEach((p) => dayCoords.push(p)));
-
-      if (dayCoords.length > 0) {
-        const bounds = L.latLngBounds(dayCoords);
-        mapInstanceRef.current.fitBounds(bounds, {
-          padding: [60, 60],
-          maxZoom: 13,
-          animate: true,
-        });
+      if (currentDay === null) {
+        el.style.opacity = "1";
+        el.style.transform = "translate(-50%, -50%) scale(1)";
+        el.style.zIndex = loc.type === "start" ? "60" : "50";
+        const halo = el.querySelector(".pin-halo");
+        if (halo) {
+          if (loc.type === "sacred_site" || loc.type === "mountain_pass") {
+            halo.classList.remove("hidden");
+          } else {
+            halo.classList.add("hidden");
+          }
+        }
+      } else if (isLocInDay) {
+        el.style.opacity = "1";
+        el.style.transform = "translate(-50%, -50%) scale(1.3)";
+        el.style.zIndex = "1000";
+        const halo = el.querySelector(".pin-halo");
+        if (halo) {
+          halo.classList.remove("hidden");
+          halo.classList.add("animate-ping");
+        }
+      } else {
+        el.style.opacity = "0.35";
+        el.style.transform = "translate(-50%, -50%) scale(0.9)";
+        el.style.zIndex = "10";
+        const halo = el.querySelector(".pin-halo");
+        if (halo) {
+          halo.classList.add("hidden");
+        }
       }
+    });
 
-      // Automatically set the best target location for the selected day
-      const targetLocId = DAY_FOCUS_MAP[currentDay];
-      const focusLoc =
-        (targetLocId && routeData.locations.find((l) => l.id === targetLocId)) ||
-        routeData.locations.find((l) => l.dayNumbers[0] === currentDay) ||
-        routeData.locations.find((l) => l.dayNumbers.includes(currentDay));
+    // 3. Focus and zoom map to active day or reset to full route bounds
+    if (leafletLibRef.current) {
+      const L = leafletLibRef.current;
 
-      if (focusLoc) {
-        setActiveLocation(focusLoc);
+      if (currentDay === null) {
+        const allCoords: [number, number][] = [];
+        routeData.locations.forEach((l) => allCoords.push(l.coordinates));
+        routeData.segments.forEach((s) => s.path.forEach((p) => allCoords.push(p)));
+        if (allCoords.length > 0) {
+          const bounds = L.latLngBounds(allCoords);
+          mapInstanceRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 13, animate: true });
+        }
+      } else {
+        const dayCoords: [number, number][] = [];
+
+        routeData.locations
+          .filter((loc) => loc.dayNumbers.includes(currentDay))
+          .forEach((loc) => dayCoords.push(loc.coordinates));
+
+        routeData.segments
+          .filter((seg) => seg.dayNumbers.includes(currentDay) || (currentDay === 1 && seg.fromId === routeData.locations[0]?.id))
+          .forEach((seg) => seg.path.forEach((p) => dayCoords.push(p)));
+
+        if (dayCoords.length > 1) {
+          const bounds = L.latLngBounds(dayCoords);
+          mapInstanceRef.current.fitBounds(bounds, {
+            padding: [60, 60],
+            maxZoom: 12,
+            animate: true,
+          });
+        } else if (dayCoords.length === 1) {
+          mapInstanceRef.current.setView(dayCoords[0], 10, { animate: true });
+        }
+
+        // Automatically set the best target location for the selected day
+        const isKailashPkg = packageSlug.includes("kailash");
+        const targetLocId = isKailashPkg ? DAY_FOCUS_MAP[currentDay] : null;
+        const focusLoc =
+          (targetLocId && routeData.locations.find((l) => l.id === targetLocId)) ||
+          routeData.locations.find((l) => l.dayNumbers[0] === currentDay) ||
+          routeData.locations.find((l) => l.dayNumbers.includes(currentDay));
+
+        if (focusLoc) {
+          setActiveLocation(focusLoc);
+        }
       }
     }
-  }, [currentDay, isMapReady, routeData]);
+  }, [currentDay, isMapReady, routeData, packageSlug]);
 
   // Handle zoom in / out
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
@@ -486,7 +547,7 @@ export function PackageRouteMap({
   }
 
   if (!routeData) {
-    if (enableRouteMap === false || !itinerary || itinerary.length === 0) return null;
+    if (!itinerary || itinerary.length === 0) return null;
 
     return (
       <section

@@ -41,6 +41,7 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   rameshwaram: { lat: 9.2876, lng: 79.3129, name: "Rameshwaram", state: "Tamil Nadu", aliases: ["rameswaram", "ramanathaswamy"] },
   dhanushkodi: { lat: 9.1788, lng: 79.4144, name: "Dhanushkodi", state: "Tamil Nadu" },
   kanyakumari: { lat: 8.0883, lng: 77.5385, name: "Kanyakumari", state: "Tamil Nadu", aliases: ["cape comorin"] },
+  padmanabhapuram: { lat: 8.2433, lng: 77.3274, name: "Padmanabhapuram Palace", state: "Tamil Nadu", aliases: ["padmanabhapuram", "padmanabhapuram palace"] },
   chennai: { lat: 13.0827, lng: 80.2707, name: "Chennai", state: "Tamil Nadu", aliases: ["madras"] },
   mahabalipuram: { lat: 12.6269, lng: 80.1927, name: "Mahabalipuram", state: "Tamil Nadu", aliases: ["mamallapuram"] },
   pondicherry: { lat: 11.9416, lng: 79.8083, name: "Puducherry", state: "Puducherry", aliases: ["pondicherry", "pondy", "auroville"] },
@@ -432,9 +433,20 @@ export async function buildDynamicRouteFromItinerary(
     const dayNum = day.dayNumber ?? day.day ?? idx + 1;
     const explicitCity = (day.city || "").trim();
 
+    const prevStop = detectedStops[detectedStops.length - 1];
     let geo: GeoPoint | null = null;
     if (explicitCity) {
-      geo = await resolveCityForDay({ city: explicitCity });
+      const explicitGeo = await resolveCityForDay({ city: explicitCity });
+      if (prevStop && explicitGeo && prevStop.geo.name.toLowerCase() === explicitGeo.name.toLowerCase()) {
+        const excursionGeo = await resolveCityForDay({ title: day.title, route: day.route });
+        if (excursionGeo && excursionGeo.name.toLowerCase() !== prevStop.geo.name.toLowerCase()) {
+          geo = excursionGeo;
+        } else {
+          geo = explicitGeo;
+        }
+      } else {
+        geo = explicitGeo;
+      }
     }
     if (!geo) {
       geo = await resolveCityForDay(day);
@@ -516,18 +528,27 @@ export async function buildDynamicRouteFromItinerary(
   groupedStops.forEach((data, stopIndex) => {
     const firstDayItem = data.days[0];
     const dayLabels = data.dayNumbers.map((d) => `Day ${d}`).join(", ");
-    const type =
-      stopIndex === 0
-        ? "start"
-        : stopIndex === groupedStops.length - 1
-        ? "stop"
-        : "stop";
+    const isStart = stopIndex === 0;
+    const isEnd = stopIndex === groupedStops.length - 1 && groupedStops.length > 1;
+    const isReturn = isEnd && groupedStops[0]?.geo.name.toLowerCase() === data.geo.name.toLowerCase();
+    const type = isStart ? "start" : isEnd ? "end" : "stop";
+
+    // If it's a return stop in the same city as the start, apply a tiny geographic visual offset so both markers are visible
+    const finalCoords: [number, number] = isReturn
+      ? [data.geo.lat - 0.008, data.geo.lng + 0.008]
+      : [data.geo.lat, data.geo.lng];
+
+    const displayName = isReturn
+      ? `${data.geo.name} (Departure)`
+      : isStart && groupedStops.length > 1
+      ? `${data.geo.name} (Start)`
+      : data.geo.name;
 
     locations.push({
       id: `loc-${stopIndex}-${data.geo.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
-      name: data.geo.name,
+      name: displayName,
       hindiName: data.geo.state ? `${data.geo.state}` : data.geo.country,
-      coordinates: [data.geo.lat, data.geo.lng],
+      coordinates: finalCoords,
       dayNumbers: data.dayNumbers,
       description: `${dayLabels}: ${firstDayItem?.title || data.geo.name}. ${
         firstDayItem?.stay ? `Accommodation: ${firstDayItem.stay}` : ""

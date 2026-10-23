@@ -6,7 +6,7 @@ export interface RouteLocation {
   altitude?: string;
   dayNumbers: number[];
   description: string;
-  type: "start" | "stop" | "sacred_site" | "mountain_pass" | "camp" | "airport";
+  type: "start" | "stop" | "end" | "sacred_site" | "mountain_pass" | "camp" | "airport";
   badge?: string;
 }
 
