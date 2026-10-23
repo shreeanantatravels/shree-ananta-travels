@@ -645,6 +645,27 @@ function DestinationsTab() {
             <Check className="w-3.5 h-3.5" /> Auto-saves on toggle / blur
           </div>
 
+          {destinations.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete all destinations?')) {
+                  saveDestinationsDirectly([], 'clear-all-destinations', 'All destinations removed!');
+                }
+              }}
+              disabled={activeLoadingKey !== null}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 disabled:bg-gray-100 text-rose-600 border border-rose-200 rounded-xl text-sm font-semibold transition-all shadow-xs"
+              title="Delete all destinations"
+            >
+              {activeLoadingKey === 'clear-all-destinations' ? (
+                <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+              ) : (
+                <Trash2 className="w-4 h-4 text-rose-600" />
+              )}
+              Clear All
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => {

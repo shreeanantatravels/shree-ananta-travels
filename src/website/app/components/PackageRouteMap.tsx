@@ -18,7 +18,6 @@ import {
   X,
 } from "lucide-react";
 import {
-  findPackageRoute,
   PackageRouteData,
   RouteLocation,
   RouteSegment,
@@ -71,22 +70,14 @@ export function PackageRouteMap({
   const [isMapReady, setIsMapReady] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Retrieve route dataset (static curated or dynamically synthesized)
-  const [routeData, setRouteData] = useState<PackageRouteData | null>(() =>
-    findPackageRoute(packageSlug, packageTitle)
-  );
+  // Pure dynamic route dataset synthesized directly from database itinerary
+  const [routeData, setRouteData] = useState<PackageRouteData | null>(null);
   const [isBuildingDynamic, setIsBuildingDynamic] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    const staticRoute = findPackageRoute(packageSlug, packageTitle);
-    if (staticRoute) {
-      setRouteData(staticRoute);
-      setIsBuildingDynamic(false);
-      return;
-    }
 
-    // Build dynamically from itinerary if route map is not explicitly disabled
+    // Build dynamically from DB itinerary if route map is not explicitly disabled
     if (enableRouteMap !== false && itinerary && itinerary.length > 0) {
       setIsBuildingDynamic(true);
       buildDynamicRouteFromItinerary(packageSlug, packageTitle, itinerary)
@@ -97,7 +88,10 @@ export function PackageRouteMap({
           }
         })
         .catch(() => {
-          if (isMounted) setIsBuildingDynamic(false);
+          if (isMounted) {
+            setRouteData(null);
+            setIsBuildingDynamic(false);
+          }
         });
     } else {
       setRouteData(null);
@@ -471,7 +465,7 @@ export function PackageRouteMap({
   const handleZoomOut = () => mapInstanceRef.current?.zoomOut();
 
   // ━━━ If No Route Data Exists or Route Map Disabled ━━━
-  if (enableRouteMap === false && !findPackageRoute(packageSlug, packageTitle)) {
+  if (enableRouteMap === false || (!isBuildingDynamic && !routeData)) {
     return null;
   }
 

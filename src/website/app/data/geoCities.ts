@@ -23,6 +23,8 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   bikaner: { lat: 28.0229, lng: 73.3119, name: "Bikaner", state: "Rajasthan" },
   pushkar: { lat: 26.4897, lng: 74.5511, name: "Pushkar", state: "Rajasthan" },
   ajmer: { lat: 26.4499, lng: 74.6399, name: "Ajmer", state: "Rajasthan", aliases: ["ajmer sharif"] },
+  samdunes: { lat: 26.8285, lng: 70.5100, name: "Sam Sand Dunes", state: "Rajasthan", aliases: ["sam", "sam dunes", "thar desert"] },
+  ranakpur: { lat: 25.1166, lng: 73.4750, name: "Ranakpur", state: "Rajasthan", aliases: ["ranakpur jain temple"] },
   mountabu: { lat: 24.5925, lng: 72.7156, name: "Mount Abu", state: "Rajasthan", aliases: ["mt abu"] },
   ranthambore: { lat: 26.0173, lng: 76.5026, name: "Ranthambore", state: "Rajasthan", aliases: ["sawai madhopur"] },
   chittorgarh: { lat: 24.8887, lng: 74.6269, name: "Chittorgarh", state: "Rajasthan", aliases: ["chittor"] },

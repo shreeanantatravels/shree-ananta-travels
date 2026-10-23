@@ -98,9 +98,11 @@ export async function GET(req: Request) {
       { name: 'Singapore', category: 'international', active: true, trending: true, image: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80' },
     ];
 
-    const hasDummy = config.destinations?.some((d: any) => d.name === 'x' || d.name === 'Bombey' || !d.name);
     const forceReset = new URL(req.url).searchParams.has('seed');
-    if (!config.destinations || config.destinations.length < 6 || hasDummy || forceReset) {
+    if (!config.destinations) {
+      config.destinations = [];
+      config.markModified('destinations');
+    } else if (forceReset) {
       config.destinations = REAL_DESTINATIONS;
       config.markModified('destinations');
     }
