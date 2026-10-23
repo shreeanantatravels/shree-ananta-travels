@@ -540,7 +540,15 @@ export function PackageRouteMap({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
+        <div
+          className="flex items-center gap-1.5 overflow-x-auto thin-scrollbar pb-2 pt-0.5 text-xs scroll-smooth"
+          style={{ scrollbarWidth: "thin" }}
+          onWheel={(e) => {
+            if (e.deltaY !== 0 && e.currentTarget.scrollWidth > e.currentTarget.clientWidth) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+        >
           <button
             onClick={() => handleDayChange(null)}
             className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer ${
