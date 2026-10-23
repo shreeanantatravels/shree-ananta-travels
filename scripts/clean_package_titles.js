@@ -19,14 +19,14 @@ const titleUpdates = [
   {
     id: "6adbccfba2f9959f3554bc0b",
     oldTitle: "Kerala Tour Package from Delhi: Munnar, Thekkady, Alleppey & Kochi – 6 Days / 5 Nights",
-    newTitle: "Kerala Tour Package from Delhi – 6 Days / 5 Nights",
-    newSlug: "kerala-tour-package-from-delhi-6-days"
+    newTitle: "Kerala Tour Package Ex-Delhi – 5 Nights / 6 Days",
+    newSlug: "kerala-tour-package-ex-delhi-6-days"
   },
   {
     id: "6adbc11887f8dacf63abf3b8",
     oldTitle: "Do Dham Yatra from Haridwar: Kedarnath & Badrinath – 6 Days / 5 Nights",
-    newTitle: "Do Dham Yatra from Haridwar – 6 Days / 5 Nights",
-    newSlug: "do-dham-yatra-from-haridwar-6-days"
+    newTitle: "Do Dham Yatra Ex-Haridwar – 5 Nights / 6 Days",
+    newSlug: "do-dham-yatra-ex-haridwar-6-days"
   },
   {
     id: "6aad4213fe63fe6d87ef8ca5",

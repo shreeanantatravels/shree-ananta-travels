@@ -417,10 +417,10 @@ export default function DestinationsCategoryPage({ category }: Props) {
                       ) : (
                         <div>
                           <span className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium block">
-                            Pricing
+                            Starting from
                           </span>
                           <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">
-                            Custom Pricing
+                            Price on Request
                           </span>
                         </div>
                       )}

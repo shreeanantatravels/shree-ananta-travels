@@ -20,6 +20,9 @@ import {
   Headphones,
   Mountain,
   Navigation,
+  Bed,
+  Utensils,
+  Bus,
   Maximize2,
   X,
   PhoneCall,
@@ -952,6 +955,17 @@ export default function PackageDetail() {
                               <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg truncate">
                                 {item.title}
                               </h3>
+                              {(item.city || item.route || item.altitude) && (
+                                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate flex items-center gap-1.5">
+                                  {[
+                                    item.city ? `📍 ${item.city}` : "",
+                                    item.route ? item.route : "",
+                                    item.altitude ? `⛰️ ${item.altitude}` : "",
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" • ")}
+                                </p>
+                              )}
                             </div>
                           </div>
 
@@ -980,7 +994,52 @@ export default function PackageDetail() {
 
                         {/* Day Card Body */}
                         {isOpen && (
-                          <div className="px-5 pb-5 pt-3 border-t border-slate-200/60 dark:border-gray-800/80">
+                          <div className="px-5 pb-5 pt-3 border-t border-slate-200/60 dark:border-gray-800/80 space-y-4">
+                            {/* Structured metadata pills if available */}
+                            {(item.route || item.altitude || item.stay || item.meals || item.transport) && (
+                              <div className="flex flex-wrap gap-2 pt-1 pb-1 text-xs">
+                                {item.route && (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/40 font-medium">
+                                    <MapPin className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+                                    <span>
+                                      <strong className="font-semibold text-indigo-900 dark:text-indigo-200">Route:</strong> {item.route}
+                                    </span>
+                                  </span>
+                                )}
+                                {item.altitude && (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-900/40 font-medium">
+                                    <Mountain className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                                    <span>
+                                      <strong className="font-semibold text-amber-900 dark:text-amber-200">Altitude:</strong> {item.altitude}
+                                    </span>
+                                  </span>
+                                )}
+                                {item.stay && (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/40 font-medium">
+                                    <Bed className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                                    <span>
+                                      <strong className="font-semibold text-emerald-900 dark:text-emerald-200">Stay:</strong> {item.stay}
+                                    </span>
+                                  </span>
+                                )}
+                                {item.meals && (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-900/40 font-medium">
+                                    <Utensils className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                                    <span>
+                                      <strong className="font-semibold text-purple-900 dark:text-purple-200">Meals:</strong> {item.meals}
+                                    </span>
+                                  </span>
+                                )}
+                                {item.transport && (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/40 font-medium">
+                                    <Bus className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                                    <span>
+                                      <strong className="font-semibold text-blue-900 dark:text-blue-200">Transport:</strong> {item.transport}
+                                    </span>
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {/* Detailed activities bullets */}
                             {(() => {
                               const rawLines = (item.description || "")
