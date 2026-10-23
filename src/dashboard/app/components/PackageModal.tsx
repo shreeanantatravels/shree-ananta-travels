@@ -16,6 +16,8 @@ import { CustomCategoryModal } from './package/CustomCategoryModal';
 import { ImageUploadSlot } from './package/ImageUploadSlot';
 import { PackageTagsSection } from './package/PackageTagsSection';
 import { PackageSeoSection } from './package/PackageSeoSection';
+import { CityAutocompleteInput } from './package/CityAutocompleteInput';
+import { RouteMapLivePreview } from './package/RouteMapLivePreview';
 import { slugifyPackage } from '@/lib/utils/packageSeoHelper';
 
 interface PackageModalProps {
@@ -98,42 +100,59 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
   const [quickCityInput, setQuickCityInput] = useState('');
   const [quickCitiesBulk, setQuickCitiesBulk] = useState('');
   const [isBulkCitiesOpen, setIsBulkCitiesOpen] = useState(false);
-  const quickCityInputRef = useRef<HTMLInputElement>(null);
+  const [showMapPreview, setShowMapPreview] = useState(true);
 
-  const handleAddQuickCity = () => {
-    const trimmed = quickCityInput.trim();
+  // Compute next target day number (fills existing days without city first, then appends)
+  const firstEmptyCityDayIndex = itineraryDays.findIndex(d => !d.city || !d.city.trim());
+  const nextTargetDayNum = firstEmptyCityDayIndex !== -1 ? firstEmptyCityDayIndex + 1 : itineraryDays.length + 1;
+
+  const handleAddCityStop = (cityToAdd: string) => {
+    const trimmed = cityToAdd.trim();
     if (!trimmed) return;
 
-    const nextDayNum = itineraryDays.length + 1;
-    const prevDay = itineraryDays.length > 0 ? itineraryDays[itineraryDays.length - 1] : null;
-    const prevCity = prevDay?.city?.trim();
+    setItineraryDays(prev => {
+      const emptyIdx = prev.findIndex(d => !d.city || !d.city.trim());
+      if (emptyIdx !== -1) {
+        // Fill existing day's city
+        return prev.map((d, idx) => {
+          if (idx !== emptyIdx) return d;
+          const prevCity = idx > 0 ? prev[idx - 1].city : '';
+          return {
+            ...d,
+            city: trimmed,
+            title: d.title && !d.title.startsWith('Day ') ? d.title : `${trimmed} Exploration`,
+            route: d.route || (prevCity ? `${prevCity} → ${trimmed}` : trimmed),
+          };
+        });
+      } else {
+        // Append a new day
+        const nextDayNum = prev.length + 1;
+        const prevCity = prev.length > 0 ? prev[prev.length - 1].city : '';
+        return [
+          ...prev,
+          {
+            id: Math.random().toString(),
+            dayNumber: nextDayNum,
+            title: `${trimmed} Exploration`,
+            description: `• Arrival and sightseeing in ${trimmed}.`,
+            city: trimmed,
+            route: prevCity ? `${prevCity} → ${trimmed}` : trimmed,
+            altitude: '',
+            stay: '',
+            meals: '',
+            transport: '',
+            isCollapsed: false,
+          },
+        ];
+      }
+    });
 
-    setItineraryDays(prev => [
-      ...prev,
-      {
-        id: Math.random().toString(),
-        dayNumber: nextDayNum,
-        title: `${trimmed} Tour`,
-        description: `• Sightseeing and exploration in ${trimmed}.`,
-        city: trimmed,
-        route: prevCity ? `${prevCity} → ${trimmed}` : trimmed,
-        altitude: '',
-        stay: '',
-        meals: '',
-        transport: '',
-        isCollapsed: false,
-      },
-    ]);
     setEnableRouteMap(true);
     setQuickCityInput('');
-    setTimeout(() => quickCityInputRef.current?.focus(), 50);
   };
 
-  const handleQuickCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddQuickCity();
-    }
+  const handleAddQuickCity = () => {
+    handleAddCityStop(quickCityInput);
   };
 
   const handleAddBulkCities = () => {
@@ -146,31 +165,53 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
     if (cities.length === 0) return;
 
     setItineraryDays(prev => {
-      let currentLength = prev.length;
-      const newDays = cities.map((city, idx) => {
-        const dayNum = currentLength + idx + 1;
-        const prevCity = idx > 0 ? cities[idx - 1] : (prev.length > 0 ? prev[prev.length - 1].city : '');
-        return {
+      const updated = [...prev];
+      let cityIdx = 0;
+
+      // 1. Fill existing days that have no city first
+      for (let i = 0; i < updated.length && cityIdx < cities.length; i++) {
+        const item = updated[i];
+        if (item && (!item.city || !item.city.trim())) {
+          const currentCity = cities[cityIdx];
+          const prevCity = i > 0 ? updated[i - 1]?.city || '' : '';
+          updated[i] = {
+            ...item,
+            city: currentCity,
+            title: item.title && !item.title.startsWith('Day ') ? item.title : `${currentCity} Exploration`,
+            route: item.route || (prevCity ? `${prevCity} → ${currentCity}` : currentCity),
+          };
+          cityIdx++;
+        }
+      }
+
+      // 2. If any cities remain, append new days
+      while (cityIdx < cities.length) {
+        const currentCity = cities[cityIdx];
+        const nextDayNum = updated.length + 1;
+        const prevCity = updated.length > 0 ? (updated[updated.length - 1]?.city || '') : '';
+        updated.push({
           id: Math.random().toString(),
-          dayNumber: dayNum,
-          title: `${city} Exploration`,
-          description: `• Arrival and sightseeing in ${city}.`,
-          city: city,
-          route: prevCity ? `${prevCity} → ${city}` : city,
+          dayNumber: nextDayNum,
+          title: `${currentCity} Exploration`,
+          description: `• Arrival and sightseeing in ${currentCity}.`,
+          city: currentCity,
+          route: prevCity ? `${prevCity} → ${currentCity}` : currentCity,
           altitude: '',
           stay: '',
           meals: '',
           transport: '',
           isCollapsed: false,
-        };
-      });
-      return [...prev, ...newDays];
+        });
+        cityIdx++;
+      }
+
+      return updated;
     });
 
     setEnableRouteMap(true);
     setQuickCitiesBulk('');
     setIsBulkCitiesOpen(false);
-    toast.success(`Added ${cities.length} day stops to route!`);
+    toast.success(`Applied ${cities.length} city stops to route!`);
   };
 
   const handleRemoveCityFromDay = (dayId: string) => {
@@ -950,20 +991,15 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                 </div>
               )}
 
-              {/* Quick Add City Input (Day by Day) */}
+              {/* Quick Add City Input (Day by Day) with Verified Autocomplete */}
               <div className="flex gap-2 items-center bg-white p-2 rounded-lg border border-indigo-200 shadow-2xs">
-                <div className="relative flex-1">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500" />
-                  <input
-                    ref={quickCityInputRef}
-                    type="text"
-                    value={quickCityInput}
-                    onChange={e => setQuickCityInput(e.target.value)}
-                    onKeyDown={handleQuickCityKeyDown}
-                    placeholder={`Enter City for Day ${itineraryDays.length + 1} (e.g., Lucknow, Nepalgunj, Simikot, Darchen...) & press Enter`}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-transparent border-0 focus:ring-0 focus:outline-none placeholder:text-gray-400 font-medium"
-                  />
-                </div>
+                <CityAutocompleteInput
+                  value={quickCityInput}
+                  onChange={setQuickCityInput}
+                  onSelectCity={handleAddCityStop}
+                  dayNumber={nextTargetDayNum}
+                  placeholder={`Enter City for Day ${nextTargetDayNum} (e.g. Madurai, Rameshwaram, Kanyakumari...)`}
+                />
                 <button
                   type="button"
                   onClick={handleAddQuickCity}
@@ -971,7 +1007,7 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-md transition-all shadow-2xs cursor-pointer flex-shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>+ Add Day {itineraryDays.length + 1} Stop</span>
+                  <span>Add Day {nextTargetDayNum} Stop</span>
                 </button>
               </div>
 
@@ -979,13 +1015,13 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
               {isBulkCitiesOpen && (
                 <div className="p-3 bg-white rounded-lg border border-indigo-200 shadow-2xs space-y-2 animate-in fade-in duration-150">
                   <p className="text-[11px] text-gray-500 font-medium">
-                    Type or paste multiple cities separated by commas (e.g., <em>Lucknow, Nepalgunj, Simikot, Hilsa, Purang, Darchen</em>). Each will automatically create Day 1, Day 2, Day 3...
+                    Type or paste multiple cities separated by commas (e.g., <em>Lucknow, Nepalgunj, Simikot, Hilsa, Purang, Darchen</em>). Each will automatically assign to Day 1, Day 2, Day 3...
                   </p>
                   <textarea
                     rows={2}
                     value={quickCitiesBulk}
                     onChange={e => setQuickCitiesBulk(e.target.value)}
-                    placeholder="e.g., Lucknow, Nepalgunj, Simikot, Hilsa, Purang, Darchen, Mansarovar"
+                    placeholder="e.g., Madurai, Rameshwaram, Dhanushkodi, Kanyakumari"
                     className="w-full p-2.5 text-xs bg-slate-50 border border-gray-200 rounded-md focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none font-medium"
                   />
                   <div className="flex justify-end gap-2">
@@ -1006,9 +1042,20 @@ export function PackageModal({ isOpen, onClose, initialData }: PackageModalProps
                       className="inline-flex items-center gap-1 px-3 py-1 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 rounded shadow-2xs cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Build Route Days</span>
+                      <span>Apply Route Days</span>
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Instant Live Connected Route Map Preview */}
+              {showMapPreview && (
+                <div className="pt-1">
+                  <RouteMapLivePreview
+                    itinerary={itineraryDays}
+                    packageTitle={title || 'Tour Route'}
+                    packageSlug={slug || 'tour-preview'}
+                  />
                 </div>
               )}
             </div>

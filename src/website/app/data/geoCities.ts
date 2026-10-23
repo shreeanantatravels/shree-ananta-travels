@@ -85,6 +85,7 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   auli: { lat: 30.5300, lng: 79.5600, name: "Auli", state: "Uttarakhand" },
   kausani: { lat: 29.8543, lng: 79.5967, name: "Kausani", state: "Uttarakhand" },
   almora: { lat: 29.5971, lng: 79.6591, name: "Almora", state: "Uttarakhand" },
+  ranikhet: { lat: 29.6434, lng: 79.4322, name: "Ranikhet", state: "Uttarakhand" },
 
   // ━━━ HIMACHAL, PUNJAB, KASHMIR & LADAKH ━━━
   delhi: { lat: 28.6139, lng: 77.2090, name: "Delhi", state: "Delhi", aliases: ["new delhi", "igi airport"] },
@@ -109,6 +110,7 @@ export const VERIFIED_DESTINATIONS: Record<string, GeoPoint> = {
   mathura: { lat: 27.4924, lng: 77.6737, name: "Mathura", state: "Uttar Pradesh", aliases: ["krishna janmabhoomi"] },
   vrindavan: { lat: 27.5806, lng: 77.7006, name: "Vrindavan", state: "Uttar Pradesh", aliases: ["prem mandir"] },
   lucknow: { lat: 26.8467, lng: 80.9462, name: "Lucknow", state: "Uttar Pradesh" },
+  farrukhabad: { lat: 27.3825, lng: 79.5716, name: "Farrukhabad", state: "Uttar Pradesh", aliases: ["fatehgarh"] },
   varanasi: { lat: 25.3176, lng: 82.9739, name: "Varanasi", state: "Uttar Pradesh", aliases: ["kashi", "banaras", "benaras"] },
   ayodhya: { lat: 26.7922, lng: 82.1998, name: "Ayodhya", state: "Uttar Pradesh", aliases: ["ram mandir"] },
   prayagraj: { lat: 25.4358, lng: 81.8463, name: "Prayagraj", state: "Uttar Pradesh", aliases: ["allahabad", "sangam", "triveni sangam"] },
@@ -232,34 +234,41 @@ export async function resolveCityForDay(day: {
   title?: string;
   route?: string;
 }): Promise<GeoPoint | null> {
-  const candidates = [day.city, day.route, day.title].filter(Boolean) as string[];
+  const explicitCity = (day.city || "").trim();
 
-  // 1. Try local verified registry first for instant resolution
+  // 1. If user explicitly provided a city, ONLY resolve that city!
+  // NEVER pollute with random words from day.title or day.route
+  if (explicitCity) {
+    const local = lookupCityCoordinates(explicitCity);
+    if (local) return local;
+
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(explicitCity)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            return {
+              lat: json.data.lat,
+              lng: json.data.lng,
+              name: json.data.name,
+              state: json.data.state,
+              country: json.data.country,
+            };
+          }
+        }
+      } catch {
+        // graceful fallback
+      }
+    }
+    return null;
+  }
+
+  // 2. Legacy fallback for old packages where city field was never set
+  const candidates = [day.route, day.title].filter(Boolean) as string[];
   for (const query of candidates) {
     const local = lookupCityCoordinates(query);
     if (local) return local;
-  }
-
-  // 2. If not in local registry, query live global geocoder (/api/geocode)
-  const targetQuery = (day.city || day.route || day.title || "").trim();
-  if (targetQuery && typeof window !== "undefined") {
-    try {
-      const res = await fetch(`/api/geocode?q=${encodeURIComponent(targetQuery)}`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.data) {
-          return {
-            lat: json.data.lat,
-            lng: json.data.lng,
-            name: json.data.name,
-            state: json.data.state,
-            country: json.data.country,
-          };
-        }
-      }
-    } catch {
-      // graceful fallback
-    }
   }
 
   return null;
@@ -373,17 +382,32 @@ export async function buildDynamicRouteFromItinerary(
 
   const detectedStops: DayStop[] = [];
 
+  // Check if user has explicitly entered any city stops
+  const hasExplicitCities = itinerary.some((d) => Boolean(d.city && d.city.trim()));
+
   for (let idx = 0; idx < itinerary.length; idx++) {
     const day = itinerary[idx];
     const dayNum = day.dayNumber ?? day.day ?? idx + 1;
-    const geo = await resolveCityForDay(day);
 
-    if (geo) {
-      detectedStops.push({ dayNumber: dayNum, geo, dayData: day });
-    } else if (detectedStops.length > 0) {
-      // If today has no new city, associate it with the previous day's city (e.g. multi-day in same city)
-      const prevStop = detectedStops[detectedStops.length - 1];
-      detectedStops.push({ dayNumber: dayNum, geo: prevStop.geo, dayData: day });
+    if (hasExplicitCities) {
+      // STRICT MODE: ONLY plot days that have an explicit city!
+      // NEVER pull random cities from old day titles (e.g. Kathmandu, Simikot) for unassigned days!
+      const explicitCity = (day.city || "").trim();
+      if (!explicitCity) continue;
+
+      const geo = await resolveCityForDay({ city: explicitCity });
+      if (geo) {
+        detectedStops.push({ dayNumber: dayNum, geo, dayData: day });
+      }
+    } else {
+      // Legacy fallback for old packages without explicit city field
+      const geo = await resolveCityForDay(day);
+      if (geo) {
+        detectedStops.push({ dayNumber: dayNum, geo, dayData: day });
+      } else if (detectedStops.length > 0) {
+        const prevStop = detectedStops[detectedStops.length - 1];
+        detectedStops.push({ dayNumber: dayNum, geo: prevStop.geo, dayData: day });
+      }
     }
   }
 
