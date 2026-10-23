@@ -1,207 +1,141 @@
 // @ts-nocheck
 "use client";
 import Link from 'next/link';
-
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { ArrowUpRight, MapPin, Clock, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useAgent } from '../context/AgentContext';
 
 interface DealItem {
   id: string;
+  slug?: string;
   tag: string;
   headline: string;
-  subtitle: string;
+  location?: string;
+  duration?: string;
   price: number;
+  originalPrice?: number;
+  discount?: number;
   image: string;
 }
 
 interface DealCardProps {
   deal: DealItem;
   className?: string;
-  height?: string;
 }
 
-function DealCard({ deal, className = '', height = 'h-48' }: DealCardProps) {
+function DealCard({ deal, className = '' }: DealCardProps) {
   const [imgSrc, setImgSrc] = useState(deal.image);
   useEffect(() => { setImgSrc(deal.image); }, [deal.image]);
 
-  return (
-    <div
-      className={`group relative overflow-hidden rounded-2xl block ${height} ${className}`}
-    >
-      <Link
-        href={`/package/${deal.id}`}
-        aria-label={`View ${deal.headline} tour package`}
-        className="absolute inset-0 z-0 block"
-      >
-        <img
-          src={imgSrc}
-          alt={deal.headline}
-          onError={() => setImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1400&q=80')}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/10 group-hover:from-black/85 transition-all duration-300" />
-        <span className="sr-only">{deal.headline}</span>
-      </Link>
-
-      {/* Tag */}
-      <div
-        className="absolute top-3 left-3 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full z-10 pointer-events-none"
-        style={{ background: 'var(--theme-gradient)' }}
-      >
-        {deal.tag}
-      </div>
-
-      {/* Arrow */}
-      <Link
-        href={`/package/${deal.id}`}
-        aria-label={`View ${deal.headline}`}
-        className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300 z-10"
-        style={{ background: 'var(--theme-primary)' }}
-      >
-        <ArrowUpRight size={15} />
-        <span className="sr-only">View {deal.headline}</span>
-      </Link>
-
-      {/* Content */}
-      <div className="absolute bottom-0 left-0 p-4 z-10 pointer-events-none">
-        <div className="text-white font-bold text-lg leading-tight pointer-events-auto">
-          <Link href={`/package/${deal.id}`} className="hover:underline">
-            {deal.headline}
-          </Link>
-        </div>
-        <p className="text-white/75 text-xs mt-0.5">{deal.subtitle}</p>
-        <div className="flex items-center gap-3 mt-2.5">
-          {deal.price && deal.price > 0 ? (
-            <span className="text-white text-sm font-semibold">
-              Starting at ₹{deal.price.toLocaleString()}
-            </span>
-          ) : (
-            <span className="text-amber-300 text-sm font-bold">
-              Price on Request
-            </span>
-          )}
-          <Link
-            href={`/package/${deal.id}`}
-            aria-label={`View itinerary for ${deal.headline}`}
-            className="inline-flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/40 bg-white/15 hover:bg-white/30 transition-colors pointer-events-auto"
-          >
-            <span>View Itinerary</span>
-            <ArrowUpRight size={11} />
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Top-right auto-cycling carousel ──────────────────────────────────────────
-function BentoCarousel({ slides }: { slides: any[] }) {
-  const [idx, setIdx]       = useState(0);
-  const [paused, setPaused] = useState(false);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const go = (n: number) => setIdx((n + slides.length) % slides.length);
-
-  useEffect(() => {
-    if (paused || slides.length <= 1) return;
-    timer.current = setInterval(() => go(idx + 1), 2500);
-    return () => { if (timer.current) clearInterval(timer.current); };
-  }, [idx, paused, slides.length]);
-
-  const slide = slides[idx];
-
-  if (!slide) return null;
+  const packageHref = `/packages/${deal.slug || deal.id}`;
 
   return (
     <div
-      className="relative h-full rounded-2xl overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      className={`group flex flex-col bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 h-full ${className}`}
     >
-      {/* Image with crossfade */}
-      {slides.map((s, i) => (
-        <img
-          key={s.id}
-          src={s.image}
-          alt={s.headline}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-          style={{ opacity: i === idx ? 1 : 0 }}
-        />
-      ))}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-      {/* Tag */}
-      <div
-        className="absolute top-3 left-3 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full z-10"
-        style={{ background: 'var(--theme-gradient)' }}
-      >
-        {slide.tag}
-      </div>
-
-      {/* Prev / Next */}
-      <button
-        onClick={() => go(idx - 1)}
-        aria-label="Previous trending slide"
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors cursor-pointer"
-      >
-        <ChevronLeft size={14} />
-        <span className="sr-only">Previous slide</span>
-      </button>
-      <button
-        onClick={() => go(idx + 1)}
-        aria-label="Next trending slide"
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors cursor-pointer"
-      >
-        <ChevronRight size={14} />
-        <span className="sr-only">Next slide</span>
-      </button>
-
-      {/* Content */}
-      <div className="absolute bottom-0 left-0 p-4 z-10">
-        <div className="text-white font-bold text-xl leading-tight">{slide.headline}</div>
-        <p className="text-white/75 text-xs mt-0.5">{slide.subtitle}</p>
-        <div className="flex items-center gap-3 mt-2.5">
-          {slide.price && slide.price > 0 ? (
-            <span className="text-white text-sm font-semibold">
-              Starting at ₹{slide.price.toLocaleString()}
-            </span>
-          ) : (
-            <span className="text-amber-300 text-sm font-bold">
-              Price on Request
-            </span>
-          )}
-          <Link href={`/package/${slide.id}`}
-            aria-label={`View itinerary for ${slide.headline}`}
-            className="inline-flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/40 bg-white/15 hover:bg-white/30 transition-colors"
-          >
-            <span>View Itinerary</span>
-            <ArrowUpRight size={11} />
-          </Link>
-        </div>
-      </div>
-
-      {/* Dots */}
-      <div className="absolute bottom-4 right-4 flex gap-1.5 z-10">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setIdx(i)}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: i === idx ? 20 : 8,
-              height: 8,
-              background: 'white',
-              opacity: i === idx ? 1 : 0.4,
-            }}
+      {/* ── Image Section (Clean, Unobstructed Photo) ── */}
+      <div className="relative w-full aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-gray-900 shrink-0">
+        <Link
+          href={packageHref}
+          aria-label={`View ${deal.headline} tour package`}
+          className="block w-full h-full relative overflow-hidden"
+        >
+          <img
+            src={imgSrc}
+            alt={deal.headline}
+            onError={() => setImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1400&q=80')}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           />
-        ))}
+          <span className="sr-only">{deal.headline}</span>
+        </Link>
+
+        {/* Tag (Top-Left) */}
+        <div
+          className="absolute top-3 left-3 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md z-10 pointer-events-none"
+          style={{ background: 'var(--theme-gradient)' }}
+        >
+          {deal.tag || 'Trending'}
+        </div>
+
+        {/* Duration Badge (Top-Right) */}
+        {deal.duration && (
+          <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm pointer-events-none border border-white/10">
+            <Clock size={11} className="text-amber-400" />
+            <span>{deal.duration}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Content Section (Cleanly Separated Below Photo) ── */}
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Location */}
+          {deal.location && (
+            <div
+              className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider mb-1.5"
+              style={{ color: 'var(--theme-primary)' }}
+            >
+              <MapPin size={12} className="shrink-0" />
+              <span className="truncate">{deal.location}</span>
+            </div>
+          )}
+
+          {/* Title */}
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[var(--theme-primary)] transition-colors mb-2">
+            <Link href={packageHref} className="hover:underline">
+              {deal.headline}
+            </Link>
+          </h3>
+
+          {/* Rating / Social Proof */}
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <div className="flex items-center text-amber-500">
+              <Star size={12} className="fill-amber-400 text-amber-400" />
+              <span className="ml-1 font-bold text-gray-800 dark:text-gray-200">4.9</span>
+            </div>
+            <span className="text-gray-300 dark:text-gray-600">•</span>
+            <span>Curated Package</span>
+          </div>
+        </div>
+
+        {/* ── Footer: Price & CTA ── */}
+        <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-2">
+          <div>
+            <span className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 block font-medium">Starting from</span>
+            <div className="flex items-baseline gap-1.5">
+              {deal.price && deal.price > 0 ? (
+                <>
+                  <span className="text-base sm:text-lg font-black text-gray-900 dark:text-white">
+                    ₹{deal.price.toLocaleString('en-IN')}
+                  </span>
+                  {deal.originalPrice && deal.originalPrice > deal.price && (
+                    <span className="text-[11px] text-gray-400 line-through">
+                      ₹{deal.originalPrice.toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">
+                  Price on Request
+                </span>
+              )}
+            </div>
+          </div>
+
+          <Link
+            href={packageHref}
+            aria-label={`View itinerary for ${deal.headline}`}
+            className="inline-flex items-center gap-1 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all shadow-sm hover:shadow hover:scale-105 active:scale-95 shrink-0"
+            style={{ background: 'var(--theme-gradient)' }}
+          >
+            <span>View Itinerary</span>
+            <ArrowUpRight size={13} />
+          </Link>
+        </div>
       </div>
     </div>
   );
 }
-
 
 export function TrendingPackages() {
   const { packages: agentPackages, isLoading } = useAgent();
@@ -210,17 +144,22 @@ export function TrendingPackages() {
     .filter(p => p.isTrending)
     .map(p => ({
       id: p._id,
+      slug: p.slug,
       tag: 'Trending',
       headline: p.title,
-      subtitle: p.location + ' — ' + p.duration,
+      location: p.location,
+      duration: p.duration,
       price: p.discountedPrice ?? p.originalPrice,
+      originalPrice: p.discountedPrice ? p.originalPrice : undefined,
+      discount: p.discountedPrice
+        ? Math.round(((p.originalPrice - p.discountedPrice) / p.originalPrice) * 100)
+        : undefined,
       image: p.imageUrl1 || '',
     }));
 
   const displayPackages = apiTrending;
 
   if (isLoading || displayPackages.length === 0) return null;
-  const carouselSlides = displayPackages.slice(0, 4);
 
   return (
     <section id="packages" className="py-16 bg-gray-50 dark:bg-gray-800/40">
@@ -251,7 +190,8 @@ export function TrendingPackages() {
               Customized tour packages across domestic and international destinations, plus Kailash Mansarovar and other yatras. Share your plan and get a quote within 2 hours.
             </p>
           </div>
-          <Link href="/packages"
+          <Link
+            href="/packages"
             className="inline-flex items-center gap-1.5 text-sm font-semibold transition-colors hover:opacity-80 flex-shrink-0"
             style={{ color: 'var(--theme-primary)' }}
           >
@@ -262,8 +202,8 @@ export function TrendingPackages() {
         {/* ── CSS Grid ── */}
         <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ${displayPackages.length === 1 ? 'justify-items-center max-w-sm sm:max-w-md mx-auto' : ''}`}>
           {displayPackages.map((deal) => (
-            <div key={deal.id} className={`relative overflow-hidden rounded-[2rem] shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 ${displayPackages.length === 1 ? 'w-full max-w-[340px] sm:max-w-md mx-auto' : ''}`}>
-              <DealCard deal={deal} height="aspect-[4/5] w-full" className="!rounded-[2rem]" />
+            <div key={deal.id} className="h-full">
+              <DealCard deal={deal} />
             </div>
           ))}
         </div>

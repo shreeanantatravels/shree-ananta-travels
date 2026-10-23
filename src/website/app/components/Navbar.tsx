@@ -17,16 +17,6 @@ function formatLogoUrl(url: any): string {
   return '';
 }
 
-const DEFAULT_DOMESTIC_FALLBACKS = [
-  'Kashmir', 'Kerala', 'Goa', 'Rajasthan', 'Manali & Himachal', 
-  'Ladakh', 'Golden Triangle', 'Andaman & Nicobar', 'Varanasi', 'Shimla'
-];
-
-const DEFAULT_INTL_FALLBACKS = [
-  'Vietnam', 'Dubai', 'Maldives', 'Turkey', 'Singapore', 'Switzerland',
-  'Thailand', 'Paris', 'Bali', 'London', 'Malaysia', 'Italy',
-  'Sri Lanka', 'Greece', 'Nepal', 'Egypt', 'Bhutan', 'Australia'
-];
 
 const DEFAULT_NAV_LINKS = [
   { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
@@ -135,9 +125,7 @@ export function Navbar() {
       });
     }
 
-    // Add fallbacks if sets are empty
-    if (domSet.size === 0) DEFAULT_DOMESTIC_FALLBACKS.forEach(d => domSet.add(d));
-    if (intlSet.size === 0) DEFAULT_INTL_FALLBACKS.forEach(d => intlSet.add(d));
+    // Strictly dynamic: NO fake fallback lists! Only destinations that actually exist in packages or admin siteConfig.
 
     return {
       domesticDestinations: Array.from(domSet).map(name => ({ name })),
@@ -293,48 +281,55 @@ export function Navbar() {
                                 </p>
                               </div>
 
-                              {/* Dropdown Destinations Grid (2 Columns with Vertical Divider Line) */}
-                              <div className="grid grid-cols-2 px-3 py-3 max-h-[380px] overflow-y-auto custom-scrollbar">
-                                {/* Column 1 */}
-                                <ul className="px-1.5 space-y-0.5">
-                                  {destCol1.map((dest: any) => {
-                                    const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-                                    const destSlug = toDestinationSlug(dest.name);
-                                    const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
-                                    return (
-                                      <li key={dest.name}>
-                                        <Link 
-                                          href={destUrl}
-                                          onClick={() => setActiveDropdown(null)}
-                                          className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800/80 dark:hover:text-amber-400 transition-colors truncate leading-snug font-normal"
-                                        >
-                                          {dest.name}
-                                        </Link>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
+                              {dropDestinations.length === 0 ? (
+                                <div className="py-8 px-5 text-center">
+                                  <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+                                    No {dropCategory === 'domestic' ? 'domestic' : 'international'} destinations added yet.
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 px-3 py-3 max-h-[380px] overflow-y-auto custom-scrollbar">
+                                  {/* Column 1 */}
+                                  <ul className="px-1.5 space-y-0.5">
+                                    {destCol1.map((dest: any) => {
+                                      const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                                      const destSlug = toDestinationSlug(dest.name);
+                                      const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                                      return (
+                                        <li key={dest.name}>
+                                          <Link 
+                                            href={destUrl}
+                                            onClick={() => setActiveDropdown(null)}
+                                            className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800/80 dark:hover:text-amber-400 transition-colors truncate leading-snug font-normal"
+                                          >
+                                            {dest.name}
+                                          </Link>
+                                        </li>
+                                      );
+                                    })}
+                                  </ul>
 
-                                {/* Column 2 with Vertical Line! */}
-                                <ul className="px-1.5 border-l border-gray-100 dark:border-gray-800 space-y-0.5">
-                                  {destCol2.map((dest: any) => {
-                                    const isKailash = (dest.name || '').toLowerCase().includes('kailash');
-                                    const destSlug = toDestinationSlug(dest.name);
-                                    const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
-                                    return (
-                                      <li key={dest.name}>
-                                        <Link 
-                                          href={destUrl}
-                                          onClick={() => setActiveDropdown(null)}
-                                          className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800/80 dark:hover:text-amber-400 transition-colors truncate leading-snug font-normal"
-                                        >
-                                          {dest.name}
-                                        </Link>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                              </div>
+                                  {/* Column 2 with Vertical Line! */}
+                                  <ul className="px-1.5 border-l border-gray-100 dark:border-gray-800 space-y-0.5">
+                                    {destCol2.map((dest: any) => {
+                                      const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                                      const destSlug = toDestinationSlug(dest.name);
+                                      const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                                      return (
+                                        <li key={dest.name}>
+                                          <Link 
+                                            href={destUrl}
+                                            onClick={() => setActiveDropdown(null)}
+                                            className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800/80 dark:hover:text-amber-400 transition-colors truncate leading-snug font-normal"
+                                          >
+                                            {dest.name}
+                                          </Link>
+                                        </li>
+                                      );
+                                    })}
+                                  </ul>
+                                </div>
+                              )}
 
                               {/* Dropdown Footer */}
                               <div className="px-5 py-3.5 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between bg-slate-50/60 dark:bg-gray-800/40">

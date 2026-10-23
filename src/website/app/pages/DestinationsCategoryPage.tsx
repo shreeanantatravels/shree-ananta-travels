@@ -127,26 +127,24 @@ export default function DestinationsCategoryPage({ category }: Props) {
       }
     });
 
-    // 2. Include destinations from siteConfig configured for this category
+    // 2. Enhance destination images from siteConfig if available
     if (siteConfig?.destinations && siteConfig.destinations.length > 0) {
       siteConfig.destinations.forEach((d) => {
         if (d.category !== category || d.active === false) return;
         const key = d.name.trim().toLowerCase();
-        if (!destMap.has(key)) {
-          destMap.set(key, {
-            name: d.name.trim(),
-            count: 0,
-            image: d.image || getFallbackImage(d.name),
-            minPrice: 0,
-            category,
-          });
+        if (destMap.has(key)) {
+          const item = destMap.get(key)!;
+          if ((!item.image || item.image.includes("unsplash.com")) && d.image) {
+            item.image = d.image;
+          }
         }
       });
     }
 
-    return Array.from(destMap.values()).sort(
-      (a, b) => b.count - a.count || a.name.localeCompare(b.name),
-    );
+    // Only show destinations that have actual packages! (Eliminates empty 0-package placeholders)
+    return Array.from(destMap.values())
+      .filter((d) => d.count > 0)
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }, [packages, siteConfig, category]);
 
   /* ── Filter destinations based on search input ── */
@@ -344,81 +342,95 @@ export default function DestinationsCategoryPage({ category }: Props) {
               <Link
                 key={dest.name}
                 href={cardHref}
-                className={`group relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col ${filteredDestinations.length === 1 ? 'w-full max-w-[340px] sm:max-w-md mx-auto' : ''}`}
+                className={`group relative bg-white dark:bg-gray-800/90 rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full ${filteredDestinations.length === 1 ? 'w-full max-w-[340px] sm:max-w-md mx-auto' : ''}`}
               >
-                {/* Image Container */}
-                <div className="relative h-56 w-full overflow-hidden bg-gray-200 dark:bg-gray-800">
+                {/* Image Container (Clean, Unobstructed Photo) */}
+                <div className="relative w-full aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-gray-900 shrink-0">
                   <img
                     src={dest.image}
                     alt={dest.name}
                     loading="lazy"
                     decoding="async"
                     width={400}
-                    height={224}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    height={250}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent" />
 
-                  {/* Package Count Badge */}
-                  <div className="absolute top-3.5 right-3.5 bg-slate-900/80 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                    <PackageCheck className="w-3.5 h-3.5 text-amber-400" />
-                    <span>
-                      {dest.count} {dest.count === 1 ? "Package" : "Packages"}
-                    </span>
-                  </div>
-
-                  {/* Category Tag */}
-                  <div className="absolute top-3.5 left-3.5 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider shadow-sm">
+                  {/* Category Tag (Top-Left) */}
+                  <div
+                    className="absolute top-3 left-3 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md z-10 pointer-events-none"
+                    style={{ background: 'var(--theme-gradient)' }}
+                  >
                     {category}
                   </div>
 
-                  {/* Title on Overlay */}
-                  <div className="absolute bottom-3.5 left-4 right-4">
-                    <div className="flex items-center gap-1.5 text-amber-400 text-xs font-semibold mb-0.5">
-                      <MapPin className="w-3.5 h-3.5" /> Destination
+                  {/* Package Count Badge (Top-Right) */}
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm pointer-events-none border border-white/10">
+                    <PackageCheck className="w-3.5 h-3.5 text-amber-400" />
+                    <span>
+                      {dest.count} {dest.count === 1 ? "Tour" : "Tours"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Body (Cleanly Below Photo) */}
+                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    {/* Destination Label */}
+                    <div
+                      className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider mb-1"
+                      style={{ color: 'var(--theme-primary)' }}
+                    >
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span>Destination</span>
                     </div>
+
+                    {/* Destination Name / Title */}
                     <h3
-                      className="text-2xl font-black text-white tracking-tight drop-shadow-md"
+                      className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug line-clamp-1 group-hover:text-[var(--theme-primary)] transition-colors mb-1.5"
                       style={{ fontFamily: "'Playfair Display', serif" }}
                     >
                       {dest.name}
                     </h3>
-                  </div>
-                </div>
 
-                {/* Body */}
-                <div className="p-5 flex-1 flex flex-col justify-between gap-4">
-                  <div>
-                    {dest.minPrice > 0 ? (
-                      <div>
-                        <span className="text-[11px] text-gray-400 font-semibold block uppercase tracking-wider">
-                          Starting From
-                        </span>
-                        <div
-                          className="text-xl font-extrabold"
-                          style={{ color: theme.primary }}
-                        >
-                          {formatPrice(dest.minPrice)}
-                          <span className="text-xs text-gray-400 font-normal ml-1">
-                            / person
+                    {/* Subtitle / Description */}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mb-2">
+                      Handcrafted packages &amp; sightseeing
+                    </p>
+                  </div>
+
+                  {/* Footer: Price & CTA */}
+                  <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-2">
+                    <div>
+                      {dest.minPrice > 0 ? (
+                        <div>
+                          <span className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium block">
+                            Starting from
+                          </span>
+                          <div className="text-base sm:text-lg font-black text-gray-900 dark:text-white">
+                            {formatPrice(dest.minPrice)}
+                            <span className="text-[11px] text-gray-400 font-normal ml-1">
+                              /person
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-medium block">
+                            Pricing
+                          </span>
+                          <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">
+                            Custom Pricing
                           </span>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="text-xs text-gray-500 font-medium italic">
-                        {dest.count > 0
-                          ? "Custom Pricing Available"
-                          : "Featured Destination"}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
 
-                  <div className="pt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
-                    <span>View Packages</span>
                     <div
-                      className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 group-hover:scale-110 text-white"
-                      style={{ background: theme.primary }}
+                      className="inline-flex items-center gap-1 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all shadow-sm group-hover:shadow group-hover:scale-105 active:scale-95 shrink-0"
+                      style={{ background: 'var(--theme-gradient)' }}
                     >
+                      <span>Explore</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </div>
