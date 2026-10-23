@@ -196,6 +196,14 @@ export function Navbar() {
                 const dropDestinations = dropCategory === 'domestic' ? domesticDestinations : internationalDestinations;
                 const pageUrl = link.url || (dropCategory === 'domestic' ? '/domestic' : '/international');
 
+                const halfDest = Math.ceil(dropDestinations.length / 2);
+                const destCol1 = dropDestinations.slice(0, halfDest);
+                const destCol2 = dropDestinations.slice(halfDest);
+
+                const halfBlog = Math.ceil(blogCategories.length / 2);
+                const blogCol1 = blogCategories.slice(0, halfBlog);
+                const blogCol2 = blogCategories.slice(halfBlog);
+
                 return (
                   <div 
                     key={link.id} 
@@ -212,100 +220,133 @@ export function Navbar() {
                       <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
                     </Link>
                     
-                    {/* Mega Dropdown Menu */}
+                    {/* Mega Dropdown Menu (Clean TravelGrow Style) */}
                     {activeDropdown === link.id && (
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-1 w-[460px] z-50">
-                        <div className="bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-[430px] z-50">
+                        <div className="bg-white dark:bg-gray-900 border border-black/[0.08] dark:border-gray-800 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_12px_32px_-4px_rgba(0,0,0,0.12)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                           {isBlogs ? (
                             <>
                               {/* Blogs Dropdown Header */}
-                              <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
-                                <div className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
-                                  <BookOpen className="w-4 h-4 text-amber-500" />
+                              <div className="px-5 pt-5 pb-3.5 border-b border-slate-100 dark:border-gray-800">
+                                <p className="text-[15px] font-semibold text-slate-900 dark:text-white tracking-tight leading-snug">
                                   Blog Categories &amp; Yatra Guides
-                                </div>
-                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-0.5">
+                                </p>
+                                <p className="text-[10.5px] font-normal text-gray-500 dark:text-gray-400 uppercase tracking-[0.08em] mt-0.5">
                                   Travel Literature &amp; Stories
-                                </span>
+                                </p>
                               </div>
 
-                              {/* Blog Categories Grid (2 Columns) */}
-                              <div className="p-5 max-h-[360px] overflow-y-auto custom-scrollbar">
-                                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                                  {blogCategories.map((cat) => (
-                                    <Link 
-                                      key={cat.slug} 
-                                      href={`/blogs/${cat.slug}`}
-                                      onClick={() => setActiveDropdown(null)}
-                                      className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
-                                    >
-                                      <span className="truncate">{cat.name}</span>
-                                      <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
-                                    </Link>
+                              {/* Blog Categories Grid (2 Columns with Vertical Divider Line) */}
+                              <div className="grid grid-cols-2 px-3 py-3 max-h-[360px] overflow-y-auto custom-scrollbar">
+                                <ul className="px-1.5 space-y-0.5">
+                                  {blogCol1.map((cat) => (
+                                    <li key={cat.slug}>
+                                      <Link 
+                                        href={`/blogs/${cat.slug}`}
+                                        onClick={() => setActiveDropdown(null)}
+                                        className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800 transition-colors truncate leading-snug font-normal"
+                                      >
+                                        {cat.name}
+                                      </Link>
+                                    </li>
                                   ))}
-                                </div>
+                                </ul>
+
+                                <ul className="px-1.5 border-l border-gray-100 dark:border-gray-800 space-y-0.5">
+                                  {blogCol2.map((cat) => (
+                                    <li key={cat.slug}>
+                                      <Link 
+                                        href={`/blogs/${cat.slug}`}
+                                        onClick={() => setActiveDropdown(null)}
+                                        className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800 transition-colors truncate leading-snug font-normal"
+                                      >
+                                        {cat.name}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
                               </div>
 
                               {/* Blogs Dropdown Footer */}
-                              <div className="bg-gray-50/80 dark:bg-gray-800/60 px-6 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold">
-                                <span className="text-gray-500 dark:text-gray-400">
+                              <div className="px-5 py-3.5 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between bg-slate-50/60 dark:bg-gray-800/40">
+                                <span className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
                                   Explore all travel blogs &amp; articles
                                 </span>
                                 <Link
                                   href="/blogs"
                                   onClick={() => setActiveDropdown(null)}
-                                  className="text-[var(--theme-primary)] dark:text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                                  className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-900 dark:text-amber-400 hover:text-[var(--theme-primary)] transition-colors group"
                                 >
-                                  View All Blogs <ArrowRight className="w-3.5 h-3.5" />
+                                  View All <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                                 </Link>
                               </div>
                             </>
                           ) : (
                             <>
                               {/* Dropdown Header */}
-                              <div className="px-6 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
-                                <div className="text-base font-extrabold text-[var(--theme-primary)] dark:text-amber-400 tracking-tight flex items-center gap-2">
-                                  <MapPin className="w-4 h-4" />
+                              <div className="px-5 pt-5 pb-3.5 border-b border-slate-100 dark:border-gray-800">
+                                <p className="text-[15px] font-semibold text-slate-900 dark:text-white tracking-tight leading-snug">
                                   {dropCategory === 'domestic' ? 'Domestic Destinations' : 'International Destinations'}
-                                </div>
-                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-0.5">
+                                </p>
+                                <p className="text-[10.5px] font-normal text-gray-500 dark:text-gray-400 uppercase tracking-[0.08em] mt-0.5">
                                   Tour Packages
-                                </span>
+                                </p>
                               </div>
 
-                              {/* Dropdown Destinations Grid (2 Columns) */}
-                              <div className="p-5 max-h-[360px] overflow-y-auto custom-scrollbar">
-                                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                                  {dropDestinations.map((dest: any) => {
+                              {/* Dropdown Destinations Grid (2 Columns with Vertical Divider Line) */}
+                              <div className="grid grid-cols-2 px-3 py-3 max-h-[380px] overflow-y-auto custom-scrollbar">
+                                {/* Column 1 */}
+                                <ul className="px-1.5 space-y-0.5">
+                                  {destCol1.map((dest: any) => {
                                     const isKailash = (dest.name || '').toLowerCase().includes('kailash');
                                     const destSlug = toDestinationSlug(dest.name);
                                     const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
                                     return (
-                                      <Link 
-                                        key={dest.name} 
-                                        href={destUrl}
-                                        onClick={() => setActiveDropdown(null)}
-                                        className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] dark:hover:text-amber-400 hover:translate-x-1 transition-all py-1 px-1 rounded-md flex items-center justify-between group/item"
-                                      >
-                                        <span className="truncate">{dest.name}</span>
-                                        <span className="opacity-0 group-hover/item:opacity-100 text-[10px] text-[var(--theme-primary)] transition-opacity">→</span>
-                                      </Link>
+                                      <li key={dest.name}>
+                                        <Link 
+                                          href={destUrl}
+                                          onClick={() => setActiveDropdown(null)}
+                                          className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800/80 dark:hover:text-amber-400 transition-colors truncate leading-snug font-normal"
+                                        >
+                                          {dest.name}
+                                        </Link>
+                                      </li>
                                     );
                                   })}
-                                </div>
+                                </ul>
+
+                                {/* Column 2 with Vertical Line! */}
+                                <ul className="px-1.5 border-l border-gray-100 dark:border-gray-800 space-y-0.5">
+                                  {destCol2.map((dest: any) => {
+                                    const isKailash = (dest.name || '').toLowerCase().includes('kailash');
+                                    const destSlug = toDestinationSlug(dest.name);
+                                    const destUrl = isKailash ? '/kailash-mansarovar' : `/${dropCategory}/${destSlug}`;
+                                    return (
+                                      <li key={dest.name}>
+                                        <Link 
+                                          href={destUrl}
+                                          onClick={() => setActiveDropdown(null)}
+                                          className="block px-3 py-[7px] text-[13.5px] text-slate-800 dark:text-gray-200 rounded-lg cursor-pointer hover:bg-amber-50 hover:text-[var(--theme-primary)] dark:hover:bg-gray-800/80 dark:hover:text-amber-400 transition-colors truncate leading-snug font-normal"
+                                        >
+                                          {dest.name}
+                                        </Link>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
                               </div>
 
                               {/* Dropdown Footer */}
-                              <div className="bg-gray-50/80 dark:bg-gray-800/60 px-6 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-semibold">
-                                <span className="text-gray-500 dark:text-gray-400">
-                                  Explore all {dropCategory === 'domestic' ? 'Domestic' : 'International'} Destinations
+                              <div className="px-5 py-3.5 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between bg-slate-50/60 dark:bg-gray-800/40">
+                                <span className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+                                  Explore all {dropCategory === 'domestic' ? 'Indian' : 'Global'} Destinations
                                 </span>
                                 <Link
                                   href={pageUrl}
                                   onClick={() => setActiveDropdown(null)}
-                                  className="text-[var(--theme-primary)] dark:text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                                  className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-900 dark:text-amber-400 hover:text-[var(--theme-primary)] transition-colors group"
                                 >
-                                  View All <ArrowRight className="w-3.5 h-3.5" />
+                                  View All <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                                 </Link>
                               </div>
                             </>
