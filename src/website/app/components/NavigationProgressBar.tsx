@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function NavigationProgressBar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isNavigating, setIsNavigating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [opacity, setOpacity] = useState(1);
@@ -26,7 +25,7 @@ export default function NavigationProgressBar() {
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Intercept clicks on internal links to give 0ms instant feedback
   useEffect(() => {
