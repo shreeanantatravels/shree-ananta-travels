@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
+import { cache } from 'react';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/db/connect';
 import Package from '@/lib/db/models/Package';
@@ -14,7 +15,7 @@ import { getDisplayPhone, DEFAULT_CONTACT_PHONE } from '@/lib/utils/contactConfi
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shreeanantatravels.com';
 
-async function getPackageBySlugOrId(slugParam: string) {
+const getPackageBySlugOrId = cache(async (slugParam: string) => {
   await connectDB();
   const query: any = {
     $or: [
@@ -24,7 +25,19 @@ async function getPackageBySlugOrId(slugParam: string) {
     ],
   };
   return await Package.findOne(query).lean();
-}
+});
+
+const getContactPhoneCached = cache(async () => {
+  try {
+    const [cfg, admin] = await Promise.all([
+      SiteConfig.findOne({ _singleton: true }).select('contactPhone').lean(),
+      AdminUser.findOne().select('whatsapp').lean(),
+    ]);
+    return admin?.whatsapp?.trim() || cfg?.contactPhone?.trim() || DEFAULT_CONTACT_PHONE;
+  } catch {
+    return DEFAULT_CONTACT_PHONE;
+  }
+});
 
 export async function generateMetadata({
   params,
@@ -120,14 +133,7 @@ export default async function PackageSlugDetailPage({
       ? pkg.originalPrice
       : undefined;
 
-  let phone = DEFAULT_CONTACT_PHONE;
-  try {
-    const [cfg, admin] = await Promise.all([
-      SiteConfig.findOne({ _singleton: true }).select('contactPhone').lean(),
-      AdminUser.findOne().select('whatsapp').lean(),
-    ]);
-    phone = admin?.whatsapp?.trim() || cfg?.contactPhone?.trim() || DEFAULT_CONTACT_PHONE;
-  } catch {}
+  const phone = await getContactPhoneCached();
 
   const jsonLd = {
     '@context': 'https://schema.org',

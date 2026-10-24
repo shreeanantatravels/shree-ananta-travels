@@ -37,6 +37,7 @@ function DealCard({ deal, className = '' }: DealCardProps) {
       <div className="relative w-full aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-gray-900 shrink-0">
         <Link
           href={packageHref}
+          prefetch={true}
           aria-label={`View ${deal.headline} tour package`}
           className="block w-full h-full relative overflow-hidden"
         >
@@ -82,7 +83,7 @@ function DealCard({ deal, className = '' }: DealCardProps) {
 
           {/* Title */}
           <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[var(--theme-primary)] transition-colors mb-2">
-            <Link href={packageHref} className="hover:underline">
+            <Link href={packageHref} prefetch={true} className="hover:underline">
               {deal.headline}
             </Link>
           </h3>
@@ -124,6 +125,7 @@ function DealCard({ deal, className = '' }: DealCardProps) {
 
           <Link
             href={packageHref}
+            prefetch={true}
             aria-label={`View itinerary for ${deal.headline}`}
             className="inline-flex items-center gap-1 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all shadow-sm hover:shadow hover:scale-105 active:scale-95 shrink-0"
             style={{ background: 'var(--theme-gradient)' }}

@@ -113,9 +113,14 @@ export function formatPackageData(pkg: any) {
 export default function PackageDetail({ initialPackage }: { initialPackage?: any } = {}) {
   const params = useParams<{ id?: string; slug?: string }>();
   const identifier = params?.slug || params?.id;
-  const { siteConfig, agent } = useAgent();
+  const { siteConfig, agent, packages: allPackages } = useAgent();
 
-  const formattedInitial = initialPackage ? formatPackageData(initialPackage) : null;
+  const formattedInitial = initialPackage
+    ? formatPackageData(initialPackage)
+    : identifier && allPackages?.length
+    ? formatPackageData(allPackages.find((p: any) => p.slug === identifier || p._id === identifier))
+    : null;
+
   const [packageData, setPackageData] = useState<any>(formattedInitial);
   const [isLoading, setIsLoading] = useState(!formattedInitial);
   const [activeImage, setActiveImage] = useState<string>(formattedInitial?.images?.[0] || "");
@@ -126,15 +131,48 @@ export default function PackageDetail({ initialPackage }: { initialPackage?: any
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
-  const [relatedPackages, setRelatedPackages] = useState<any[]>([]);
+  const [relatedPackages, setRelatedPackages] = useState<any[]>(() => {
+    if (allPackages?.length && identifier) {
+      return allPackages.filter((p: any) => p.slug !== identifier && p._id !== identifier).slice(0, 3);
+    }
+    return [];
+  });
   const [selectedRouteDay, setSelectedRouteDay] = useState<number | null>(null);
   const [showInclusions, setShowInclusions] = useState(false);
   const [showExclusions, setShowExclusions] = useState(false);
 
-  // Fetch package details
+  // Keep packageData in sync when initialPackage or identifier changes across navigations
   useEffect(() => {
-    // If already preloaded with matching slug/id, skip re-fetching
+    if (initialPackage) {
+      const formatted = formatPackageData(initialPackage);
+      setPackageData(formatted);
+      setIsLoading(false);
+      setActiveImage(formatted?.images?.[0] || "");
+      return;
+    }
+
+    if (identifier && allPackages?.length) {
+      const match = allPackages.find((p: any) => p.slug === identifier || p._id === identifier);
+      if (match) {
+        const formatted = formatPackageData(match);
+        setPackageData(formatted);
+        setIsLoading(false);
+        setActiveImage(formatted?.images?.[0] || "");
+      }
+    }
+  }, [initialPackage, identifier, allPackages]);
+
+  // Client-side fallback fetch only if data is not available from SSR or context cache
+  useEffect(() => {
+    if (initialPackage) {
+      setIsLoading(false);
+      return;
+    }
     if (packageData && (packageData.slug === identifier || packageData.id === identifier)) {
+      setIsLoading(false);
+      return;
+    }
+    if (identifier && allPackages?.some((p: any) => p.slug === identifier || p._id === identifier)) {
       setIsLoading(false);
       return;
     }
@@ -158,22 +196,29 @@ export default function PackageDetail({ initialPackage }: { initialPackage?: any
       .finally(() => {
         setIsLoading(false);
       });
-  }, [identifier]);
+  }, [identifier, initialPackage, packageData, allPackages]);
 
-  // Fetch related packages
+  // Sync related packages
   useEffect(() => {
-    fetch("/api/packages?isActive=true")
-      .then((res) => res.json())
-      .then((resData) => {
-        if (resData.success && Array.isArray(resData.data)) {
-          const filtered = resData.data
-            .filter((p: any) => p.slug !== identifier && p._id !== identifier)
-            .slice(0, 3);
-          setRelatedPackages(filtered);
-        }
-      })
-      .catch(() => {});
-  }, [identifier]);
+    if (allPackages?.length && identifier) {
+      const filtered = allPackages
+        .filter((p: any) => p.slug !== identifier && p._id !== identifier)
+        .slice(0, 3);
+      setRelatedPackages(filtered);
+    } else if (identifier) {
+      fetch("/api/packages?isActive=true")
+        .then((res) => res.json())
+        .then((resData) => {
+          if (resData.success && Array.isArray(resData.data)) {
+            const filtered = resData.data
+              .filter((p: any) => p.slug !== identifier && p._id !== identifier)
+              .slice(0, 3);
+            setRelatedPackages(filtered);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [identifier, allPackages]);
 
   // Handle scroll for sticky bar
   useEffect(() => {
@@ -257,15 +302,27 @@ export default function PackageDetail({ initialPackage }: { initialPackage?: any
       <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col">
         <Topbar />
         <Navbar />
-        <div className="flex-1 flex items-center justify-center flex-col gap-4 py-20">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full border-4 border-[var(--theme-primary)]/20 border-t-[var(--theme-primary)] animate-spin" />
-            <Sparkles className="w-6 h-6 text-[var(--theme-primary)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-8">
+          <div className="h-4 bg-slate-200 dark:bg-gray-800 rounded w-1/4" />
+          <div className="space-y-3">
+            <div className="h-6 bg-slate-200 dark:bg-gray-800 rounded w-28" />
+            <div className="h-10 bg-slate-200 dark:bg-gray-800 rounded w-3/4 max-w-2xl" />
+            <div className="h-5 bg-slate-200 dark:bg-gray-800 rounded w-1/2 max-w-md" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-semibold text-lg animate-pulse">
-            Loading Package Details...
-          </p>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-6">
+              <div className="aspect-[16/9] w-full bg-slate-200 dark:bg-gray-800 rounded-3xl" />
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="aspect-[16/9] bg-slate-200 dark:bg-gray-800 rounded-xl" />
+                ))}
+              </div>
+            </div>
+            <div className="lg:col-span-4 space-y-6">
+              <div className="h-96 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-3xl p-6 space-y-5" />
+            </div>
+          </div>
+        </main>
         <Footer />
       </div>
     );
