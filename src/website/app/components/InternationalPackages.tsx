@@ -15,6 +15,7 @@ export function InternationalPackages() {
     .filter(p => p.category === 'international')
     .map(p => ({
       id: p._id,
+      slug: p.slug,
       title: p.title,
       location: p.location,
       price: p.discountedPrice ?? p.originalPrice,

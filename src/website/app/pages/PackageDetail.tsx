@@ -40,14 +40,86 @@ import { useState, useEffect } from "react";
 import { useAgent } from "../context/AgentContext";
 import { getDisplayPhone, getTelHref, getWhatsAppUrl } from "../utils/contactConfig";
 
-export default function PackageDetail() {
+export function formatPackageData(pkg: any) {
+  if (!pkg) return null;
+  const images = [pkg.imageUrl1, pkg.imageUrl2, pkg.imageUrl3, pkg.imageUrl4].filter(Boolean);
+
+  return {
+    id: pkg._id?.toString() || pkg.id,
+    slug: pkg.slug,
+    title: pkg.title || "Tour Package",
+    location: pkg.location || "India",
+    category: pkg.category || "kailash",
+    packageType: pkg.packageType || "pilgrimage",
+    price:
+      pkg.discountedPrice && pkg.discountedPrice > 0
+        ? pkg.discountedPrice
+        : pkg.originalPrice && pkg.originalPrice > 0
+          ? pkg.originalPrice
+          : 0,
+    originalPrice:
+      pkg.originalPrice && pkg.discountedPrice && pkg.originalPrice > pkg.discountedPrice
+        ? pkg.originalPrice
+        : null,
+    duration: pkg.duration || "Custom Duration",
+    badges: Array.isArray(pkg.badges) ? pkg.badges : [],
+    images: images,
+    description:
+      pkg.description ||
+      "Handcrafted travel package curated with personalized accommodations, transfers, and guided sightseeing.",
+    enableRouteMap:
+      pkg.enableRouteMap ??
+      (pkg.category === "kailash" || (pkg.itinerary && pkg.itinerary.some((i: any) => !!i.city))),
+    enableAltitude:
+      pkg.enableAltitude ??
+      (pkg.category === "kailash" || (pkg.itinerary && pkg.itinerary.some((i: any) => !!i.altitude))),
+    itinerary:
+      pkg.itinerary && pkg.itinerary.length > 0
+        ? pkg.itinerary.map((i: any, index: number) => ({
+            day: i.dayNumber ?? index + 1,
+            title: i.title || `Day ${i.dayNumber ?? index + 1}`,
+            description: i.description || "",
+            city: i.city || "",
+            route: i.route || "",
+            altitude: i.altitude || "",
+            stay: i.stay || "",
+            meals: i.meals || "",
+            transport: i.transport || "",
+          }))
+        : [],
+    inclusions: Array.isArray(pkg.inclusions) ? pkg.inclusions : [],
+    exclusions: Array.isArray(pkg.exclusions) ? pkg.exclusions : [],
+    termsAndConditions: Array.isArray(pkg.termsAndConditions)
+      ? pkg.termsAndConditions
+      : typeof pkg.termsAndConditions === "string" && pkg.termsAndConditions.trim()
+        ? [pkg.termsAndConditions]
+        : [],
+    route: pkg.route || "",
+    departure: pkg.departure || "",
+    tourStyle: pkg.tourStyle || "",
+    routeBannerTitle: pkg.routeBannerTitle || "",
+    routeBannerSubtitle: pkg.routeBannerSubtitle || "",
+    trustFeatures: Array.isArray(pkg.trustFeatures) ? pkg.trustFeatures : [],
+    conciergeTitle: pkg.conciergeTitle || "",
+    conciergeSubtitle: pkg.conciergeSubtitle || "",
+    registrationSteps: Array.isArray(pkg.registrationSteps) ? pkg.registrationSteps : [],
+    registrationTitle: pkg.registrationTitle || "",
+    travelEssentials: Array.isArray(pkg.travelEssentials) ? pkg.travelEssentials : [],
+    travelEssentialsTitle: pkg.travelEssentialsTitle || "",
+    travelEssentialsSubtitle: pkg.travelEssentialsSubtitle || "",
+  };
+}
+
+export default function PackageDetail({ initialPackage }: { initialPackage?: any } = {}) {
   const params = useParams<{ id?: string; slug?: string }>();
   const identifier = params?.slug || params?.id;
   const { siteConfig, agent } = useAgent();
 
-  const [packageData, setPackageData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeImage, setActiveImage] = useState<string>("");
+  const formattedInitial = initialPackage ? formatPackageData(initialPackage) : null;
+  const [packageData, setPackageData] = useState<any>(formattedInitial);
+  const [isLoading, setIsLoading] = useState(!formattedInitial);
+  const [activeImage, setActiveImage] = useState<string>(formattedInitial?.images?.[0] || "");
+  const [isGalleryHovered, setIsGalleryHovered] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({ 1: true });
   const [showStickyBar, setShowStickyBar] = useState(false);
@@ -61,6 +133,11 @@ export default function PackageDetail() {
 
   // Fetch package details
   useEffect(() => {
+    // If already preloaded with matching slug/id, skip re-fetching
+    if (packageData && (packageData.slug === identifier || packageData.id === identifier)) {
+      setIsLoading(false);
+      return;
+    }
     if (!identifier) return;
 
     setIsLoading(true);
@@ -68,69 +145,9 @@ export default function PackageDetail() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.data) {
-          const pkg = data.data;
-          const images = [pkg.imageUrl1, pkg.imageUrl2, pkg.imageUrl3, pkg.imageUrl4].filter(Boolean);
-
-          setPackageData({
-            id: pkg._id,
-            slug: pkg.slug,
-            title: pkg.title || "Tour Package",
-            location: pkg.location || "India",
-            category: pkg.category || "kailash",
-            packageType: pkg.packageType || "pilgrimage",
-            price:
-              pkg.discountedPrice && pkg.discountedPrice > 0
-                ? pkg.discountedPrice
-                : pkg.originalPrice && pkg.originalPrice > 0
-                  ? pkg.originalPrice
-                  : 0,
-            originalPrice:
-              pkg.originalPrice && pkg.discountedPrice && pkg.originalPrice > pkg.discountedPrice
-                ? pkg.originalPrice
-                : null,
-            duration: pkg.duration || "Custom Duration",
-            badges: Array.isArray(pkg.badges) ? pkg.badges : [],
-            images: images,
-            description:
-              pkg.description ||
-              "Handcrafted travel package curated with personalized accommodations, transfers, and guided sightseeing.",
-            enableRouteMap:
-              pkg.enableRouteMap ??
-              (pkg.category === "kailash" || (pkg.itinerary && pkg.itinerary.some((i: any) => !!i.city))),
-            enableAltitude:
-              pkg.enableAltitude ??
-              (pkg.category === "kailash" || (pkg.itinerary && pkg.itinerary.some((i: any) => !!i.altitude))),
-            itinerary:
-              pkg.itinerary && pkg.itinerary.length > 0
-                ? pkg.itinerary.map((i: any, index: number) => ({
-                    day: i.dayNumber ?? index + 1,
-                    title: i.title || `Day ${i.dayNumber ?? index + 1}`,
-                    description: i.description || "",
-                    city: i.city || "",
-                    route: i.route || "",
-                    altitude: i.altitude || "",
-                    stay: i.stay || "",
-                    meals: i.meals || "",
-                    transport: i.transport || "",
-                  }))
-                : [],
-            inclusions: Array.isArray(pkg.inclusions) ? pkg.inclusions : [],
-            exclusions: Array.isArray(pkg.exclusions) ? pkg.exclusions : [],
-            termsAndConditions: Array.isArray(pkg.termsAndConditions)
-              ? pkg.termsAndConditions
-              : typeof pkg.termsAndConditions === "string" && pkg.termsAndConditions.trim()
-                ? [pkg.termsAndConditions]
-                : [],
-            route: pkg.route || "",
-            departure: pkg.departure || "",
-            tourStyle: pkg.tourStyle || "",
-            routeBannerTitle: pkg.routeBannerTitle || "",
-            routeBannerSubtitle: pkg.routeBannerSubtitle || "",
-            trustFeatures: Array.isArray(pkg.trustFeatures) ? pkg.trustFeatures : [],
-            conciergeTitle: pkg.conciergeTitle || "",
-            conciergeSubtitle: pkg.conciergeSubtitle || "",
-          });
-          setActiveImage(images[0] || "");
+          const formatted = formatPackageData(data.data);
+          setPackageData(formatted);
+          setActiveImage(formatted?.images?.[0] || "");
         } else {
           setPackageData(null);
         }
@@ -284,6 +301,48 @@ export default function PackageDetail() {
   const isPriceOnRequest = !packageData.price || packageData.price <= 0;
   const currentActiveImage = activeImage || (packageData.images && packageData.images[0]) || "";
   const currentActiveIndex = packageData.images ? Math.max(0, packageData.images.indexOf(currentActiveImage)) : 0;
+
+  // Auto-advance gallery image every 3 seconds (pauses on hover or when lightbox is open)
+  useEffect(() => {
+    if (
+      !packageData?.images ||
+      packageData.images.length <= 1 ||
+      isGalleryHovered ||
+      lightboxIndex !== null
+    ) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setActiveImage((prev) => {
+        const images = packageData.images;
+        if (!images || images.length <= 1) return prev;
+        const currentIdx = images.indexOf(prev || images[0]);
+        const nextIdx = (currentIdx + 1) % images.length;
+        return images[nextIdx];
+      });
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [packageData?.images, isGalleryHovered, lightboxIndex]);
+
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!packageData?.images || packageData.images.length <= 1) return;
+    const images = packageData.images;
+    const currentIdx = Math.max(0, images.indexOf(currentActiveImage));
+    const prevIdx = (currentIdx - 1 + images.length) % images.length;
+    setActiveImage(images[prevIdx]);
+  };
+
+  const handleNextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!packageData?.images || packageData.images.length <= 1) return;
+    const images = packageData.images;
+    const currentIdx = Math.max(0, images.indexOf(currentActiveImage));
+    const nextIdx = (currentIdx + 1) % images.length;
+    setActiveImage(images[nextIdx]);
+  };
 
   // Breadcrumb Category name & link
   const categoryLabel =
@@ -449,12 +508,15 @@ export default function PackageDetail() {
               <div
                 className="w-full aspect-[16/9] relative rounded-2xl md:rounded-3xl overflow-hidden shadow-xl bg-slate-950 group cursor-pointer border border-slate-200 dark:border-gray-800"
                 onClick={() => setLightboxIndex(currentActiveIndex)}
+                onMouseEnter={() => setIsGalleryHovered(true)}
+                onMouseLeave={() => setIsGalleryHovered(false)}
               >
                 {currentActiveImage ? (
                   <img
+                    key={currentActiveImage}
                     src={currentActiveImage}
                     alt={packageData.title}
-                    className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.01]"
+                    className="w-full h-full object-cover object-center transition-all duration-500 group-hover:scale-[1.01]"
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-white p-6">
@@ -462,6 +524,32 @@ export default function PackageDetail() {
                     <p className="text-xl font-bold">{packageData.title}</p>
                     <p className="text-xs text-slate-400 mt-1">{packageData.location}</p>
                   </div>
+                )}
+
+                {/* Left (Prev) Arrow Button */}
+                {packageData.images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={handlePrevImage}
+                    className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/75 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+                    title="Previous Photo"
+                    aria-label="Previous Photo"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-white" />
+                  </button>
+                )}
+
+                {/* Right (Next) Arrow Button */}
+                {packageData.images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={handleNextImage}
+                    className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/75 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+                    title="Next Photo"
+                    aria-label="Next Photo"
+                  >
+                    <ChevronRight className="w-5 h-5 text-white" />
+                  </button>
                 )}
 
                 {/* Bottom-left Fullscreen Action */}
@@ -485,7 +573,11 @@ export default function PackageDetail() {
               </div>
 
               {/* Mobile Thumbnails Row (Visible only on < md) */}
-              <div className="grid md:hidden grid-cols-4 gap-2 mt-2.5">
+              <div
+                className="grid md:hidden grid-cols-4 gap-2 mt-2.5"
+                onMouseEnter={() => setIsGalleryHovered(true)}
+                onMouseLeave={() => setIsGalleryHovered(false)}
+              >
                 {packageData.images.slice(0, 4).map((imgUrl: string, idx: number) => {
                   const isSelected = currentActiveImage === imgUrl;
                   const hasMore = idx === 3 && packageData.images.length > 4;
@@ -527,7 +619,11 @@ export default function PackageDetail() {
             </div>
 
             {/* Right Column: 4 Widescreen 16:9 Thumbnails + Yatra Inclusions/Booking Card */}
-            <div className="hidden md:flex md:w-[38%] lg:w-[35%] flex-col gap-3 justify-between min-w-0">
+            <div
+              className="hidden md:flex md:w-[38%] lg:w-[35%] flex-col gap-3 justify-between min-w-0"
+              onMouseEnter={() => setIsGalleryHovered(true)}
+              onMouseLeave={() => setIsGalleryHovered(false)}
+            >
               {/* 2x2 Grid: 4 Thumbnails in 16:9 widescreen */}
               <div className="grid grid-cols-2 gap-2.5 flex-shrink-0">
                 {packageData.images.slice(0, 4).map((imgUrl: string, idx: number) => {

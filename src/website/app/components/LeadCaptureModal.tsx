@@ -22,6 +22,10 @@ const PASSENGER_OPTIONS = [
   { label: '6+ Group', value: '6+' },
 ];
 
+// Module-level flag: persists across client-side page transitions (SPA routing),
+// but resets automatically whenever the user does a full page refresh (F5 / reload).
+let hasShownInThisPageLoad = false;
+
 export function LeadCaptureModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -35,7 +39,14 @@ export function LeadCaptureModal() {
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsOpen(true), 3000);
+    // Only show once per full page load; do not trigger again when navigating back & forth
+    if (hasShownInThisPageLoad) return;
+
+    const timer = setTimeout(() => {
+      hasShownInThisPageLoad = true;
+      setIsOpen(true);
+    }, 3000);
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -44,6 +55,7 @@ export function LeadCaptureModal() {
   }, [isOpen]);
 
   const handleClose = () => {
+    hasShownInThisPageLoad = true;
     setIsOpen(false);
   };
 

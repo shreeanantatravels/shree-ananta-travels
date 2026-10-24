@@ -1,6 +1,7 @@
 import { AgentProvider } from "@website/app/context/AgentContext";
 import { ThemeProvider } from "@website/app/context/ThemeContext";
 import AgentThemeSync from "@website/app/components/AgentThemeSync";
+import ScrollRestorationManager from "@website/app/components/ScrollRestorationManager";
 import connectDB from "@/lib/db/connect";
 import Package from "@/lib/db/models/Package";
 import SiteConfig from "@/lib/db/models/SiteConfig";
@@ -200,6 +201,7 @@ export default async function WebsiteLayout({
     >
       <ThemeProvider>
         <AgentThemeSync />
+        <ScrollRestorationManager />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(getSiteGraphSchema(dynamicPhone)) }}

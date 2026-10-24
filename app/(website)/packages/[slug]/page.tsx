@@ -201,7 +201,7 @@ export default async function PackageSlugDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <PackageDetail />
+      <PackageDetail initialPackage={JSON.parse(JSON.stringify(pkg))} />
     </>
   );
 }
