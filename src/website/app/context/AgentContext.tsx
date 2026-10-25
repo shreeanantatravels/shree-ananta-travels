@@ -124,18 +124,16 @@ export function AgentProvider({
   initialSiteConfig = null,
   initialAgent = null,
 }: AgentProviderProps) {
+  const hasInitialData = initialPackages.length > 0 && !!initialSiteConfig;
   const [agent, setAgent] = useState<AgentProfile | null>(initialAgent);
   const [packages, setPackages] = useState<AgentPackage[]>(initialPackages);
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(initialSiteConfig);
-  const [isLoading, setIsLoading] = useState(!initialPackages.length);
+  // Only show loading spinner if we have NO initial SSR data at all
+  const [isLoading, setIsLoading] = useState(!hasInitialData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If not pre-hydrated, show loading state
-    if (!packages.length || !siteConfig) {
-      setIsLoading(true);
-    }
-
+    // Background-refresh data without blocking the UI when SSR already provided initial data
     Promise.all([
       fetch('/api/auth/me', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ success: false })),
       fetch('/api/packages?isActive=true', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ success: false })),
