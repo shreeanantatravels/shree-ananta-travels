@@ -76,33 +76,13 @@ export function DomesticPackages() {
               Explore the beauty of India with our specially curated packages
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/domestic"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors hover:opacity-80"
-              style={{ color: 'var(--theme-primary)' }}
-            >
-              View All Domestic Tours <ArrowUpRight size={15} />
-            </Link>
-            {displayPackages.length > 1 && (
-              <div className="flex sm:hidden items-center gap-1.5 ml-2">
-                <button
-                  onClick={() => scroll('left')}
-                  aria-label="Previous Domestic Package"
-                  className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 shadow-sm active:scale-95"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => scroll('right')}
-                  aria-label="Next Domestic Package"
-                  className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 shadow-sm active:scale-95"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
+          <Link
+            href="/domestic"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors hover:opacity-80"
+            style={{ color: 'var(--theme-primary)' }}
+          >
+            View All Domestic Tours <ArrowUpRight size={15} />
+          </Link>
         </div>
 
         <div
@@ -116,7 +96,7 @@ export function DomesticPackages() {
             <button
               onClick={() => scroll('left')}
               aria-label="Previous Package"
-              className="hidden sm:flex absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-[var(--theme-primary)] hover:text-white transition-all border border-gray-200 dark:border-gray-700 cursor-pointer"
+              className="flex absolute left-0 sm:-left-3 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-xl items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-[var(--theme-primary)] hover:text-white transition-all border border-gray-200 dark:border-gray-700 cursor-pointer active:scale-90"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -126,7 +106,7 @@ export function DomesticPackages() {
             <button
               onClick={() => scroll('right')}
               aria-label="Next Package"
-              className="hidden sm:flex absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-[var(--theme-primary)] hover:text-white transition-all border border-gray-200 dark:border-gray-700 cursor-pointer"
+              className="flex absolute right-0 sm:-right-3 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-xl items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-[var(--theme-primary)] hover:text-white transition-all border border-gray-200 dark:border-gray-700 cursor-pointer active:scale-90"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
