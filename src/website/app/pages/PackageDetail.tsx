@@ -935,7 +935,7 @@ export default function PackageDetail({ initialPackage }: { initialPackage?: any
       </section>
 
       {/* ━━━ Section E: Sticky Navigation Tabs ━━━ */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-y border-slate-200 dark:border-gray-800 shadow-xs">
+      <div className="sticky top-[68px] sm:top-[74px] z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-y border-slate-200 dark:border-gray-800 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4 overflow-x-auto no-scrollbar py-2.5">
             <div className="flex items-center gap-2 sm:gap-4 text-xs font-bold text-gray-600 dark:text-gray-300 whitespace-nowrap">
@@ -1500,7 +1500,7 @@ export default function PackageDetail({ initialPackage }: { initialPackage?: any
           </div>
 
           {/* Right Column (4 Cols): Sticky Booking Widget */}
-          <div className="lg:col-span-4 sticky top-24 space-y-6">
+          <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
             <div className="bg-white dark:bg-gray-900 rounded-3xl border border-slate-200/80 dark:border-gray-800 shadow-2xl p-6 space-y-6">
               {/* Pricing Box */}
               <div className="bg-slate-50 dark:bg-gray-800/60 p-5 rounded-2xl border border-slate-200/60 dark:border-gray-700/60">

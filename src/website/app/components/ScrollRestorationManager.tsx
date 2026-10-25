@@ -66,8 +66,11 @@ export default function ScrollRestorationManager() {
 
       const attemptScroll = () => {
         if (userInteractedRef.current) return;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        if (maxScroll <= 50) return;
+        const targetY = Math.min(savedScrollY, maxScroll);
         window.scrollTo({
-          top: savedScrollY,
+          top: targetY,
           behavior: "instant",
         });
       };
