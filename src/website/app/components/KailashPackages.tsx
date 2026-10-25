@@ -10,7 +10,7 @@ import { useAgent } from '../context/AgentContext';
 export function KailashPackages() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [isMobile, setIsMobile] = useState(false);
   const { packages: agentPackages, isLoading } = useAgent();
 
   const apiKailash = (agentPackages || [])
@@ -40,21 +40,15 @@ export function KailashPackages() {
 
   const displayPackages = apiKailash;
 
-  const isMobile = windowWidth < 640;
-  const visibleCount = isMobile ? 1 : windowWidth < 1024 ? 2 : 4;
+  const visibleCount = isMobile ? 1 : 4;
   const maxIndex = Math.max(0, displayPackages.length - visibleCount);
 
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  useEffect(() => {
-    if (currentIndex > maxIndex) {
-      setCurrentIndex(maxIndex);
-    }
-  }, [maxIndex, currentIndex]);
 
   const goNext = useCallback(() => {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
@@ -122,11 +116,11 @@ export function KailashPackages() {
             </button>
           )}
 
-          <div className="overflow-hidden mx-0 sm:mx-8">
+          <div className="overflow-hidden mx-8 sm:mx-10">
             <div
               className="flex transition-transform duration-500 ease-out"
               style={{
-                transform: `translateX(-${(currentIndex * 100) / visibleCount}%)`,
+                transform: `translateX(-${currentIndex * (isMobile ? 88 : 25)}%)`,
               }}
             >
               {displayPackages.map((pkg) => (
@@ -134,10 +128,10 @@ export function KailashPackages() {
                   key={pkg.id}
                   className="flex-shrink-0 px-2 sm:px-3"
                   style={{
-                    width: isMobile ? '100%' : `${100 / visibleCount}%`,
+                    width: isMobile ? '88%' : '25%',
                   }}
                 >
-                  <div className="w-full max-w-[340px] lg:max-w-none mx-auto h-full">
+                  <div className="w-full h-full">
                     <PackageCard {...pkg} />
                   </div>
                 </div>

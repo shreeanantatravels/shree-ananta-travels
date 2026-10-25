@@ -212,7 +212,7 @@ export function PackageCard({
 
   return (
     <div className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-      <div className="relative overflow-hidden w-full aspect-[4/5] bg-slate-900">
+      <div className="relative overflow-hidden w-full aspect-[16/10] sm:aspect-[4/5] bg-slate-900">
         <Link
           href={packageHref}
           prefetch={true}
@@ -265,7 +265,7 @@ export function PackageCard({
           </p>
           
           {/* Title */}
-          <div className="text-xl font-bold text-[#1e293b] dark:text-white leading-tight mb-2 line-clamp-2">
+          <div className="text-lg sm:text-xl font-bold text-[#1e293b] dark:text-white leading-tight mb-2 line-clamp-2">
             <Link href={packageHref} prefetch={true} className="hover:text-[var(--theme-primary)] transition-colors">
               {title}
             </Link>
