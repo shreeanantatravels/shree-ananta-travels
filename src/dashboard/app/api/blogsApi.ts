@@ -41,6 +41,10 @@ export interface BlogData {
   scheduledAt?: string;
   readTime: number;
   tags: string[];
+  faq?: {
+    question: string;
+    answer: string;
+  }[];
   seo?: {
     title?: string;
     description?: string;

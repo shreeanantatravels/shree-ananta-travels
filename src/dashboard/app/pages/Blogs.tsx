@@ -122,6 +122,7 @@ export function Blogs() {
     isFeatured: false,
     scheduledAt: '',
     tags: '' as string,
+    faq: [] as { question: string; answer: string }[],
     seoTitle: '',
     seoDescription: '',
     canonicalUrl: '',
@@ -210,6 +211,7 @@ export function Blogs() {
       isFeatured: false,
       scheduledAt: '',
       tags: '',
+      faq: [],
       seoTitle: '',
       seoDescription: '',
       canonicalUrl: '',
@@ -242,6 +244,9 @@ export function Blogs() {
       isFeatured: Boolean(blog.isFeatured),
       scheduledAt: blog.scheduledAt ? new Date(blog.scheduledAt).toISOString().slice(0, 16) : '',
       tags: Array.isArray(blog.tags) ? blog.tags.join(', ') : '',
+      faq: Array.isArray(blog.faq)
+        ? blog.faq.map((f) => ({ question: f.question || '', answer: f.answer || '' }))
+        : [],
       seoTitle: blog.seo?.title || `${blog.title} | Shree Ananta Travels`,
       seoDescription: blog.seo?.description || blog.excerpt || '',
       canonicalUrl: blog.seo?.canonicalUrl || '',
@@ -303,6 +308,29 @@ export function Blogs() {
       return;
     }
     handleAutoGenerateExcerpt();
+  };
+
+  // FAQ management handlers
+  const handleAddFaq = () => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: [...(prev.faq || []), { question: '', answer: '' }],
+    }));
+  };
+
+  const handleRemoveFaq = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: (prev.faq || []).filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleFaqChange = (index: number, field: 'question' | 'answer', value: string) => {
+    setFormData((prev) => {
+      const next = [...(prev.faq || [])];
+      next[index] = { ...next[index], [field]: value };
+      return { ...prev, faq: next };
+    });
   };
 
   // Image Upload handler with dimension & format validation
@@ -431,6 +459,12 @@ export function Blogs() {
       isFeatured: formData.isFeatured,
       scheduledAt: formData.scheduledAt ? new Date(formData.scheduledAt).toISOString() : undefined,
       tags: formData.tags ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      faq: (formData.faq || [])
+        .filter((f) => f.question.trim() || f.answer.trim())
+        .map((f) => ({
+          question: f.question.trim(),
+          answer: f.answer.trim(),
+        })),
       seo: {
         title: formData.seoTitle.trim() || `${formData.title.trim()} | Shree Ananta Travels`,
         description: formData.seoDescription.trim() || formData.excerpt.trim(),
@@ -1262,11 +1296,6 @@ export function Blogs() {
                                     loading="lazy"
                                     {...props}
                                   />
-                                  {alt && (
-                                    <p className="text-xs text-gray-400 italic text-center py-2 bg-gray-50">
-                                      {alt}
-                                    </p>
-                                  )}
                                 </div>
                               ),
                             }}
@@ -1281,6 +1310,113 @@ export function Blogs() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* ── FAQ Section: Question & Answer Builder ─────────────────── */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-200/70 shadow-sm space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                      Frequently Asked Questions (FAQs)
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                        {(formData.faq || []).length} {(formData.faq || []).length === 1 ? 'question' : 'questions'}
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500">
+                      Add structured Question & Answer pairs. These display in an interactive accordion on the blog page.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddFaq}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-amber-500/20"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add FAQ
+                </button>
+              </div>
+
+              {(!formData.faq || formData.faq.length === 0) ? (
+                <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl text-center bg-gray-50/50">
+                  <HelpCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-gray-700">No FAQs added yet</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5 mb-3">
+                    Click "Add FAQ" to provide questions & answers for travellers.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleAddFaq}
+                    className="px-3.5 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add First FAQ
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {formData.faq.map((item, index) => (
+                    <div
+                      key={index}
+                      className="p-4 bg-gray-50/80 rounded-xl border border-gray-200 space-y-3 relative group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-md">
+                          Question #{index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFaq(index)}
+                          className="text-gray-400 hover:text-red-600 p-1 rounded-md transition-colors cursor-pointer"
+                          title="Delete Question"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                          Question <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={item.question}
+                          onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
+                          placeholder="e.g. Is Kailash Mansarovar Yatra open for Indian citizens via Nepal in 2027?"
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-bold text-gray-700 block mb-1">
+                          Answer <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={item.answer}
+                          onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
+                          placeholder="Enter clear, informative answer..."
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={handleAddFaq}
+                    className="w-full py-2.5 border-2 border-dashed border-gray-200 hover:border-amber-400 rounded-xl text-xs font-bold text-gray-600 hover:text-amber-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white"
+                  >
+                    <Plus className="w-4 h-4 text-amber-600" />
+                    Add Another Question & Answer
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* ── SEO Section: Simplified with Live Google Preview ────────── */}

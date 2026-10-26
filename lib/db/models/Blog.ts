@@ -9,6 +9,11 @@ export interface IBlogSEO {
   noIndex?: boolean;
 }
 
+export interface IBlogFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface IBlogSocialSharing {
   ogTitle?: string;
   ogDescription?: string;
@@ -33,6 +38,7 @@ export interface IBlog extends Document {
   scheduledAt?: Date;
   readTime: number;
   tags: string[];
+  faq: IBlogFAQ[];
   seo: IBlogSEO;
   socialSharing: IBlogSocialSharing;
   redirectFromSlugs: string[];
@@ -126,6 +132,15 @@ const BlogSchema = new Schema<IBlog>(
     },
     tags: {
       type: [String],
+      default: [],
+    },
+    faq: {
+      type: [
+        {
+          question: { type: String, trim: true, default: '' },
+          answer: { type: String, trim: true, default: '' },
+        },
+      ],
       default: [],
     },
     seo: {

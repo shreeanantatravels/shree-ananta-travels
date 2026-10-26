@@ -16,6 +16,7 @@ import {
   MapPin,
   List,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -44,6 +45,10 @@ export interface BlogDetailArticle extends BlogItem {
   content: string;
   updatedAt?: string;
   tags?: string[];
+  faq?: {
+    question: string;
+    answer: string;
+  }[];
 }
 
 interface BlogDetailPageProps {
@@ -57,16 +62,66 @@ export default function BlogDetailPage({
 }: BlogDetailPageProps) {
   const [showPlanTourModal, setShowPlanTourModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showToc, setShowToc] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  // Parse headings from markdown or HTML content for the Table of Contents
+  // Directly use structured FAQs added in Admin Editor (with fallback for legacy markdown)
+  const { cleanContent, faqs } = useMemo(() => {
+    // 1. Prioritize native structured FAQs saved in DB
+    if (Array.isArray(article.faq) && article.faq.length > 0) {
+      const faqRegex = /##\s+Frequently asked questions([\s\S]*?)(?=\n##\s+|$)/i;
+      const clean = (article.content || '').replace(faqRegex, '').trim();
+      return {
+        cleanContent: clean,
+        faqs: article.faq.filter((f) => f.question && f.answer),
+      };
+    }
+
+    if (!article.content) return { cleanContent: '', faqs: [] };
+
+    // 2. Legacy fallback if an older post had FAQs embedded in markdown
+    const faqRegex = /##\s+Frequently asked questions([\s\S]*?)(?=\n##\s+|$)/i;
+    const match = article.content.match(faqRegex);
+    if (!match) {
+      return { cleanContent: article.content, faqs: [] };
+    }
+
+    const faqBody = match[1];
+    const faqItems: { question: string; answer: string }[] = [];
+    const lines = faqBody.split(/\r?\n/);
+    let currentQ: string | null = null;
+    let currentA: string[] = [];
+
+    for (const line of lines) {
+      const qMatch = line.match(/^###\s+(.+)$/);
+      if (qMatch) {
+        if (currentQ) {
+          faqItems.push({ question: currentQ, answer: currentA.join('\n').trim() });
+        }
+        currentQ = qMatch[1].replace(/^\*+|\*+$/g, '').trim();
+        currentA = [];
+      } else if (currentQ) {
+        currentA.push(line);
+      }
+    }
+    if (currentQ) {
+      faqItems.push({ question: currentQ, answer: currentA.join('\n').trim() });
+    }
+
+    const clean = article.content.replace(faqRegex, '').trim();
+    return { cleanContent: clean, faqs: faqItems };
+  }, [article.faq, article.content]);
+
+  // Parse headings from cleanContent or HTML content for the Table of Contents
   const tableOfContents = useMemo(() => {
-    if (!article.content) return [];
+    const contentToParse = cleanContent || article.content;
+    if (!contentToParse) return [];
     const items: { id: string; text: string; level: number }[] = [];
 
     // Check if content has HTML headings: <h2> or <h3>
     const htmlHeadingRegex = /<h([23])[^>]*>([\s\S]*?)<\/h\1>/gi;
     let htmlMatch;
-    while ((htmlMatch = htmlHeadingRegex.exec(article.content)) !== null) {
+    while ((htmlMatch = htmlHeadingRegex.exec(contentToParse)) !== null) {
       const level = parseInt(htmlMatch[1], 10);
       const rawText = htmlMatch[2].replace(/<[^>]+>/g, '').trim();
       const id = rawText
@@ -80,7 +135,7 @@ export default function BlogDetailPage({
 
     if (items.length === 0) {
       // Parse markdown headings ## or ###
-      const lines = article.content.split('\n');
+      const lines = contentToParse.split(/\r?\n/);
       lines.forEach((line) => {
         const match = line.match(/^(#{2,3})\s+(.+)$/);
         if (match) {
@@ -97,7 +152,7 @@ export default function BlogDetailPage({
     }
 
     return items;
-  }, [article.content]);
+  }, [cleanContent, article.content]);
 
   const handleShareClick = async () => {
     if (typeof window !== 'undefined') {
@@ -272,41 +327,60 @@ export default function BlogDetailPage({
               loading="eager"
             />
           </div>
-          {article.coverImageAlt && (
-            <p className="text-[11px] text-gray-400 italic text-center mt-2.5">
-              {article.coverImageAlt}
-            </p>
-          )}
         </div>
 
         {/* ── Main Content Area: Article & Sidebar ──────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 mt-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="max-w-6xl mx-auto px-4 mt-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left Column: Article Body (8 cols) */}
-            <article className="lg:col-span-8 space-y-8">
-              {/* Optional Table of Contents for Long Articles */}
+            <article className="lg:col-span-8 space-y-8 min-w-0">
+              {/* Collapsible Table of Contents (TravelGrow clean aesthetic) */}
               {tableOfContents.length >= 2 && (
-                <div className="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-bold text-[#0a1c3d]">
-                    <List className="w-4 h-4 text-[#d4af37]" />
-                    <span>In This Article (Table of Contents)</span>
-                  </div>
-                  <ul className="space-y-2 text-xs">
-                    {tableOfContents.map((item, idx) => (
-                      <li
-                        key={idx}
-                        className={`${item.level === 3 ? 'pl-4' : 'font-semibold'}`}
-                      >
-                        <a
-                          href={`#${item.id}`}
-                          className="text-gray-600 hover:text-[#b8860b] hover:underline flex items-center gap-1.5 transition-colors"
-                        >
-                          <span className="text-[#d4af37]">•</span>
-                          <span>{item.text}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="bg-white rounded-2xl border border-gray-200/90 shadow-xs overflow-hidden transition-all">
+                  <button
+                    type="button"
+                    onClick={() => setShowToc((prev) => !prev)}
+                    className="w-full px-5 py-4 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 text-sm font-bold text-[#0a1c3d]">
+                      <div className="w-7 h-7 rounded-lg bg-[#d4af37]/15 text-[#996515] flex items-center justify-center">
+                        <List className="w-4 h-4" />
+                      </div>
+                      <span>In This Article (Table of Contents)</span>
+                      <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
+                        {tableOfContents.length} topics
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                      <span>{showToc ? 'Hide' : 'Show'}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                          showToc ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {showToc && (
+                    <div className="px-5 pb-5 pt-1 border-t border-gray-100">
+                      <ul className="space-y-2 text-xs max-h-80 overflow-y-auto pr-2 mt-3">
+                        {tableOfContents.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className={`${item.level === 3 ? 'pl-4' : 'font-semibold'}`}
+                          >
+                            <a
+                              href={`#${item.id}`}
+                              className="text-gray-600 hover:text-[#b8860b] hover:underline flex items-center gap-1.5 transition-colors"
+                            >
+                              <span className="text-[#d4af37]">•</span>
+                              <span>{item.text}</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -435,18 +509,86 @@ export default function BlogDetailPage({
                           loading="lazy"
                           {...props}
                         />
-                        {alt && (
-                          <p className="text-xs text-gray-400 italic text-center py-2 bg-gray-50">
-                            {alt}
-                          </p>
-                        )}
                       </div>
                     ),
                   }}
                 >
-                  {article.content}
+                  {cleanContent || article.content}
                 </ReactMarkdown>
               </div>
+
+              {/* ── Interactive Frequently Asked Questions Accordion (TravelGrow Style) ── */}
+              {faqs.length > 0 && (
+                <div id="frequently-asked-questions" className="my-10 pt-8 border-t border-slate-200/80">
+                  <h3
+                    className="text-2xl sm:text-3xl font-black text-[#0a1c3d] tracking-tight mb-2"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    Frequently Asked Questions
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 mb-6">
+                    Find quick answers to common questions about this travel guide.
+                  </p>
+
+                  <div className="space-y-3">
+                    {faqs.map((faq, i) => {
+                      const isOpen = openFaqIndex === i;
+                      return (
+                        <div
+                          key={i}
+                          className={`rounded-2xl transition-all duration-300 border overflow-hidden ${
+                            isOpen
+                              ? "bg-white border-amber-300 shadow-md shadow-amber-500/5 ring-1 ring-amber-500/20"
+                              : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setOpenFaqIndex(isOpen ? null : i)}
+                            className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left cursor-pointer transition-colors"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span
+                                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                                  isOpen
+                                    ? "bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm shadow-orange-500/20"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                Q{i + 1}
+                              </span>
+                              <span
+                                className={`font-bold text-sm sm:text-base leading-snug transition-colors ${
+                                  isOpen ? "text-amber-800" : "text-slate-800"
+                                }`}
+                              >
+                                {faq.question}
+                              </span>
+                            </div>
+                            <div
+                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
+                                isOpen
+                                  ? "bg-amber-50 text-amber-600 rotate-180"
+                                  : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                              }`}
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </div>
+                          </button>
+
+                          {isOpen && (
+                            <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0">
+                              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100 text-slate-700 text-xs sm:text-sm sm:text-base leading-relaxed">
+                                {faq.answer}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Tags Section */}
               {article.tags && article.tags.length > 0 && (
@@ -510,8 +652,48 @@ export default function BlogDetailPage({
               </div>
             </article>
 
-            {/* Right Column: Sidebar (4 cols) */}
-            <aside className="lg:col-span-4 space-y-6">
+            {/* Right Column: Sticky Sidebar (4 cols - TravelGrow Style) */}
+            <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 self-start">
+              {/* ── TravelGrow Style Vibrant Card 1 ── */}
+              <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-orange-500/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2 sm:mb-3 leading-snug">
+                  Ready for your next adventure?
+                </h3>
+                <p className="text-orange-50 text-xs sm:text-sm mb-6 sm:mb-7 font-medium leading-relaxed">
+                  Let us help you plan the perfect trip tailored just for you.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowPlanTourModal(true)}
+                  className="w-full py-3 sm:py-3.5 bg-white text-orange-600 text-center rounded-2xl font-black hover:bg-orange-50 transition-all shadow-lg text-sm sm:text-base cursor-pointer active:scale-95"
+                >
+                  Get Free Package Quote
+                </button>
+              </div>
+
+              {/* ── TravelGrow Style Midnight Blue Card 2 ── */}
+              <div className="bg-gradient-to-br from-[#0a1c3d] via-[#102b5c] to-[#040e20] rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-[#d4af37]/30 relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#d4af37]/20 rounded-full blur-xl pointer-events-none" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#d4af37] uppercase tracking-wider mb-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+                  <span>Custom Tour Planning</span>
+                </div>
+                <h4 className="text-lg sm:text-xl font-black text-white mb-2 leading-snug">
+                  Plan a Tour with Experts
+                </h4>
+                <p className="text-blue-100/90 text-xs sm:text-sm mb-5 leading-relaxed font-normal">
+                  Looking for a customized holiday or sacred yatra? Fill a quick enquiry and get free personalized quotes from verified travel agents.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowPlanTourModal(true)}
+                  className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-center rounded-2xl font-bold shadow-lg shadow-orange-500/30 transition-all text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  Plan a Tour / Get Quotes
+                </button>
+              </div>
+
               {/* Author & Agency Desk Card */}
               <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">

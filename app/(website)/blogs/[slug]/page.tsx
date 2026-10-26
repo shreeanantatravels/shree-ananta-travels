@@ -389,6 +389,25 @@ export default async function BlogSlugResolverPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {blog.faq && blog.faq.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: blog.faq.map((f: any) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: f.answer,
+                },
+              })),
+            }),
+          }}
+        />
+      )}
       <BlogDetailPage article={serializedBlog} relatedArticles={serializedRelated} />
     </>
   );

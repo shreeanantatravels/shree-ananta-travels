@@ -190,6 +190,15 @@ export async function PUT(
       blog.tags = body.tags.map((t: string) => String(t).trim()).filter(Boolean);
     }
 
+    if (Array.isArray(body.faq)) {
+      blog.faq = body.faq
+        .map((item: any) => ({
+          question: String(item?.question || '').trim(),
+          answer: String(item?.answer || '').trim(),
+        }))
+        .filter((item: any) => item.question || item.answer);
+    }
+
     // SEO updates
     if (body.seo) {
       blog.seo = {

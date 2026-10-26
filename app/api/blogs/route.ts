@@ -238,6 +238,14 @@ export async function POST(req: Request) {
       scheduledAt,
       readTime,
       tags: Array.isArray(body.tags) ? body.tags.map((t: string) => String(t).trim()).filter(Boolean) : [],
+      faq: Array.isArray(body.faq)
+        ? body.faq
+            .map((item: any) => ({
+              question: String(item?.question || '').trim(),
+              answer: String(item?.answer || '').trim(),
+            }))
+            .filter((item: any) => item.question || item.answer)
+        : [],
       seo: {
         title: seoTitle,
         description: seoDescription,
