@@ -50,6 +50,7 @@ import {
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import { useGetMeQuery } from '../api/authApi';
 import { useGetSiteConfigQuery } from '../api/siteConfigApi';
 
@@ -1140,8 +1141,41 @@ export function Blogs() {
 
                         <div className="prose prose-base max-w-none text-gray-800 leading-relaxed font-normal pt-2">
                           <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
                             components={{
+                              table: ({ node, children, ...props }) => (
+                                <div className="overflow-x-auto my-6 rounded-xl border border-gray-200 shadow-sm">
+                                  <table className="w-full text-left text-sm border-collapse" {...props}>
+                                    {children}
+                                  </table>
+                                </div>
+                              ),
+                              thead: ({ node, children, ...props }) => (
+                                <thead className="bg-[#0a1c3d] text-white" {...props}>
+                                  {children}
+                                </thead>
+                              ),
+                              tbody: ({ node, children, ...props }) => (
+                                <tbody className="divide-y divide-gray-100 bg-white text-gray-700" {...props}>
+                                  {children}
+                                </tbody>
+                              ),
+                              tr: ({ node, children, ...props }) => (
+                                <tr className="hover:bg-amber-50/40 transition-colors odd:bg-white even:bg-gray-50/50" {...props}>
+                                  {children}
+                                </tr>
+                              ),
+                              th: ({ node, children, ...props }) => (
+                                <th className="py-3 px-4 font-bold border-b border-gray-200 text-xs sm:text-sm tracking-wide text-white" {...props}>
+                                  {children}
+                                </th>
+                              ),
+                              td: ({ node, children, ...props }) => (
+                                <td className="py-3 px-4 text-xs sm:text-sm align-top leading-relaxed text-gray-700" {...props}>
+                                  {children}
+                                </td>
+                              ),
                               h2: ({ node, children, ...props }) => (
                                 <h2
                                   className="text-xl sm:text-2xl font-black text-[#0a1c3d] tracking-tight mt-8 mb-4 pt-3 border-t border-gray-100"

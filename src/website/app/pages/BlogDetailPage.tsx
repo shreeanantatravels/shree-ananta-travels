@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import { Topbar } from '../components/Topbar';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
@@ -85,11 +86,12 @@ export default function BlogDetailPage({
         if (match) {
           const level = match[1].length; // 2 for h2, 3 for h3
           const rawText = match[2].trim();
-          const id = rawText
+          const cleanText = rawText.replace(/^\*+|\*+$/g, '').replace(/^_+|_+$/g, '').trim();
+          const id = cleanText
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '');
-          items.push({ id, text: rawText, level });
+          items.push({ id, text: cleanText, level });
         }
       });
     }
@@ -311,8 +313,41 @@ export default function BlogDetailPage({
               {/* Rendered Article Body */}
               <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-normal">
                 <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw]}
                   components={{
+                    table: ({ node, children, ...props }) => (
+                      <div className="overflow-x-auto my-8 rounded-xl border border-gray-200 shadow-sm">
+                        <table className="w-full text-left text-sm border-collapse" {...props}>
+                          {children}
+                        </table>
+                      </div>
+                    ),
+                    thead: ({ node, children, ...props }) => (
+                      <thead className="bg-[#0a1c3d] text-white" {...props}>
+                        {children}
+                      </thead>
+                    ),
+                    tbody: ({ node, children, ...props }) => (
+                      <tbody className="divide-y divide-gray-100 bg-white text-gray-700" {...props}>
+                        {children}
+                      </tbody>
+                    ),
+                    tr: ({ node, children, ...props }) => (
+                      <tr className="hover:bg-amber-50/40 transition-colors odd:bg-white even:bg-gray-50/50" {...props}>
+                        {children}
+                      </tr>
+                    ),
+                    th: ({ node, children, ...props }) => (
+                      <th className="py-3.5 px-4 font-bold border-b border-gray-200 text-xs sm:text-sm tracking-wide text-white" {...props}>
+                        {children}
+                      </th>
+                    ),
+                    td: ({ node, children, ...props }) => (
+                      <td className="py-3.5 px-4 text-xs sm:text-sm align-top leading-relaxed text-gray-700" {...props}>
+                        {children}
+                      </td>
+                    ),
                     h2: ({ node, children, ...props }) => {
                       const text = getHeadingText(children);
                       const id = text
