@@ -489,15 +489,31 @@ export default function BlogDetailPage({
                     hr: ({ node, ...props }) => (
                       <hr className="my-8 border-t-2 border-gray-200" {...props} />
                     ),
-                    a: ({ node, href, children, ...props }) => (
-                      <Link
-                        href={href || '#'}
-                        className="text-[#0a1c3d] font-bold underline decoration-[#d4af37] decoration-2 underline-offset-4 hover:text-[#b8860b] transition-colors"
-                        {...props}
-                      >
-                        {children}
-                      </Link>
-                    ),
+                    a: ({ node, href, children, ...props }) => {
+                      const isExternal = href?.startsWith('http://') || href?.startsWith('https://');
+                      if (isExternal) {
+                        return (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#0a1c3d] font-bold underline decoration-[#d4af37] decoration-2 underline-offset-4 hover:text-[#b8860b] transition-colors"
+                            {...props}
+                          >
+                            {children}
+                          </a>
+                        );
+                      }
+                      return (
+                        <Link
+                          href={href || '#'}
+                          className="text-[#0a1c3d] font-bold underline decoration-[#d4af37] decoration-2 underline-offset-4 hover:text-[#b8860b] transition-colors"
+                          {...props}
+                        >
+                          {children}
+                        </Link>
+                      );
+                    },
                     img: ({ node, src, alt, ...props }) => (
                       <div className="my-8 rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                         <img
