@@ -79,7 +79,7 @@ export async function generateMetadata({
     const title = blog.seo?.title || `${blog.title} | Shree Ananta Travels`;
     const description = blog.seo?.description || blog.excerpt || '';
     const canonicalUrl = blog.seo?.canonicalUrl || `${baseUrl}/blogs/${blog.slug}`;
-    const coverImage = blog.socialSharing?.ogImage || blog.coverImage || `${baseUrl}/uploads/shree-ananta-logo.webp`;
+    const coverImage = blog.coverImage || blog.socialSharing?.ogImage || `${baseUrl}/uploads/shree-ananta-logo.webp`;
     const ogTitle = blog.socialSharing?.ogTitle || title;
     const ogDescription = blog.socialSharing?.ogDescription || description;
 

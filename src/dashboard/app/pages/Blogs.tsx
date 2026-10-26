@@ -391,7 +391,7 @@ export function Blogs() {
           ...prev,
           coverImage: json.url,
           coverImageAlt: prev.coverImageAlt || prev.title,
-          ogImage: prev.ogImage ? prev.ogImage : json.url,
+          ogImage: json.url,
         }));
         toast.success('Cover image uploaded successfully.');
       } catch (err: any) {
