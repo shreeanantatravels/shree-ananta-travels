@@ -17,6 +17,7 @@ import {
   List,
   Sparkles,
   ChevronDown,
+  TrendingUp,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -41,6 +42,15 @@ function getHeadingText(children: React.ReactNode): string {
   return String(children);
 }
 
+export interface PopularPackageItem {
+  _id: string;
+  title: string;
+  slug: string;
+  imageUrl1?: string;
+  duration?: string;
+  location?: string;
+}
+
 export interface BlogDetailArticle extends BlogItem {
   content: string;
   updatedAt?: string;
@@ -54,15 +64,17 @@ export interface BlogDetailArticle extends BlogItem {
 interface BlogDetailPageProps {
   article: BlogDetailArticle;
   relatedArticles: BlogItem[];
+  popularPackages?: PopularPackageItem[];
 }
 
 export default function BlogDetailPage({
   article,
   relatedArticles,
+  popularPackages = [],
 }: BlogDetailPageProps) {
   const [showPlanTourModal, setShowPlanTourModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [showToc, setShowToc] = useState(false);
+  const [showToc, setShowToc] = useState(true);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   // Directly use structured FAQs added in Admin Editor (with fallback for legacy markdown)
@@ -112,44 +124,30 @@ export default function BlogDetailPage({
     return { cleanContent: clean, faqs: faqItems };
   }, [article.faq, article.content]);
 
-  // Parse headings from cleanContent or HTML content for the Table of Contents
+  // Parse headings from markdown content for the Table of Contents
   const tableOfContents = useMemo(() => {
     const contentToParse = cleanContent || article.content;
     if (!contentToParse) return [];
     const items: { id: string; text: string; level: number }[] = [];
 
-    // Check if content has HTML headings: <h2> or <h3>
-    const htmlHeadingRegex = /<h([23])[^>]*>([\s\S]*?)<\/h\1>/gi;
-    let htmlMatch;
-    while ((htmlMatch = htmlHeadingRegex.exec(contentToParse)) !== null) {
-      const level = parseInt(htmlMatch[1], 10);
-      const rawText = htmlMatch[2].replace(/<[^>]+>/g, '').trim();
-      const id = rawText
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-      if (rawText) {
-        items.push({ id, text: rawText, level });
-      }
-    }
-
-    if (items.length === 0) {
-      // Parse markdown headings ## or ###
-      const lines = contentToParse.split(/\r?\n/);
-      lines.forEach((line) => {
-        const match = line.match(/^(#{2,3})\s+(.+)$/);
-        if (match) {
-          const level = match[1].length; // 2 for h2, 3 for h3
-          const rawText = match[2].trim();
-          const cleanText = rawText.replace(/^\*+|\*+$/g, '').replace(/^_+|_+$/g, '').trim();
-          const id = cleanText
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '');
+    const lines = contentToParse.split(/\r?\n/);
+    lines.forEach((line) => {
+      const match = line.match(/^(#{2,3})\s+(.+)$/);
+      if (match) {
+        const level = match[1].length; // 2 for h2, 3 for h3
+        const rawText = match[2].trim();
+        const cleanText = rawText.replace(/^\*+|\*+$/g, '').replace(/^_+|_+$/g, '').trim();
+        // Skip FAQ header if faqs are rendered separately in the accordion
+        if (cleanText.toLowerCase().includes('frequently asked questions')) return;
+        const id = cleanText
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        if (cleanText) {
           items.push({ id, text: cleanText, level });
         }
-      });
-    }
+      }
+    });
 
     return items;
   }, [cleanContent, article.content]);
@@ -538,8 +536,8 @@ export default function BlogDetailPage({
                           key={i}
                           className={`rounded-2xl transition-all duration-300 border overflow-hidden ${
                             isOpen
-                              ? "bg-white border-amber-300 shadow-md shadow-amber-500/5 ring-1 ring-amber-500/20"
-                              : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
+                              ? "bg-white border-[#d4af37]/60 shadow-md shadow-[#d4af37]/10 ring-1 ring-[#d4af37]/20"
+                              : "bg-white border-gray-200/80 hover:border-gray-300 hover:shadow-xs"
                           }`}
                         >
                           <button
@@ -551,15 +549,15 @@ export default function BlogDetailPage({
                               <span
                                 className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                                   isOpen
-                                    ? "bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm shadow-orange-500/20"
-                                    : "bg-slate-100 text-slate-600"
+                                    ? "bg-[#0a1c3d] text-[#f3d375] shadow-sm shadow-[#0a1c3d]/20"
+                                    : "bg-gray-100 text-gray-600"
                                 }`}
                               >
                                 Q{i + 1}
                               </span>
                               <span
                                 className={`font-bold text-sm sm:text-base leading-snug transition-colors ${
-                                  isOpen ? "text-amber-800" : "text-slate-800"
+                                  isOpen ? "text-[#0a1c3d]" : "text-gray-800"
                                 }`}
                               >
                                 {faq.question}
@@ -568,8 +566,8 @@ export default function BlogDetailPage({
                             <div
                               className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
                                 isOpen
-                                  ? "bg-amber-50 text-amber-600 rotate-180"
-                                  : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                                  ? "bg-[#d4af37]/15 text-[#996515] rotate-180"
+                                  : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                               }`}
                             >
                               <ChevronDown className="w-4 h-4" />
@@ -578,7 +576,7 @@ export default function BlogDetailPage({
 
                           {isOpen && (
                             <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0">
-                              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100 text-slate-700 text-xs sm:text-sm sm:text-base leading-relaxed">
+                              <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 text-gray-700 text-xs sm:text-sm sm:text-base leading-relaxed">
                                 {faq.answer}
                               </div>
                             </div>
@@ -652,127 +650,160 @@ export default function BlogDetailPage({
               </div>
             </article>
 
-            {/* Right Column: Sticky Sidebar (4 cols - TravelGrow Style) */}
+            {/* Right Column: Sticky Sidebar (4 cols - Shree Ananta Travels Brand Theme) */}
             <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 self-start">
-              {/* ── TravelGrow Style Vibrant Card 1 ── */}
-              <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-orange-500/20 relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2 sm:mb-3 leading-snug">
-                  Ready for your next adventure?
-                </h3>
-                <p className="text-orange-50 text-xs sm:text-sm mb-6 sm:mb-7 font-medium leading-relaxed">
-                  Let us help you plan the perfect trip tailored just for you.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowPlanTourModal(true)}
-                  className="w-full py-3 sm:py-3.5 bg-white text-orange-600 text-center rounded-2xl font-black hover:bg-orange-50 transition-all shadow-lg text-sm sm:text-base cursor-pointer active:scale-95"
-                >
-                  Get Free Package Quote
-                </button>
-              </div>
-
-              {/* ── TravelGrow Style Midnight Blue Card 2 ── */}
-              <div className="bg-gradient-to-br from-[#0a1c3d] via-[#102b5c] to-[#040e20] rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-[#d4af37]/30 relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#d4af37]/20 rounded-full blur-xl pointer-events-none" />
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#d4af37] uppercase tracking-wider mb-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
-                  <span>Custom Tour Planning</span>
-                </div>
-                <h4 className="text-lg sm:text-xl font-black text-white mb-2 leading-snug">
-                  Plan a Tour with Experts
-                </h4>
-                <p className="text-blue-100/90 text-xs sm:text-sm mb-5 leading-relaxed font-normal">
-                  Looking for a customized holiday or sacred yatra? Fill a quick enquiry and get free personalized quotes from verified travel agents.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowPlanTourModal(true)}
-                  className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-center rounded-2xl font-bold shadow-lg shadow-orange-500/30 transition-all text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-                >
-                  Plan a Tour / Get Quotes
-                </button>
-              </div>
-
-              {/* Author & Agency Desk Card */}
-              <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-sm space-y-4">
+              {/* ── Card 1: Official Editorial Desk & Author ── */}
+              <div className="bg-white p-6 rounded-3xl border border-gray-200/90 shadow-sm hover:shadow-md transition-shadow space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#0a1c3d] text-white flex items-center justify-center font-bold text-base shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-[#0a1c3d] text-white flex items-center justify-center font-bold text-base shadow-md shrink-0">
                     <Compass className="w-6 h-6 text-[#d4af37]" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#0a1c3d]">Shree Ananta Travels</h4>
-                    <p className="text-[11px] text-gray-500 font-medium">Official Editorial Desk</p>
+                    <p className="text-[11px] text-[#996515] font-semibold">Official Editorial Desk</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-600 leading-relaxed font-light">
                   India’s premier travel and pilgrimage agency headquartered in East of Kailash, New Delhi. Specialized in Kailash Mansarovar Yatra, domestic holidays, and international tours.
                 </p>
-                <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-[#b8860b]">
-                  <Link href="/about" className="hover:underline flex items-center gap-1">
-                    About our agency <ArrowRight className="w-3 h-3" />
+                <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-[#b8860b]">
+                  <Link href="/about" className="hover:text-[#0a1c3d] flex items-center gap-1 transition-colors">
+                    About our agency <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowPlanTourModal(true)}
+                    className="px-3.5 py-1.5 bg-[#d4af37]/15 hover:bg-[#d4af37]/25 text-[#996515] rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+                  >
+                    Plan Tour
+                  </button>
                 </div>
               </div>
 
-              {/* Popular Tour Categories / Quick Links */}
-              <div className="bg-white p-6 rounded-3xl border border-gray-200/80 shadow-sm space-y-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Featured Packages &amp; Yatras
-                </h4>
-                <ul className="space-y-2.5 text-xs">
+              {/* ── Card: Popular Packages (Trending) ── */}
+              {popularPackages && popularPackages.length > 0 && (
+                <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gray-200/90 shadow-sm hover:shadow-md transition-shadow space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                    <h4 className="text-sm font-extrabold text-[#0a1c3d] tracking-tight flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-amber-500" />
+                      Popular Packages
+                    </h4>
+                    <Link href="/packages" className="text-[11px] font-bold text-[#b8860b] hover:underline">
+                      View All
+                    </Link>
+                  </div>
+
+                  <div className="space-y-3.5 divide-y divide-gray-100">
+                    {popularPackages.map((pkg) => (
+                      <Link
+                        key={pkg._id}
+                        href={`/packages/${pkg.slug || pkg._id}`}
+                        className="group/pkg flex items-center gap-3 pt-3 first:pt-0"
+                      >
+                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
+                          <img
+                            src={pkg.imageUrl1 || "/uploads/shree-ananta-logo.webp"}
+                            alt={pkg.title}
+                            className="w-full h-full object-cover group-hover/pkg:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h5 className="text-xs font-bold text-gray-900 group-hover/pkg:text-amber-600 transition-colors line-clamp-2 leading-snug">
+                            {pkg.title}
+                          </h5>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 mt-1">
+                            View Details →
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Card 2: Featured Packages & Yatras ── */}
+              <div className="bg-white p-6 rounded-3xl border border-gray-200/90 shadow-sm hover:shadow-md transition-shadow space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                  <h4 className="text-xs font-bold text-[#0a1c3d] uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+                    Featured Packages &amp; Yatras
+                  </h4>
+                  <Link href="/packages" className="text-[11px] font-bold text-[#b8860b] hover:underline">
+                    View All
+                  </Link>
+                </div>
+                <ul className="space-y-2 text-xs">
                   <li>
                     <Link
                       href="/kailash-mansarovar"
-                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#d4af37]/10 transition-colors group font-semibold text-gray-800"
+                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50/80 hover:bg-[#d4af37]/15 hover:border-[#d4af37]/40 border border-transparent transition-all group font-semibold text-gray-800"
                     >
-                      <span>Kailash Mansarovar Yatra</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b]" />
+                      <span className="group-hover:text-[#0a1c3d] transition-colors">Kailash Mansarovar Yatra</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b] transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </li>
                   <li>
                     <Link
                       href="/spiritual"
-                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#d4af37]/10 transition-colors group font-semibold text-gray-800"
+                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50/80 hover:bg-[#d4af37]/15 hover:border-[#d4af37]/40 border border-transparent transition-all group font-semibold text-gray-800"
                     >
-                      <span>Adi Kailash &amp; Char Dham</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b]" />
+                      <span className="group-hover:text-[#0a1c3d] transition-colors">Adi Kailash &amp; Char Dham</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b] transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </li>
                   <li>
                     <Link
                       href="/domestic"
-                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#d4af37]/10 transition-colors group font-semibold text-gray-800"
+                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50/80 hover:bg-[#d4af37]/15 hover:border-[#d4af37]/40 border border-transparent transition-all group font-semibold text-gray-800"
                     >
-                      <span>Domestic Holiday Packages</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b]" />
+                      <span className="group-hover:text-[#0a1c3d] transition-colors">Domestic Holiday Packages</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b] transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </li>
                   <li>
                     <Link
                       href="/international"
-                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#d4af37]/10 transition-colors group font-semibold text-gray-800"
+                      className="flex items-center justify-between p-3 rounded-xl bg-gray-50/80 hover:bg-[#d4af37]/15 hover:border-[#d4af37]/40 border border-transparent transition-all group font-semibold text-gray-800"
                     >
-                      <span>International Tours &amp; Visas</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b]" />
+                      <span className="group-hover:text-[#0a1c3d] transition-colors">International Tours &amp; Visas</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#b8860b] transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </li>
                 </ul>
               </div>
 
-              {/* Contact Assistance Box */}
-              <div className="bg-blue-50/60 p-6 rounded-3xl border border-blue-200/60 text-center space-y-3">
-                <Phone className="w-8 h-8 text-[#0a1c3d] mx-auto" />
-                <h4 className="text-sm font-bold text-[#0a1c3d]">Need Customized Guidance?</h4>
-                <p className="text-xs text-gray-600 font-light">
-                  Speak directly with our pilgrimage and holiday specialists.
-                </p>
-                <a
-                  href={telHref}
-                  className="block py-2.5 px-4 bg-[#0a1c3d] hover:bg-[#d4af37] text-white hover:text-[#0a1c3d] text-xs font-bold rounded-xl transition-all"
-                >
-                  Call {displayPhone}
-                </a>
+              {/* ── Card 3: Need Customized Guidance? (Shree Ananta Travels Royal Theme) ── */}
+              <div className="bg-gradient-to-br from-[#0a1c3d] via-[#102b5c] to-[#040e20] p-6 sm:p-7 rounded-3xl border-2 border-[#d4af37]/40 shadow-xl text-white text-center space-y-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mt-6 -mr-6 w-28 h-28 bg-[#d4af37]/15 rounded-full blur-xl pointer-events-none" />
+                <div className="w-12 h-12 rounded-2xl bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#f3d375] flex items-center justify-center mx-auto shadow-sm">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-base sm:text-lg font-black text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    Need Customized Guidance?
+                  </h4>
+                  <p className="text-xs text-blue-100/80 font-light mt-1">
+                    Speak directly with our pilgrimage and holiday specialists.
+                  </p>
+                </div>
+                <div className="space-y-2.5 pt-1">
+                  <a
+                    href={telHref}
+                    className="w-full py-3 px-4 bg-gradient-to-r from-[#d4af37] via-[#e5c158] to-[#c59b27] hover:brightness-105 text-[#0a1c3d] text-xs font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call {displayPhone}</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setShowPlanTourModal(true)}
+                    className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+                    <span>Plan Your Tour / Get Quotes</span>
+                  </button>
+                </div>
               </div>
             </aside>
           </div>

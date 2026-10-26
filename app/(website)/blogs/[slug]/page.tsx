@@ -314,6 +314,33 @@ export default async function BlogSlugResolverPage({
     relatedFinal = [...relatedFinal, ...additional];
   }
 
+  // Fetch popular / trending packages for blog detail sidebar
+  let rawPackages = await Package.find({
+    isActive: { $ne: false },
+    $or: [{ isTrending: true }, { badges: 'trending' }],
+  })
+    .sort({ updatedAt: -1, createdAt: -1 })
+    .limit(4)
+    .select('title slug imageUrl1 duration location')
+    .lean();
+
+  if (!rawPackages || rawPackages.length === 0) {
+    rawPackages = await Package.find({ isActive: { $ne: false } })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .select('title slug imageUrl1 duration location')
+      .lean();
+  }
+
+  const popularPackages = JSON.parse(JSON.stringify(rawPackages)).map((p: any) => ({
+    _id: p._id.toString(),
+    title: p.title,
+    slug: p.slug || p._id.toString(),
+    imageUrl1: p.imageUrl1,
+    duration: p.duration,
+    location: p.location,
+  }));
+
   const serializedBlog = JSON.parse(JSON.stringify(blog));
   const serializedRelated = JSON.parse(JSON.stringify(relatedFinal));
 
@@ -408,7 +435,11 @@ export default async function BlogSlugResolverPage({
           }}
         />
       )}
-      <BlogDetailPage article={serializedBlog} relatedArticles={serializedRelated} />
+      <BlogDetailPage
+        article={serializedBlog}
+        relatedArticles={serializedRelated}
+        popularPackages={popularPackages}
+      />
     </>
   );
 }
