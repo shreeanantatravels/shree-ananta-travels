@@ -62,6 +62,45 @@ function resolveLogoUrl(url?: string): string {
   return `/uploads/${url}`;
 }
 
+// ── Sanitize pasted HTML: strip junk (Google Docs meta, inline styles, etc.) ──
+function sanitizePastedHtml(html: string): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Remove script, style, meta, link, head tags
+  doc.querySelectorAll('script,style,meta,link,head').forEach(el => el.remove());
+
+  // Remove Google Docs internal wrapper spans (keep their children)
+  doc.querySelectorAll('b[id^="docs-internal"]').forEach(el => {
+    el.replaceWith(...Array.from(el.childNodes));
+  });
+
+  // Strip inline styles, classes, ids (keep semantic tags intact)
+  doc.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+  doc.querySelectorAll('[class]').forEach(el => el.removeAttribute('class'));
+  doc.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+
+  return doc.body.innerHTML;
+}
+
+// ── Upload a blob or data URL image, return server public URL ──
+async function uploadDataUrlImage(dataUrl: string): Promise<string | null> {
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const ext = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : blob.type.includes('webp') ? 'webp' : 'jpg';
+    const file = new File([blob], `pasted-image-${Date.now()}.${ext}`, { type: blob.type });
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('type', 'blog');
+    const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
+    const json = await uploadRes.json();
+    return json.success && json.url ? json.url : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Blogs() {
   const { data: authData } = useGetMeQuery();
   const { data: siteConfigRes } = useGetSiteConfigQuery();
@@ -135,13 +174,134 @@ export function Blogs() {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [showAdvancedSeo, setShowAdvancedSeo] = useState(false);
   const [showSocialPreview, setShowSocialPreview] = useState(false);
-  const [editorPreviewMode, setEditorPreviewMode] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [isPasting, setIsPasting] = useState(false);
 
-  // Scheduled date picker input ref
+  // Refs
   const scheduledInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  // Sync editor div content when formData.content changes externally (edit mode load)
+  useEffect(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    // Only sync if content differs (avoid cursor jump while typing)
+    if (el.innerHTML !== formData.content) {
+      el.innerHTML = formData.content;
+    }
+  }, [formData.content]);
+
+  // ── WYSIWYG execCommand helper ──────────────────────────────────────────────
+  const exec = (cmd: string, value?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(cmd, false, value);
+    // sync state after command
+    if (editorRef.current) {
+      setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+    }
+  };
+
+  // ── Insert link prompt ──
+  const handleInsertLink = () => {
+    const url = prompt('Enter link URL (e.g. /packages or https://example.com):');
+    if (!url) return;
+    const text = window.getSelection()?.toString() || url;
+    exec('insertHTML', `<a href="${url}">${text}</a>`);
+  };
+
+  // ── Insert image from toolbar (file picker) ──
+  const handleInsertImageFile = async (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('type', 'blog');
+    setIsPasting(true);
+    toast.loading('Image upload ho rahi hai...', { id: 'editor-img' });
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (json.success && json.url) {
+        exec('insertHTML', `<img src="${json.url}" alt="Blog image" style="max-width:100%;border-radius:8px;margin:16px 0;" />`);
+        toast.success('Image insert ho gayi!', { id: 'editor-img' });
+      } else {
+        toast.error('Image upload failed', { id: 'editor-img' });
+      }
+    } catch {
+      toast.error('Image upload failed', { id: 'editor-img' });
+    } finally {
+      setIsPasting(false);
+    }
+  };
+
+  // ── WYSIWYG Paste Handler ────────────────────────────────────────────────
+  const handleWysiwygPaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const cd = e.clipboardData;
+    if (!cd) return;
+    e.preventDefault();
+    setIsPasting(true);
+
+    // ── Case 1: Image files (screenshot / ctrl+v from image editor) ──
+    const imageFiles = Array.from(cd.files).filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length > 0) {
+      for (const file of imageFiles) {
+        await handleInsertImageFile(file);
+      }
+      setIsPasting(false);
+      return;
+    }
+
+    // ── Case 2: HTML (Google Docs, Word, webpage) ──
+    const html = cd.getData('text/html');
+    if (html && html.trim()) {
+      toast.loading('Content process ho raha hai...', { id: 'wysiwyg-paste' });
+
+      // Sanitize + parse
+      let cleanHtml = sanitizePastedHtml(html);
+
+      // Find data: / blob: images and upload them
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(cleanHtml, 'text/html');
+      const imgEls = Array.from(doc.querySelectorAll('img'));
+      let hadUploads = false;
+      for (const imgEl of imgEls) {
+        const src = imgEl.getAttribute('src') || '';
+        if (src.startsWith('data:') || src.startsWith('blob:')) {
+          hadUploads = true;
+          const publicUrl = await uploadDataUrlImage(src);
+          if (publicUrl) {
+            imgEl.setAttribute('src', publicUrl);
+            imgEl.setAttribute('style', 'max-width:100%;border-radius:8px;margin:16px 0;');
+          } else {
+            imgEl.remove();
+          }
+        } else if (src) {
+          imgEl.setAttribute('style', 'max-width:100%;border-radius:8px;margin:16px 0;');
+        }
+      }
+      cleanHtml = doc.body.innerHTML;
+
+      document.execCommand('insertHTML', false, cleanHtml);
+      if (editorRef.current) {
+        setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+      }
+      toast.dismiss('wysiwyg-paste');
+      if (hadUploads) toast.success('Images upload ho gayi aur content paste ho gaya!');
+      else toast.success('Content paste ho gaya with full formatting!');
+      setIsPasting(false);
+      return;
+    }
+
+    // ── Case 3: Plain text ──
+    const text = cd.getData('text/plain');
+    if (text) {
+      document.execCommand('insertText', false, text);
+      if (editorRef.current) {
+        setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+      }
+    }
+    setIsPasting(false);
+  };
 
   const openCalendarPicker = () => {
     try {
@@ -284,11 +444,13 @@ export function Blogs() {
       toast.error('Write article content first to generate an excerpt suggestion.');
       return;
     }
+    // Strip HTML tags (content is now stored as HTML)
     const clean = formData.content
-      .replace(/<[^>]*>?/gm, '')
-      .replace(/#+\s+.+/g, '')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      .replace(/[*_`~>]/g, '')
+      .replace(/<[^>]*>/gm, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
       .replace(/\s+/g, ' ')
       .trim();
 
@@ -1047,268 +1209,126 @@ export function Blogs() {
                 />
               </div>
 
-              {/* Article Content Editor */}
+              {/* Article Content Editor – WYSIWYG */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Article Content <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-[11px] font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setEditorPreviewMode(false)}
-                      className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                        !editorPreviewMode ? 'bg-white shadow text-gray-900' : 'text-gray-500'
-                      }`}
-                    >
-                      Markdown Editor
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditorPreviewMode(true)}
-                      className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                        editorPreviewMode ? 'bg-white shadow text-gray-900' : 'text-gray-500'
-                      }`}
-                    >
-                      Formatted Preview
-                    </button>
-                  </div>
+                  <span className="text-[10px] text-gray-400 font-medium italic">WYSIWYG — jo dikhta hai waisa hi save hoga</span>
                 </div>
 
-                {!editorPreviewMode ? (
-                  <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
-                    {/* Quick Formatting Toolbar */}
-                    <div className="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-1.5 flex-wrap text-xs text-gray-600">
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + '\n\n## Section Heading\n' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded font-bold cursor-pointer"
-                        title="Add H2 Heading"
+                <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
+                    {/* WYSIWYG Toolbar */}
+                    <div className="bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center gap-0.5 flex-wrap text-xs text-gray-700">
+                      {/* Format select */}
+                      <select
+                        onChange={(e) => { exec('formatBlock', e.target.value); e.target.value = ''; }}
+                        defaultValue=""
+                        className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-semibold cursor-pointer mr-1"
+                        title="Paragraph style"
                       >
-                        H2
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + '\n\n### Sub-heading\n' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded font-bold cursor-pointer"
-                        title="Add H3 Heading"
-                      >
-                        H3
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + ' **bold text** ' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded font-bold cursor-pointer"
-                        title="Bold"
-                      >
-                        B
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + ' *italic text* ' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded italic cursor-pointer"
-                        title="Italic"
-                      >
-                        I
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + '\n\n- Bullet item 1\n- Bullet item 2\n' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer"
-                        title="Bulleted List"
-                      >
-                        • List
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + '\n\n1. First step or point\n2. Second step or point\n' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded font-semibold cursor-pointer"
-                        title="Numbered List"
-                      >
-                        1. Numbered List
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + '\n\n---\n\n' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded font-semibold cursor-pointer"
-                        title="Divider Line"
-                      >
-                        — Divider Line
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + '\n\n> Important tip or divine travel quote...\n' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer"
-                        title="Blockquote"
-                      >
-                        Quote
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({ ...prev, content: prev.content + ' [Shree Ananta Tour Packages](/packages) ' }))}
-                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer"
-                        title="Internal Link"
-                      >
-                        Link
-                      </button>
+                        <option value="" disabled>Format</option>
+                        <option value="p">Paragraph</option>
+                        <option value="h2">Heading 2</option>
+                        <option value="h3">Heading 3</option>
+                        <option value="h4">Heading 4</option>
+                        <option value="blockquote">Blockquote</option>
+                        <option value="pre">Code Block</option>
+                      </select>
+
+                      <div className="w-px h-5 bg-gray-200 mx-1" />
+
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('bold'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded font-bold cursor-pointer" title="Bold (Ctrl+B)">B</button>
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('italic'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded italic cursor-pointer" title="Italic (Ctrl+I)">I</button>
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('underline'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded underline cursor-pointer" title="Underline (Ctrl+U)">U</button>
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('strikeThrough'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded line-through cursor-pointer" title="Strikethrough">S</button>
+
+                      <div className="w-px h-5 bg-gray-200 mx-1" />
+
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer" title="Bullet List">• List</button>
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('insertOrderedList'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer" title="Numbered List">1. List</button>
+
+                      <div className="w-px h-5 bg-gray-200 mx-1" />
+
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); handleInsertLink(); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer" title="Insert Link">🔗 Link</button>
+
+                      {/* Image insert button */}
+                      <label className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer" title="Insert Image">
+                        🖼 Image
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleInsertImageFile(f);
+                          e.target.value = '';
+                        }} />
+                      </label>
+
+                      <div className="w-px h-5 bg-gray-200 mx-1" />
+
+                      <button type="button" onMouseDown={(e) => { e.preventDefault(); exec('removeFormat'); }}
+                        className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer text-gray-500" title="Clear Formatting">✕ Clear</button>
                     </div>
 
-                    <textarea
-                      rows={18}
-                      value={formData.content}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
-                      placeholder="Write your article content using standard Markdown syntax (headings, paragraphs, lists, quotes, internal package links)..."
-                      className="w-full p-4 bg-white text-xs text-gray-900 font-mono leading-relaxed focus:outline-none resize-y"
-                    />
-                  </div>
-                ) : (
-                  <div className="p-6 border border-gray-200 rounded-xl bg-white min-h-[380px] max-h-[650px] overflow-y-auto text-gray-800 leading-relaxed shadow-xs">
-                    {formData.content ? (
-                      <div className="space-y-4">
-                        <div className="pb-3 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                          <span className="inline-flex items-center gap-1.5 font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200/60">
-                            <Eye className="w-3.5 h-3.5 text-amber-600" />
-                            Live Website Preview (Formatted view without raw *)
-                          </span>
-                          <span className="text-gray-400 font-medium">Exact reader view as on /blogs</span>
-                        </div>
-
-                        <div className="prose prose-base max-w-none text-gray-800 leading-relaxed font-normal pt-2">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeRaw]}
-                            components={{
-                              table: ({ node, children, ...props }) => (
-                                <div className="overflow-x-auto my-6 rounded-xl border border-gray-200 shadow-sm">
-                                  <table className="w-full text-left text-sm border-collapse" {...props}>
-                                    {children}
-                                  </table>
-                                </div>
-                              ),
-                              thead: ({ node, children, ...props }) => (
-                                <thead className="bg-[#0a1c3d] text-white" {...props}>
-                                  {children}
-                                </thead>
-                              ),
-                              tbody: ({ node, children, ...props }) => (
-                                <tbody className="divide-y divide-gray-100 bg-white text-gray-700" {...props}>
-                                  {children}
-                                </tbody>
-                              ),
-                              tr: ({ node, children, ...props }) => (
-                                <tr className="hover:bg-amber-50/40 transition-colors odd:bg-white even:bg-gray-50/50" {...props}>
-                                  {children}
-                                </tr>
-                              ),
-                              th: ({ node, children, ...props }) => (
-                                <th className="py-3 px-4 font-bold border-b border-gray-200 text-xs sm:text-sm tracking-wide text-white" {...props}>
-                                  {children}
-                                </th>
-                              ),
-                              td: ({ node, children, ...props }) => (
-                                <td className="py-3 px-4 text-xs sm:text-sm align-top leading-relaxed text-gray-700" {...props}>
-                                  {children}
-                                </td>
-                              ),
-                              h2: ({ node, children, ...props }) => (
-                                <h2
-                                  className="text-xl sm:text-2xl font-black text-[#0a1c3d] tracking-tight mt-8 mb-4 pt-3 border-t border-gray-100"
-                                  style={{ fontFamily: "'Playfair Display', serif" }}
-                                  {...props}
-                                >
-                                  {children}
-                                </h2>
-                              ),
-                              h3: ({ node, children, ...props }) => (
-                                <h3
-                                  className="text-lg sm:text-xl font-bold text-[#0a1c3d] mt-6 mb-3"
-                                  {...props}
-                                >
-                                  {children}
-                                </h3>
-                              ),
-                              h4: ({ node, children, ...props }) => (
-                                <h4
-                                  className="text-base font-bold text-[#0a1c3d] mt-4 mb-2"
-                                  {...props}
-                                >
-                                  {children}
-                                </h4>
-                              ),
-                              p: ({ node, children, ...props }) => (
-                                <p className="text-gray-700 leading-relaxed mb-4 text-[15px]" {...props}>
-                                  {children}
-                                </p>
-                              ),
-                              strong: ({ node, children, ...props }) => (
-                                <strong className="font-extrabold text-gray-900" {...props}>
-                                  {children}
-                                </strong>
-                              ),
-                              em: ({ node, children, ...props }) => (
-                                <em className="italic text-gray-800" {...props}>
-                                  {children}
-                                </em>
-                              ),
-                              blockquote: ({ node, children, ...props }) => (
-                                <blockquote
-                                  className="pl-5 py-3 my-5 border-l-4 border-[#d4af37] bg-gradient-to-r from-[#d4af37]/10 to-transparent rounded-r-xl italic text-gray-800 font-medium"
-                                  {...props}
-                                >
-                                  {children}
-                                </blockquote>
-                              ),
-                              ul: ({ node, children, ...props }) => (
-                                <ul className="list-disc pl-6 mb-4 space-y-2 text-gray-700 text-sm sm:text-base" {...props}>
-                                  {children}
-                                </ul>
-                              ),
-                              ol: ({ node, children, ...props }) => (
-                                <ol className="list-decimal pl-6 mb-4 space-y-2.5 text-gray-700 text-sm sm:text-base" {...props}>
-                                  {children}
-                                </ol>
-                              ),
-                              li: ({ node, children, ...props }) => (
-                                <li className="leading-relaxed pl-1 marker:font-bold marker:text-[#0a1c3d]" {...props}>
-                                  {children}
-                                </li>
-                              ),
-                              hr: ({ node, ...props }) => (
-                                <hr className="my-6 border-t-2 border-gray-200" {...props} />
-                              ),
-                              a: ({ node, href, children, ...props }) => (
-                                <a
-                                  href={href || '#'}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[#0a1c3d] font-bold underline decoration-[#d4af37] decoration-2 underline-offset-4 hover:text-[#b8860b] transition-colors"
-                                  {...props}
-                                >
-                                  {children}
-                                </a>
-                              ),
-                              img: ({ node, src, alt, ...props }) => (
-                                <div className="my-6 rounded-xl overflow-hidden shadow-md border border-gray-100 max-w-xl">
-                                  <img
-                                    src={src}
-                                    alt={alt || 'Blog illustration'}
-                                    className="w-full h-auto object-cover"
-                                    loading="lazy"
-                                    {...props}
-                                  />
-                                </div>
-                              ),
-                            }}
-                          >
-                            {formData.content}
-                          </ReactMarkdown>
-                        </div>
+                    {isPasting && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-700 font-medium">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Content process ho raha hai, please wait...
                       </div>
-                    ) : (
-                      <p className="text-gray-400 italic text-center py-10">No content written yet. Switch to Markdown Editor to write your article.</p>
                     )}
+
+                    {/* WYSIWYG contenteditable area */}
+                    <div
+                      ref={editorRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onInput={() => {
+                        if (editorRef.current) {
+                          setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+                        }
+                      }}
+                      onPaste={handleWysiwygPaste}
+                      data-placeholder=""
+                      className="w-full p-5 bg-white min-h-[380px] focus:outline-none wysiwyg-editor prose prose-sm max-w-none text-gray-800 leading-relaxed"
+                      style={{
+                        fontFamily: 'inherit',
+                        lineHeight: '1.75',
+                      }}
+                    />
+
+                    <style>{`
+                      .wysiwyg-editor:empty:before {
+                        content: attr(data-placeholder);
+                        color: #9ca3af;
+                        font-style: italic;
+                        pointer-events: none;
+                      }
+                      .wysiwyg-editor h2 { font-size: 1.4rem; font-weight: 900; color: #0a1c3d; margin: 1.5rem 0 0.75rem; border-top: 1px solid #e5e7eb; padding-top: 0.75rem; }
+                      .wysiwyg-editor h3 { font-size: 1.15rem; font-weight: 700; color: #0a1c3d; margin: 1.25rem 0 0.5rem; }
+                      .wysiwyg-editor h4 { font-size: 1rem; font-weight: 700; color: #0a1c3d; margin: 1rem 0 0.4rem; }
+                      .wysiwyg-editor p { margin-bottom: 1rem; color: #374151; }
+                      .wysiwyg-editor ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+                      .wysiwyg-editor ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+                      .wysiwyg-editor li { margin-bottom: 0.4rem; }
+                      .wysiwyg-editor blockquote { border-left: 4px solid #d4af37; background: linear-gradient(to right, rgba(212,175,55,0.1), transparent); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; font-style: italic; color: #374151; }
+                      .wysiwyg-editor a { color: #0a1c3d; font-weight: 700; text-decoration: underline; text-decoration-color: #d4af37; text-underline-offset: 3px; }
+                      .wysiwyg-editor a:hover { color: #b8860b; }
+                      .wysiwyg-editor img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
+                      .wysiwyg-editor table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+                      .wysiwyg-editor th { background: #0a1c3d; color: white; padding: 0.5rem 1rem; text-align: left; font-size: 0.8rem; }
+                      .wysiwyg-editor td { padding: 0.5rem 1rem; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; color: #374151; }
+                      .wysiwyg-editor tr:nth-child(even) td { background: #f9fafb; }
+                      .wysiwyg-editor hr { border: none; border-top: 2px solid #e5e7eb; margin: 1.5rem 0; }
+                      .wysiwyg-editor pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-family: monospace; overflow-x: auto; font-size: 0.8rem; }
+                      .wysiwyg-editor code { background: #f1f5f9; color: #0a1c3d; padding: 0.1rem 0.3rem; border-radius: 3px; font-family: monospace; font-size: 0.85em; }
+                    `}</style>
                   </div>
-                )}
               </div>
             </div>
 
