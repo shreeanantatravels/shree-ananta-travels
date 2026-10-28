@@ -1298,6 +1298,7 @@ export function Blogs() {
                       className="w-full p-5 bg-white min-h-[380px] focus:outline-none wysiwyg-editor prose prose-sm max-w-none text-gray-800 leading-relaxed"
                       style={{
                         fontFamily: 'inherit',
+                        
                         lineHeight: '1.75',
                       }}
                     />
