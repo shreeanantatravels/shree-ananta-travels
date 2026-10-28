@@ -82,7 +82,7 @@ export async function POST(req: Request) {
         return NextResponse.json(
           {
             success: false,
-            message: 'Navbar me maximum 18 categories hi add ki ja sakti hain. Kripya pehle kisi category se "Show in Navbar" uncheck karein.',
+            message: 'A maximum of 18 categories can be added to the Navbar. Please uncheck "Show in Navbar" on an existing category first.',
           },
           { status: 400 }
         );
@@ -143,7 +143,7 @@ export async function PUT(req: Request) {
           return NextResponse.json(
             {
               success: false,
-              message: 'Navbar me maximum 18 categories hi add ki ja sakti hain. Kripya pehle kisi category se "Show in Navbar" uncheck karein.',
+              message: 'A maximum of 18 categories can be added to the Navbar. Please uncheck "Show in Navbar" on an existing category first.',
             },
             { status: 400 }
           );
@@ -154,7 +154,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({
         success: true,
         data: category,
-        message: willBeInNavbar ? 'Category Navbar me add kar di gayi' : 'Category Navbar se hata di gayi',
+        message: willBeInNavbar ? 'Category added to Navbar successfully' : 'Category removed from Navbar successfully',
       });
     }
 

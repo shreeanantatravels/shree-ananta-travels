@@ -514,17 +514,31 @@ export default function BlogDetailPage({
                         </Link>
                       );
                     },
-                    img: ({ node, src, alt, ...props }) => (
-                      <div className="my-8 rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-                        <img
-                          src={src}
-                          alt={alt || 'Travel destination'}
-                          className="w-full h-auto object-cover"
-                          loading="lazy"
-                          {...props}
-                        />
-                      </div>
-                    ),
+                    img: ({ node, src, alt, style, ...props }: any) => {
+                      const customWidth = style?.width || props.width;
+                      const isRight = style?.marginLeft === 'auto' && style?.marginRight !== 'auto';
+                      const isLeft = (style?.marginLeft === '0' || style?.marginLeft === '0px') && style?.marginRight === 'auto';
+                      const alignClass = isRight ? 'ml-auto mr-0' : isLeft ? 'mr-auto ml-0' : 'mx-auto';
+
+                      return (
+                        <div
+                          className={`my-8 rounded-2xl overflow-hidden shadow-lg border border-gray-100 ${alignClass}`}
+                          style={{
+                            width: customWidth || '100%',
+                            maxWidth: '100%',
+                            display: 'block',
+                          }}
+                        >
+                          <img
+                            src={src}
+                            alt={alt || 'Travel destination'}
+                            className="w-full h-auto object-cover"
+                            loading="lazy"
+                            {...props}
+                          />
+                        </div>
+                      );
+                    },
                   }}
                 >
                   {cleanContent || article.content}

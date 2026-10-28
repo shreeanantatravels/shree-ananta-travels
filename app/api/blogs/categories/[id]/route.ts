@@ -60,7 +60,7 @@ export async function PUT(
           return NextResponse.json(
             {
               success: false,
-              message: 'Navbar me maximum 18 categories hi add ki ja sakti hain. Kripya pehle kisi category se "Show in Navbar" uncheck karein.',
+              message: 'A maximum of 18 categories can be added to the Navbar. Please uncheck "Show in Navbar" on an existing category first.',
             },
             { status: 400 }
           );

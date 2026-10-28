@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -48,9 +48,6 @@ import {
   BlogCategoryData,
 } from '../api/blogsApi';
 import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
 import { useGetMeQuery } from '../api/authApi';
 import { useGetSiteConfigQuery } from '../api/siteConfigApi';
 
@@ -178,10 +175,13 @@ export function Blogs() {
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isPasting, setIsPasting] = useState(false);
+  const [selectedImageEl, setSelectedImageEl] = useState<HTMLImageElement | null>(null);
+  const [selectedImageRect, setSelectedImageRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
 
   // Refs
   const scheduledInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+  const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   // Sync editor div content when formData.content changes externally (edit mode load)
   useEffect(() => {
@@ -192,6 +192,160 @@ export function Blogs() {
       el.innerHTML = formData.content;
     }
   }, [formData.content]);
+
+  // Measure and align the overlay over the active image
+  const updateOverlayRect = useCallback((img: HTMLImageElement) => {
+    const wrapper = editorWrapperRef.current;
+    if (!wrapper || !img) return;
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const imgRect = img.getBoundingClientRect();
+    setSelectedImageRect({
+      top: imgRect.top - wrapperRect.top,
+      left: imgRect.left - wrapperRect.left,
+      width: imgRect.width,
+      height: imgRect.height,
+    });
+  }, []);
+
+  // Update overlay on scroll, resize, or selection changes
+  useEffect(() => {
+    if (!selectedImageEl) {
+      setSelectedImageRect(null);
+      return;
+    }
+    updateOverlayRect(selectedImageEl);
+
+    const handleScrollOrResize = () => {
+      if (selectedImageEl) updateOverlayRect(selectedImageEl);
+    };
+
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [selectedImageEl, updateOverlayRect]);
+
+  // Handle clicking outside editor wrapper to deselect image
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (editorWrapperRef.current && !editorWrapperRef.current.contains(e.target as Node)) {
+        setSelectedImageEl(null);
+        setSelectedImageRect(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut: Delete or Backspace to remove selected image
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedImageEl && (e.key === 'Backspace' || e.key === 'Delete')) {
+        e.preventDefault();
+        handleDeleteSelectedImage();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedImageEl]);
+
+  // Set image width (percentage)
+  const handleSetImageWidth = (width: string) => {
+    if (!selectedImageEl) return;
+    selectedImageEl.style.width = width;
+    selectedImageEl.style.height = 'auto';
+    updateOverlayRect(selectedImageEl);
+    if (editorRef.current) {
+      setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+    }
+  };
+
+  // Adjust width by percentage delta
+  const handleAdjustImageWidth = (delta: number) => {
+    if (!selectedImageEl || !editorWrapperRef.current) return;
+    const currentWidth = selectedImageEl.offsetWidth;
+    const wrapperWidth = editorWrapperRef.current.clientWidth - 40;
+    const currentPercent = Math.round((currentWidth / wrapperWidth) * 100);
+    const newPercent = Math.max(15, Math.min(100, currentPercent + delta));
+    handleSetImageWidth(`${newPercent}%`);
+  };
+
+  // Set image alignment
+  const handleSetImageAlign = (align: 'left' | 'center' | 'right') => {
+    if (!selectedImageEl) return;
+    selectedImageEl.style.display = 'block';
+    if (align === 'center') {
+      selectedImageEl.style.marginLeft = 'auto';
+      selectedImageEl.style.marginRight = 'auto';
+    } else if (align === 'left') {
+      selectedImageEl.style.marginLeft = '0';
+      selectedImageEl.style.marginRight = 'auto';
+    } else if (align === 'right') {
+      selectedImageEl.style.marginLeft = 'auto';
+      selectedImageEl.style.marginRight = '0';
+    }
+    updateOverlayRect(selectedImageEl);
+    if (editorRef.current) {
+      setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+    }
+  };
+
+  // Delete selected image
+  const handleDeleteSelectedImage = () => {
+    if (!selectedImageEl) return;
+    selectedImageEl.remove();
+    setSelectedImageEl(null);
+    setSelectedImageRect(null);
+    if (editorRef.current) {
+      setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+    }
+  };
+
+  // Mouse drag handle to resize image
+  const handleResizeMouseDown = (e: React.MouseEvent, direction: 'se' | 'sw') => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!selectedImageEl || !editorWrapperRef.current) return;
+
+    const startX = e.clientX;
+    const startWidth = selectedImageEl.offsetWidth;
+    const wrapperWidth = editorWrapperRef.current.clientWidth - 40;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = direction === 'se' ? moveEvent.clientX - startX : startX - moveEvent.clientX;
+      const newWidthPx = Math.max(100, Math.min(wrapperWidth, startWidth + deltaX));
+      const newPercent = Math.round((newWidthPx / wrapperWidth) * 100);
+      selectedImageEl.style.width = `${newPercent}%`;
+      selectedImageEl.style.height = 'auto';
+      updateOverlayRect(selectedImageEl);
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      if (editorRef.current) {
+        setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Click on contenteditable to select image or deselect
+  const handleEditorClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target && target.tagName === 'IMG') {
+      const img = target as HTMLImageElement;
+      setSelectedImageEl(img);
+      updateOverlayRect(img);
+    } else {
+      setSelectedImageEl(null);
+      setSelectedImageRect(null);
+    }
+  };
 
   // ── WYSIWYG execCommand helper ──────────────────────────────────────────────
   const exec = (cmd: string, value?: string) => {
@@ -217,13 +371,13 @@ export function Blogs() {
     fd.append('file', file);
     fd.append('type', 'blog');
     setIsPasting(true);
-    toast.loading('Image upload ho rahi hai...', { id: 'editor-img' });
+    toast.loading('Uploading image...', { id: 'editor-img' });
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const json = await res.json();
       if (json.success && json.url) {
-        exec('insertHTML', `<img src="${json.url}" alt="Blog image" style="max-width:100%;border-radius:8px;margin:16px 0;" />`);
-        toast.success('Image insert ho gayi!', { id: 'editor-img' });
+        exec('insertHTML', `<img src="${json.url}" alt="Blog image" style="max-width:100%;border-radius:8px;margin:16px auto;display:block;" />`);
+        toast.success('Image inserted!', { id: 'editor-img' });
       } else {
         toast.error('Image upload failed', { id: 'editor-img' });
       }
@@ -254,7 +408,7 @@ export function Blogs() {
     // ── Case 2: HTML (Google Docs, Word, webpage) ──
     const html = cd.getData('text/html');
     if (html && html.trim()) {
-      toast.loading('Content process ho raha hai...', { id: 'wysiwyg-paste' });
+      toast.loading('Processing pasted content...', { id: 'wysiwyg-paste' });
 
       // Sanitize + parse
       let cleanHtml = sanitizePastedHtml(html);
@@ -271,12 +425,12 @@ export function Blogs() {
           const publicUrl = await uploadDataUrlImage(src);
           if (publicUrl) {
             imgEl.setAttribute('src', publicUrl);
-            imgEl.setAttribute('style', 'max-width:100%;border-radius:8px;margin:16px 0;');
+            imgEl.setAttribute('style', 'max-width:100%;border-radius:8px;margin:16px auto;display:block;');
           } else {
             imgEl.remove();
           }
         } else if (src) {
-          imgEl.setAttribute('style', 'max-width:100%;border-radius:8px;margin:16px 0;');
+          imgEl.setAttribute('style', 'max-width:100%;border-radius:8px;margin:16px auto;display:block;');
         }
       }
       cleanHtml = doc.body.innerHTML;
@@ -286,8 +440,8 @@ export function Blogs() {
         setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
       }
       toast.dismiss('wysiwyg-paste');
-      if (hadUploads) toast.success('Images upload ho gayi aur content paste ho gaya!');
-      else toast.success('Content paste ho gaya with full formatting!');
+      if (hadUploads) toast.success('Images uploaded and content pasted successfully!');
+      else toast.success('Content pasted with full formatting!');
       setIsPasting(false);
       return;
     }
@@ -690,7 +844,7 @@ export function Blogs() {
     if (catShowInNavbar) {
       const isAlreadyNavbar = editingCategory ? Boolean(editingCategory.showInNavbar) : false;
       if (!isAlreadyNavbar && navbarCategoriesCount >= 18) {
-        toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category se "Show in Navbar" uncheck karein.');
+        toast.error('A maximum of 18 categories can be added to the Navbar. Please uncheck "Show in Navbar" on an existing category first.');
         return;
       }
     }
@@ -744,15 +898,15 @@ export function Blogs() {
   const handleToggleNavbar = async (cat: BlogCategoryData) => {
     const willEnable = !cat.showInNavbar;
     if (willEnable && navbarCategoriesCount >= 18) {
-      toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category ko Navbar se hatayein.');
+      toast.error('A maximum of 18 categories can be added to the Navbar. Please remove a category from the Navbar first.');
       return;
     }
     try {
       const res = await toggleCategoryNavbar(cat._id).unwrap();
-      toast.success(res.message || (willEnable ? `"${cat.name}" Navbar me add ho gayi` : `"${cat.name}" Navbar se hata di gayi`));
+      toast.success(res.message || (willEnable ? `"${cat.name}" added to Navbar` : `"${cat.name}" removed from Navbar`));
       refetchCategories();
     } catch (err: any) {
-      toast.error(err.data?.message || err.message || 'Navbar status update karne me error aaya.');
+      toast.error(err.data?.message || err.message || 'Failed to update Navbar status.');
     }
   };
 
@@ -763,7 +917,7 @@ export function Blogs() {
       return;
     }
     if (quickCatNavbar && navbarCategoriesCount >= 18) {
-      toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category se "Show in Navbar" uncheck karein.');
+      toast.error('A maximum of 18 categories can be added to the Navbar. Please uncheck "Show in Navbar" on an existing category first.');
       return;
     }
     setIsSavingQuickCat(true);
@@ -1215,7 +1369,7 @@ export function Blogs() {
                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Article Content <span className="text-red-500">*</span>
                   </label>
-                  <span className="text-[10px] text-gray-400 font-medium italic">WYSIWYG — jo dikhta hai waisa hi save hoga</span>
+                  <span className="text-[10px] text-gray-400 font-medium italic">Visual WYSIWYG Editor — Live formatting preview</span>
                 </div>
 
                 <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
@@ -1276,32 +1430,212 @@ export function Blogs() {
                         className="px-2 py-1 hover:bg-gray-200 rounded cursor-pointer text-gray-500" title="Clear Formatting">✕ Clear</button>
                     </div>
 
-                    {isPasting && (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-700 font-medium">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        Content process ho raha hai, please wait...
+                    {/* Active Selected Image Controls Bar in Toolbar */}
+                    {selectedImageEl && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 px-3 py-2 flex items-center justify-between gap-2 flex-wrap text-xs text-blue-950 animate-fadeIn">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold flex items-center gap-1 text-blue-800">
+                            <span>🖼 Image Resize:</span>
+                          </span>
+                          <div className="inline-flex rounded-lg border border-blue-200 bg-white p-0.5 shadow-xs">
+                            {(['25%', '50%', '75%', '100%'] as const).map(size => (
+                              <button
+                                key={size}
+                                type="button"
+                                onClick={() => handleSetImageWidth(size)}
+                                className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                                  selectedImageEl.style.width === size
+                                    ? 'bg-blue-600 text-white shadow-xs'
+                                    : 'text-gray-700 hover:bg-blue-50'
+                                }`}
+                              >
+                                {size}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="w-px h-4 bg-blue-200 mx-0.5" />
+
+                          <span className="font-bold text-blue-800 text-[11px]">Fine Tune:</span>
+                          <button
+                            type="button"
+                            onClick={() => handleAdjustImageWidth(-10)}
+                            className="px-2 py-0.5 bg-white border border-blue-200 rounded font-bold hover:bg-blue-100 cursor-pointer shadow-xs text-xs"
+                            title="Decrease width by 10%"
+                          >
+                            − 10%
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAdjustImageWidth(10)}
+                            className="px-2 py-0.5 bg-white border border-blue-200 rounded font-bold hover:bg-blue-100 cursor-pointer shadow-xs text-xs"
+                            title="Increase width by 10%"
+                          >
+                            + 10%
+                          </button>
+
+                          <div className="w-px h-4 bg-blue-200 mx-0.5" />
+
+                          <span className="font-bold text-blue-800 text-[11px]">Align:</span>
+                          <button
+                            type="button"
+                            onClick={() => handleSetImageAlign('left')}
+                            className="px-2 py-0.5 bg-white border border-blue-200 rounded hover:bg-blue-100 cursor-pointer text-xs"
+                            title="Align Left"
+                          >
+                            ◀ Left
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSetImageAlign('center')}
+                            className="px-2 py-0.5 bg-white border border-blue-200 rounded hover:bg-blue-100 cursor-pointer text-xs"
+                            title="Align Center"
+                          >
+                            ⏺ Center
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSetImageAlign('right')}
+                            className="px-2 py-0.5 bg-white border border-blue-200 rounded hover:bg-blue-100 cursor-pointer text-xs"
+                            title="Align Right"
+                          >
+                            ▶ Right
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-blue-600 font-medium italic hidden md:inline">
+                            (Or drag blue corner handles on image)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleDeleteSelectedImage}
+                            className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-xs flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    {/* WYSIWYG contenteditable area */}
-                    <div
-                      ref={editorRef}
-                      contentEditable
-                      suppressContentEditableWarning
-                      onInput={() => {
-                        if (editorRef.current) {
-                          setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
-                        }
-                      }}
-                      onPaste={handleWysiwygPaste}
-                      data-placeholder=""
-                      className="w-full p-5 bg-white min-h-[380px] focus:outline-none wysiwyg-editor prose prose-sm max-w-none text-gray-800 leading-relaxed"
-                      style={{
-                        fontFamily: 'inherit',
-                        
-                        lineHeight: '1.75',
-                      }}
-                    />
+                    {isPasting && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-700 font-medium">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Processing content &amp; uploading images, please wait...
+                      </div>
+                    )}
+
+                    {/* WYSIWYG contenteditable area with interactive image resize overlay */}
+                    <div ref={editorWrapperRef} className="relative w-full">
+                      <div
+                        ref={editorRef}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onClick={handleEditorClick}
+                        onInput={() => {
+                          if (editorRef.current) {
+                            setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+                          }
+                        }}
+                        onPaste={handleWysiwygPaste}
+                        data-placeholder="Start typing your article... or paste content from Google Docs / Word with formatting and images."
+                        className="w-full p-5 bg-white min-h-[380px] focus:outline-none wysiwyg-editor prose prose-sm max-w-none text-gray-800 leading-relaxed"
+                        style={{
+                          fontFamily: 'inherit',
+                          lineHeight: '1.75',
+                        }}
+                      />
+
+                      {/* Floating Image Resize Overlay & Corner Handles */}
+                      {selectedImageRect && selectedImageEl && (
+                        <div
+                          className="absolute z-20 pointer-events-auto"
+                          style={{
+                            top: `${selectedImageRect.top}px`,
+                            left: `${selectedImageRect.left}px`,
+                            width: `${selectedImageRect.width}px`,
+                            height: `${selectedImageRect.height}px`,
+                          }}
+                        >
+                          {/* Highlight Border */}
+                          <div className="absolute inset-0 border-2 border-blue-500 rounded-lg pointer-events-none shadow-sm ring-4 ring-blue-500/10" />
+
+                          {/* Floating Quick Action Pill */}
+                          <div
+                            className={`absolute ${selectedImageRect.top < 45 ? '-bottom-12' : '-top-11'} left-1/2 -translate-x-1/2 bg-gray-900/95 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-xl shadow-xl flex items-center gap-1.5 whitespace-nowrap z-30 border border-gray-700/60`}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            <span className="text-[11px] font-semibold text-gray-400 mr-0.5">Size:</span>
+                            {(['25%', '50%', '75%', '100%'] as const).map(size => (
+                              <button
+                                key={size}
+                                type="button"
+                                onClick={() => handleSetImageWidth(size)}
+                                className={`px-1.5 py-0.5 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                                  selectedImageEl.style.width === size
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-gray-300 hover:bg-gray-800'
+                                }`}
+                              >
+                                {size}
+                              </button>
+                            ))}
+
+                            <div className="w-px h-3 bg-gray-700 mx-0.5" />
+
+                            <button
+                              type="button"
+                              onClick={() => handleSetImageAlign('left')}
+                              className="px-1.5 py-0.5 text-gray-300 hover:bg-gray-800 rounded cursor-pointer text-[11px]"
+                              title="Align Left"
+                            >
+                              ◀
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSetImageAlign('center')}
+                              className="px-1.5 py-0.5 text-gray-300 hover:bg-gray-800 rounded cursor-pointer text-[11px]"
+                              title="Align Center"
+                            >
+                              ⏺
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSetImageAlign('right')}
+                              className="px-1.5 py-0.5 text-gray-300 hover:bg-gray-800 rounded cursor-pointer text-[11px]"
+                              title="Align Right"
+                            >
+                              ▶
+                            </button>
+
+                            <div className="w-px h-3 bg-gray-700 mx-0.5" />
+
+                            <button
+                              type="button"
+                              onClick={handleDeleteSelectedImage}
+                              className="px-1.5 py-0.5 text-red-300 hover:bg-red-900/60 rounded cursor-pointer text-[11px] font-bold"
+                              title="Delete image"
+                            >
+                              🗑
+                            </button>
+                          </div>
+
+                          {/* Bottom-right Drag Handle */}
+                          <div
+                            onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+                            className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-md cursor-se-resize hover:scale-125 transition-transform z-30"
+                            title="Drag to resize image"
+                          />
+                          {/* Bottom-left Drag Handle */}
+                          <div
+                            onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+                            className="absolute -bottom-2 -left-2 w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-md cursor-sw-resize hover:scale-125 transition-transform z-30"
+                            title="Drag to resize image"
+                          />
+                        </div>
+                      )}
+                    </div>
 
                     <style>{`
                       .wysiwyg-editor:empty:before {
@@ -1320,7 +1654,18 @@ export function Blogs() {
                       .wysiwyg-editor blockquote { border-left: 4px solid #d4af37; background: linear-gradient(to right, rgba(212,175,55,0.1), transparent); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; font-style: italic; color: #374151; }
                       .wysiwyg-editor a { color: #0a1c3d; font-weight: 700; text-decoration: underline; text-decoration-color: #d4af37; text-underline-offset: 3px; }
                       .wysiwyg-editor a:hover { color: #b8860b; }
-                      .wysiwyg-editor img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
+                      .wysiwyg-editor img {
+                        max-width: 100%;
+                        border-radius: 8px;
+                        margin: 1rem auto;
+                        display: block;
+                        cursor: pointer;
+                        transition: outline 0.15s ease;
+                      }
+                      .wysiwyg-editor img:hover {
+                        outline: 2px dashed #3b82f6;
+                        outline-offset: 3px;
+                      }
                       .wysiwyg-editor table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
                       .wysiwyg-editor th { background: #0a1c3d; color: white; padding: 0.5rem 1rem; text-align: left; font-size: 0.8rem; }
                       .wysiwyg-editor td { padding: 0.5rem 1rem; border-bottom: 1px solid #e5e7eb; font-size: 0.8rem; color: #374151; }
@@ -2023,7 +2368,7 @@ export function Blogs() {
                         if (!catShowInNavbar) {
                           const isAlready = editingCategory ? Boolean(editingCategory.showInNavbar) : false;
                           if (!isAlready && navbarCategoriesCount >= 18) {
-                            toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category ko uncheck karein.');
+                            toast.error('A maximum of 18 categories can be added to the Navbar. Please uncheck an existing category first.');
                             return;
                           }
                         }
@@ -2048,7 +2393,7 @@ export function Blogs() {
                       if (!catShowInNavbar) {
                         const isAlready = editingCategory ? Boolean(editingCategory.showInNavbar) : false;
                         if (!isAlready && navbarCategoriesCount >= 18) {
-                          toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category ko uncheck karein.');
+                          toast.error('A maximum of 18 categories can be added to the Navbar. Please uncheck an existing category first.');
                           return;
                         }
                       }
@@ -2305,7 +2650,7 @@ export function Blogs() {
                     <label 
                       onClick={() => {
                         if (!quickCatNavbar && navbarCategoriesCount >= 18) {
-                          toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category ko uncheck karein.');
+                          toast.error('A maximum of 18 categories can be added to the Navbar. Please uncheck an existing category first.');
                           return;
                         }
                         setQuickCatNavbar(!quickCatNavbar);
@@ -2326,7 +2671,7 @@ export function Blogs() {
                     aria-checked={quickCatNavbar}
                     onClick={() => {
                       if (!quickCatNavbar && navbarCategoriesCount >= 18) {
-                        toast.error('Navbar me maximum 18 categories hi add ki ja sakti hain! Kripya pehle kisi category ko uncheck karein.');
+                        toast.error('A maximum of 18 categories can be added to the Navbar. Please uncheck an existing category first.');
                         return;
                       }
                       setQuickCatNavbar(!quickCatNavbar);
