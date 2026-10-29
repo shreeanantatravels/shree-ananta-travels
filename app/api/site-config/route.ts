@@ -23,7 +23,7 @@ export async function GET(req: Request) {
       { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
       { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
       { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
-      { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
+      { id: 'groups', label: 'Group Tours', url: '/group-tours', isActive: true, canDelete: false, order: 4 },
       { id: 'spiritual', label: 'Spiritual', url: '/spiritual', isActive: true, canDelete: false, order: 5 },
       { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
       { id: 'trending', label: 'Trending', url: '/trending', isActive: true, canDelete: false, order: 7 },
@@ -45,6 +45,10 @@ export async function GET(req: Request) {
         if (l.url === '/packages?category=trending') {
           updated = true;
           return { ...l, url: '/trending' };
+        }
+        if (l.url === '/packages?category=groups') {
+          updated = true;
+          return { ...l, label: l.label === 'Groups' ? 'Group Tours' : l.label, url: '/group-tours' };
         }
         if (l.url === '/packages?category=spiritual') {
           updated = true;

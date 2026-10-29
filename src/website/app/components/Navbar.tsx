@@ -22,7 +22,7 @@ const DEFAULT_NAV_LINKS = [
   { id: 'kailash', label: 'Kailash Mansarovar', url: '/kailash-mansarovar', isActive: true, canDelete: false, order: 1 },
   { id: 'domestic', label: 'Domestic', url: '/domestic', isDropdown: true, category: 'domestic', isActive: true, canDelete: false, order: 2 },
   { id: 'international', label: 'International', url: '/international', isDropdown: true, category: 'international', isActive: true, canDelete: false, order: 3 },
-  { id: 'groups', label: 'Groups', url: '/packages?category=groups', isActive: true, canDelete: false, order: 4 },
+  { id: 'groups', label: 'Group Tours', url: '/group-tours', isActive: true, canDelete: false, order: 4 },
   { id: 'spiritual', label: 'Spiritual', url: '/spiritual', isActive: true, canDelete: false, order: 5 },
   { id: 'services', label: 'Services', url: '/services', isActive: true, canDelete: false, order: 6 },
   { id: 'trending', label: 'Trending', url: '/trending', isActive: true, canDelete: false, order: 7 },
@@ -80,6 +80,9 @@ export function Navbar() {
       }
       if (link.id === 'trending' || link.url === '/packages?category=trending') {
         return { ...link, url: '/trending' };
+      }
+      if (link.id === 'groups' || link.url === '/packages?category=groups' || link.url === '/group-tours') {
+        return { ...link, label: link.label || 'Group Tours', url: '/group-tours' };
       }
       if (link.id === 'spiritual' || link.url === '/packages?category=spiritual') {
         return { ...link, url: '/spiritual' };

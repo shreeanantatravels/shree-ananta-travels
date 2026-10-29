@@ -24,6 +24,9 @@ interface PackageCardProps {
   offer?: string;
   inclusions?: string[];
   exclusions?: string[];
+  departure?: string;
+  tags?: string[];
+  tourStyle?: string;
 }
 
 function optimizeCardImageUrl(url: string): string {
@@ -60,6 +63,9 @@ export function PackageCard({
   offer,
   inclusions = [],
   exclusions = [],
+  departure,
+  tags,
+  tourStyle,
 }: PackageCardProps) {
   const { siteConfig } = useAgent();
   const [imgSrc, setImgSrc] = useState<string>(() => optimizeCardImageUrl(imageUrl || ''));
@@ -85,6 +91,7 @@ export function PackageCard({
   const effectiveOffer = offer || (cardOffer?.isActive && cardOffer?.text ? cardOffer.text : undefined);
 
   const isBestseller = badges?.includes('bestseller');
+  const isGroupTour = tags?.some(t => t.toLowerCase().includes('group')) || tourStyle?.toLowerCase().includes('group') || title.toLowerCase().includes('group');
 
   if (featured) {
     return (
@@ -247,6 +254,15 @@ export function PackageCard({
           </div>
         )}
 
+        {/* Group Tour Badge (top left) */}
+        {isGroupTour && (
+          <div className="absolute top-3 left-3 z-10 pointer-events-none">
+            <span className="inline-flex items-center gap-1 bg-blue-600/90 text-white font-bold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full shadow-md backdrop-blur-xs">
+              👥 Group Tour
+            </span>
+          </div>
+        )}
+
         {/* Bestseller Badge (curved style with gold color) */}
         {isBestseller && (
           <div className="absolute top-0 right-0 z-10 animate-fade-in-up pointer-events-none">
@@ -280,12 +296,18 @@ export function PackageCard({
             <span className="text-sm text-gray-400">({reviews})</span>
           </div>
 
-          {/* Duration and Tour Type */}
-          <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400 text-sm mb-4">
-            <div className="flex items-center gap-1.5">
+          {/* Duration and Tour Type / Batch Date */}
+          <div className="flex items-center gap-2.5 text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-4 flex-wrap">
+            <div className="flex items-center gap-1.5 shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               {duration}
             </div>
+            {departure && (
+              <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-300 font-semibold text-xs bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 truncate max-w-[210px]" title={departure}>
+                <span>📅</span>
+                <span className="truncate">{departure.replace(/Fixed Batch:\s*|Upcoming Batches:\s*|Group Batch:\s*|Group:\s*/i, '').split('|')[0].trim()}</span>
+              </div>
+            )}
           </div>
         </div>
         

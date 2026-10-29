@@ -28,12 +28,12 @@ export default function AgentMarketplacePage({
   initialSearch,
   initialDestinationTitle,
 }: { 
-  initialCategory?: 'all' | 'domestic' | 'international' | 'trending';
+  initialCategory?: 'all' | 'group' | 'domestic' | 'international' | 'trending';
   initialSearch?: string;
   initialDestinationTitle?: string;
 } = {}) {
   const { agent, packages, siteConfig } = useAgent();
-  const [filter, setFilter] = useState<'all' | 'domestic' | 'international' | 'trending'>(initialCategory || 'all');
+  const [filter, setFilter] = useState<'all' | 'group' | 'domestic' | 'international' | 'trending'>(initialCategory || 'all');
   const [search, setSearch] = useState(initialSearch || '');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -46,8 +46,12 @@ export default function AgentMarketplacePage({
       const url = new URL(window.location.href);
       const cat = url.searchParams.get('category');
       const q = url.searchParams.get('search');
-      if (cat && ['all', 'domestic', 'international', 'trending'].includes(cat) && !initialCategory) {
-        setFilter(cat as any);
+      if (cat && !initialCategory) {
+        if (cat === 'groups' || cat === 'group') {
+          setFilter('group');
+        } else if (['all', 'domestic', 'international', 'trending'].includes(cat)) {
+          setFilter(cat as any);
+        }
       }
       if (q && !initialSearch) setSearch(q);
     }
@@ -101,10 +105,23 @@ export default function AgentMarketplacePage({
     });
   };
 
+  const isGroupPackage = (p: AgentPackage) => {
+    const tags = (p.tags || []).map((t: string) => t.toLowerCase());
+    const pkgType = ((p as any).packageType || '').toLowerCase();
+    const style = ((p as any).tourStyle || '').toLowerCase();
+    const title = (p.title || '').toLowerCase();
+    return tags.some((t: string) => t.includes('group')) || pkgType.includes('group') || style.includes('group') || title.includes('group');
+  };
+
   // Filter across ALL packages in the entire database
   const filtered = (packages || []).filter(p => {
     const matchCat = filter === 'all' 
-      || (filter === 'trending' ? (p.isTrending || p.badges?.includes('trending')) : p.category === filter);
+      ? true 
+      : filter === 'trending' 
+        ? (p.isTrending || p.badges?.includes('trending'))
+        : filter === 'group'
+          ? isGroupPackage(p)
+          : p.category === filter;
     const matchSearch = isPackageMatch(p, search);
     return matchCat && matchSearch;
   });
@@ -112,9 +129,10 @@ export default function AgentMarketplacePage({
   // Count matching packages per category
   const searchMatchedPackages = (packages || []).filter(p => isPackageMatch(p, search));
 
-  const getCategoryCount = (tab: 'all' | 'domestic' | 'international' | 'trending') => {
+  const getCategoryCount = (tab: 'all' | 'group' | 'domestic' | 'international' | 'trending') => {
     if (tab === 'all') return searchMatchedPackages.length;
     if (tab === 'trending') return searchMatchedPackages.filter(p => p.isTrending || p.badges?.includes('trending')).length;
+    if (tab === 'group') return searchMatchedPackages.filter(p => isGroupPackage(p)).length;
     return searchMatchedPackages.filter(p => p.category === tab).length;
   };
 
@@ -248,23 +266,27 @@ export default function AgentMarketplacePage({
 
               const pageTitle = searchDestination
                 ? `${searchDestination} Packages`
-                : (filter === 'domestic'
-                    ? 'Domestic Packages'
-                    : filter === 'international'
-                      ? 'International Packages'
-                      : filter === 'trending'
-                        ? 'Trending Packages'
-                        : 'Tour Packages');
+                : (filter === 'group'
+                    ? 'Fixed Group Tour Packages'
+                    : filter === 'domestic'
+                      ? 'Domestic Packages'
+                      : filter === 'international'
+                        ? 'International Packages'
+                        : filter === 'trending'
+                          ? 'Trending Packages'
+                          : 'Tour Packages');
 
               const pageSubtitle = searchDestination
                 ? `Explore hand-crafted ${searchDestination} tour packages, itineraries, and exclusive travel deals by ${displayName}.`
-                : (filter === 'domestic' 
-                    ? 'Immerse yourself in rich heritage, diverse cultures, and breathtaking landscapes with our hand-crafted domestic itineraries.' 
-                    : filter === 'international' 
-                      ? 'Cross borders and experience the extraordinary. From tropical paradises to bustling world-renowned metropolis, your adventure awaits.' 
-                      : filter === 'trending'
-                        ? 'Discover the most popular and highly sought-after travel experiences chosen by thousands of travelers.'
-                        : agent?.tagline || `Discover the best travel experiences crafted by ${displayName}`);
+                : (filter === 'group'
+                    ? 'Join our upcoming fixed departure group tours with verified stays, friendly co-travelers, and dedicated tour coordinators.'
+                    : filter === 'domestic' 
+                      ? 'Immerse yourself in rich heritage, diverse cultures, and breathtaking landscapes with our hand-crafted domestic itineraries.' 
+                      : filter === 'international' 
+                        ? 'Cross borders and experience the extraordinary. From tropical paradises to bustling world-renowned metropolis, your adventure awaits.' 
+                        : filter === 'trending'
+                          ? 'Discover the most popular and highly sought-after travel experiences chosen by thousands of travelers.'
+                          : agent?.tagline || `Discover the best travel experiences crafted by ${displayName}`);
 
               return (
                 <>
@@ -288,9 +310,10 @@ export default function AgentMarketplacePage({
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5 mb-8">
           {/* Category Tabs (Scrollable on Mobile) */}
           <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 bg-slate-200/80 dark:bg-gray-800 rounded-2xl overflow-x-auto scrollbar-none w-full md:w-auto shrink-0 shadow-inner">
-            {(['all', 'domestic', 'international', 'trending'] as const).map(tab => {
+            {(['all', 'group', 'domestic', 'international', 'trending'] as const).map(tab => {
               const isSelected = filter === tab;
               const count = getCategoryCount(tab);
+              const label = tab === 'all' ? 'All' : tab === 'group' ? 'Group Tours' : tab;
               return (
                 <button
                   key={tab}
@@ -301,7 +324,7 @@ export default function AgentMarketplacePage({
                   }`}
                   onClick={() => setFilter(tab)}
                 >
-                  <span className="capitalize">{tab}</span>
+                  <span className="capitalize">{label}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
                       isSelected
@@ -359,6 +382,9 @@ export default function AgentMarketplacePage({
                     badges={pkg.badges as any}
                     inclusions={pkg.inclusions}
                     exclusions={pkg.exclusions}
+                    departure={(pkg as any).departure}
+                    tags={pkg.tags}
+                    tourStyle={(pkg as any).tourStyle}
                   />
                 </div>
               ))}
