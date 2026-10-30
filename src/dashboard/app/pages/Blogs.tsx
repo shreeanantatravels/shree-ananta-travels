@@ -348,6 +348,7 @@ export function Blogs() {
   // Click on contenteditable to select image or deselect
   const handleEditorClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
+    
     if (target && target.tagName === 'IMG') {
       const img = target as HTMLImageElement;
       setSelectedImageEl(img);
