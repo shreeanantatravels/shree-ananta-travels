@@ -150,6 +150,7 @@ export function Navbar() {
           ? `max-w-[1600px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl shadow-xl border border-gray-200/50 dark:border-gray-800/50 px-4 sm:px-6 py-2.5 sm:py-3 ${
               isOpen ? 'rounded-2xl sm:rounded-3xl' : 'rounded-full'
             }` 
+            
           : 'max-w-[1600px] w-full px-4 sm:px-8 py-3.5 sm:py-4'
       }`}>
         <div className="flex items-center justify-between">
