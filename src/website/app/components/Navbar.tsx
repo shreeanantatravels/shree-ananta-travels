@@ -114,6 +114,7 @@ export function Navbar() {
         internationalDestinations: intl,
       };
     }
+    
 
     // 2. Fallback only if no destinations configured yet
     const domSet = new Set<string>();
