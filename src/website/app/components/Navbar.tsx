@@ -99,16 +99,14 @@ export function Navbar() {
 
   /* ── Dynamically compute active domestic and international destinations ── */
   const { domesticDestinations, internationalDestinations } = useMemo(() => {
-    // 1. If destinations are set in dashboard (siteConfig), use ONLY those (max 9, no duplicates, exclude Kailash)
+    // 1. If destinations are set in dashboard (siteConfig), use ONLY those (no duplicates, exclude Kailash)
     if (siteConfig?.destinations && siteConfig.destinations.length > 0) {
       const dom = siteConfig.destinations
         .filter((d: any) => d.active !== false && d.showInNavbar !== false && d.category !== 'international' && !d.name?.toLowerCase().includes('kailash'))
-        .slice(0, 9)
         .map((d: any) => ({ name: d.name }));
 
       const intl = siteConfig.destinations
         .filter((d: any) => d.active !== false && d.showInNavbar !== false && d.category === 'international' && !d.name?.toLowerCase().includes('kailash'))
-        .slice(0, 9)
         .map((d: any) => ({ name: d.name }));
 
       return {
