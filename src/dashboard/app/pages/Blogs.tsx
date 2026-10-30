@@ -183,6 +183,17 @@ export function Blogs() {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
 
+  // Set default paragraph separator to p for clean semantic paragraph editing
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      try {
+        document.execCommand('defaultParagraphSeparator', false, 'p');
+      } catch {
+        // ignore if not supported in environment
+      }
+    }
+  }, []);
+
   // Sync editor div content when formData.content changes externally (edit mode load)
   useEffect(() => {
     const el = editorRef.current;
@@ -344,6 +355,31 @@ export function Blogs() {
     } else {
       setSelectedImageEl(null);
       setSelectedImageRect(null);
+    }
+  };
+
+  // Handle keydown: ensure Enter inside headings drops down to a standard paragraph instead of continuing as H2
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      let node: Node | null = sel.anchorNode;
+      let headingEl: HTMLElement | null = null;
+      while (node && node !== editorRef.current) {
+        if (node.nodeType === Node.ELEMENT_NODE && /^(H1|H2|H3|H4|H5|H6)$/i.test((node as HTMLElement).tagName)) {
+          headingEl = node as HTMLElement;
+          break;
+        }
+        node = node.parentNode;
+      }
+      if (headingEl) {
+        setTimeout(() => {
+          document.execCommand('formatBlock', false, 'p');
+          if (editorRef.current) {
+            setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
+          }
+        }, 0);
+      }
     }
   };
 
@@ -1533,6 +1569,7 @@ export function Blogs() {
                         contentEditable
                         suppressContentEditableWarning
                         onClick={handleEditorClick}
+                        onKeyDown={handleEditorKeyDown}
                         onInput={() => {
                           if (editorRef.current) {
                             setFormData(prev => ({ ...prev, content: editorRef.current!.innerHTML }));
