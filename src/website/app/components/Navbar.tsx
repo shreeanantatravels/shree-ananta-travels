@@ -99,40 +99,43 @@ export function Navbar() {
 
   /* ── Dynamically compute active domestic and international destinations ── */
   const { domesticDestinations, internationalDestinations } = useMemo(() => {
+    // 1. If destinations are set in dashboard (siteConfig), use ONLY those (max 9, no duplicates, exclude Kailash)
+    if (siteConfig?.destinations && siteConfig.destinations.length > 0) {
+      const dom = siteConfig.destinations
+        .filter((d: any) => d.active !== false && d.showInNavbar !== false && d.category !== 'international' && !d.name?.toLowerCase().includes('kailash'))
+        .slice(0, 9)
+        .map((d: any) => ({ name: d.name }));
+
+      const intl = siteConfig.destinations
+        .filter((d: any) => d.active !== false && d.showInNavbar !== false && d.category === 'international' && !d.name?.toLowerCase().includes('kailash'))
+        .slice(0, 9)
+        .map((d: any) => ({ name: d.name }));
+
+      return {
+        domesticDestinations: dom,
+        internationalDestinations: intl,
+      };
+    }
+
+    // 2. Fallback only if no destinations configured yet
     const domSet = new Set<string>();
     const intlSet = new Set<string>();
 
-    // 1. From packages
     (packages || []).forEach((pkg: AgentPackage) => {
       if (!pkg.location) return;
-      const name = pkg.location.trim();
-      if (!name) return;
+      if (pkg.location.toLowerCase().includes('kailash') || (pkg.title || '').toLowerCase().includes('kailash')) return;
+      const clean = pkg.location.split(',')[0].split('&')[0].trim();
+      if (!clean) return;
       if (pkg.category === 'international') {
-        intlSet.add(name);
+        intlSet.add(clean);
       } else {
-        domSet.add(name);
+        domSet.add(clean);
       }
     });
 
-    // 2. From siteConfig
-    if (siteConfig?.destinations) {
-      siteConfig.destinations.forEach((d: any) => {
-        if (d.active === false) return;
-        const name = d.name.trim();
-        if (!name) return;
-        if (d.category === 'international') {
-          intlSet.add(name);
-        } else {
-          domSet.add(name);
-        }
-      });
-    }
-
-    // Strictly dynamic: NO fake fallback lists! Only destinations that actually exist in packages or admin siteConfig.
-
     return {
-      domesticDestinations: Array.from(domSet).map(name => ({ name })),
-      internationalDestinations: Array.from(intlSet).map(name => ({ name })),
+      domesticDestinations: Array.from(domSet).slice(0, 9).map(name => ({ name })),
+      internationalDestinations: Array.from(intlSet).slice(0, 9).map(name => ({ name })),
     };
   }, [packages, siteConfig]);
 
